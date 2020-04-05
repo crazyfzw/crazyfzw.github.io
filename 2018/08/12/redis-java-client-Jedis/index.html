@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"crazyfzw.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"valine","storage":true,"lazyload":true,"nav":null,"activeClass":"valine"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="一、概述Jedis 是 Redis 官方推荐的 Java 连接开发工具。Jedis 是一个非常小但又功能健全的 java 客户端。Jedis 是开源的，目前最新版本是 2.9.0 , 兼容 redis 2.8.x 和 3.x.x.版本，Github 地址： https:&#x2F;&#x2F;github.com&#x2F;xetorthio&#x2F;jedis">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Redis 开发与运维 3：Redis 的Java 客户端 Jedis">
+<meta property="og:url" content="https://crazyfzw.github.io/2018/08/12/redis-java-client-Jedis/index.html">
+<meta property="og:site_name" content="Crazyfzw&#39;s blog">
+<meta property="og:description" content="一、概述Jedis 是 Redis 官方推荐的 Java 连接开发工具。Jedis 是一个非常小但又功能健全的 java 客户端。Jedis 是开源的，目前最新版本是 2.9.0 , 兼容 redis 2.8.x 和 3.x.x.版本，Github 地址： https:&#x2F;&#x2F;github.com&#x2F;xetorthio&#x2F;jedis">
+<meta property="og:image" content="https://crazyfzw.github.io/images/2018081301.png">
+<meta property="og:image" content="https://crazyfzw.github.io/images/2018081302.png">
+<meta property="og:image" content="https://crazyfzw.github.io/images/2018081303.jpg">
+<meta property="og:image" content="https://crazyfzw.github.io/images/2018081304.jpg">
+<meta property="og:image" content="https://crazyfzw.github.io/images/2018081305.png">
+<meta property="article:published_time" content="2018-08-12T04:51:57.000Z">
+<meta property="article:modified_time" content="2020-04-04T16:11:49.189Z">
+<meta property="article:author" content="crazyfzw">
+<meta property="article:tag" content="Redis">
+<meta property="article:tag" content="Jedis">
+<meta property="article:tag" content="jedisPool">
+<meta property="article:tag" content="Pipelining">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://crazyfzw.github.io/images/2018081301.png">
+
+<link rel="canonical" href="https://crazyfzw.github.io/2018/08/12/redis-java-client-Jedis/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-Hans'
+  };
+</script>
+
+  <title>Redis 开发与运维 3：Redis 的Java 客户端 Jedis | Crazyfzw's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Crazyfzw's blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Crazyfzw's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Return to base, step by step.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="https://crazyfzw.github.io/2018/08/12/redis-java-client-Jedis/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/uploads/avatar.jpg">
+      <meta itemprop="name" content="crazyfzw">
+      <meta itemprop="description" content="做个有趣的技术人">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Crazyfzw's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Redis 开发与运维 3：Redis 的Java 客户端 Jedis
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-08-12 12:51:57" itemprop="dateCreated datePublished" datetime="2018-08-12T12:51:57+08:00">2018-08-12</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-04-05 00:11:49" itemprop="dateModified" datetime="2020-04-05T00:11:49+08:00">2020-04-05</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Redis/" itemprop="url" rel="index"><span itemprop="name">Redis</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2018/08/12/redis-java-client-Jedis/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2018/08/12/redis-java-client-Jedis/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>4.7k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>4 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h2><p>Jedis 是 Redis 官方推荐的 Java 连接开发工具。Jedis 是一个非常小但又功能健全的 java 客户端。Jedis 是开源的，目前最新版本是 2.9.0 , 兼容 redis 2.8.x 和 3.x.x.版本，Github 地址： <a href="https://github.com/xetorthio/jedis" target="_blank" rel="noopener">https://github.com/xetorthio/jedis</a></p>
+<a id="more"></a>
+
+<p><strong>Jedis 提供了哪些支持？</strong></p>
+<ul>
+<li>排序</li>
+<li>连接操作</li>
+<li>支持 redis 所有 value 操作相关的命令</li>
+<li>支持 redis 提供的五种数据结构及相关命令</li>
+<li>事物 (Transactions)</li>
+<li>Pipelining</li>
+<li>发布/订阅 Publish/Subscribe</li>
+<li>连接池 (Connection pooling)</li>
+<li>分片 (Sharding )</li>
+<li>Lua 脚本</li>
+<li>集群 (Redis Cluster)</li>
+<li>Persistence control commands</li>
+<li>Remote server control commands</li>
+</ul>
+<h2 id="二、获取-Jedis"><a href="#二、获取-Jedis" class="headerlink" title="二、获取 Jedis"></a>二、获取 Jedis</h2><p>通过 maven 配置依赖</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>redis.clients<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>jedis<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.9.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">type</span>&gt;</span>jar<span class="tag">&lt;/<span class="name">type</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">scope</span>&gt;</span>compile<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="三、Jedis-直连-Redis"><a href="#三、Jedis-直连-Redis" class="headerlink" title="三、Jedis 直连 Redis"></a>三、Jedis 直连 Redis</h2><p>直连方式每次都会新建 TCP 连接，使用后再断开连接，对于频繁访问 Redis 的场景显然不是高效的使用方式。生产环境不推荐使用这种方式。</p>
+<p><img src="/images/2018081301.png" alt=""></p>
+<p>代码示例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">Jedis jedis = <span class="keyword">null</span>;</span><br><span class="line"><span class="keyword">try</span> &#123; </span><br><span class="line">    <span class="comment">//生成一个Jedis对象，这个对象负责和指定Redis实例进行通信</span></span><br><span class="line">    jedis = <span class="keyword">new</span> Jedis(<span class="string">"127.0.0.1"</span>,<span class="number">6379</span>);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//然后通过 jedis 对象就可以调用 redis 支持的命令了，比如</span></span><br><span class="line">    jedis.set(<span class="string">"hello"</span>,<span class="string">"world"</span>);</span><br><span class="line">    String value = jedis.get(<span class="string">"hello"</span>);</span><br><span class="line">    </span><br><span class="line">&#125; <span class="keyword">catch</span> (Exception e)&#123; </span><br><span class="line">    logger.error(e.getMessage(), e);</span><br><span class="line">&#125; <span class="keyword">finally</span> &#123; </span><br><span class="line">    <span class="keyword">if</span> (jedis != <span class="keyword">null</span>) &#123; </span><br><span class="line">       <span class="comment">//使用完之后关闭连接</span></span><br><span class="line">       jedis.close(); </span><br><span class="line">    &#125; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在实际项目推荐使用 try catch finally 的形式来进行代码的书写：一方面可以在 Jedis 出现异常的时候（本身是网络操作），将异常进行捕获或者抛出；另一个方面无论执行成功或者失败，将 Jedis 连接关闭掉。</p>
+<p>创建 Jedis 时，还可以调用以下构造函数，指定 客户端连接超时时间、客户端读写超时时间：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Jedis jedis = <span class="keyword">new</span> Jedis(<span class="keyword">final</span> String host, <span class="keyword">final</span> <span class="keyword">int</span> port, <span class="keyword">final</span> <span class="keyword">int</span> connectionTimeout, <span class="keyword">final</span> <span class="keyword">int</span> soTimeout);</span><br></pre></td></tr></table></figure>
+
+<h2 id="四、Jedis-连接池方式"><a href="#四、Jedis-连接池方式" class="headerlink" title="四、Jedis 连接池方式"></a>四、Jedis 连接池方式</h2><p>所有Jedis对象预先放在池子中（JedisPool），每次要连接 Redis，只需要在池子中借，用完了在归还给连接池。生产环境一般都使用这种方式。</p>
+<p><img src="/images/2018081302.png" alt=""></p>
+<p>Jedis提供了 JedisPool 这个类作为对 Jedis 的连接，同时使用了 Apache 的通用对象池工具 common-pool2 作为资源的管理工具。</p>
+<p>代码示例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//1.common-pool2 连接池配置</span></span><br><span class="line">GenericObjectPoolConfig poolConfig = <span class="keyword">new</span> GenericObjectPoolConfig();</span><br><span class="line"><span class="comment">//可以根据需要设置相关属性</span></span><br><span class="line">poolConfig.setMaxTotal(<span class="number">200</span>);</span><br><span class="line">poolConfig.setMaxIdle(<span class="number">50</span>);</span><br><span class="line">poolConfig.setMinIdle(<span class="number">10</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">//2.初始化Jedis连接池</span></span><br><span class="line">JedisPool jedisPool = <span class="keyword">new</span> JedisPool(poolConfig, <span class="string">"127.0.0.1"</span>, <span class="number">6379</span>);</span><br></pre></td></tr></table></figure>
+
+
+
+<p>此时，获取 Jedis 对象不再是直接生成一个 Jedis 对象进行直连，而是从连接池直接获取：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"> Jedis jedis = <span class="keyword">null</span>;</span><br><span class="line"><span class="keyword">try</span> &#123; </span><br><span class="line">    <span class="comment">//从连接池借用 jedis 对象</span></span><br><span class="line">    jedis = jedisPool.getResource();</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//执行操作</span></span><br><span class="line">    jedis.set(<span class="string">"hello"</span>,<span class="string">"world"</span>);</span><br><span class="line">    String value = jedis.get(<span class="string">"hello"</span>);</span><br><span class="line">    </span><br><span class="line">&#125; <span class="keyword">catch</span> (Exception e)&#123; </span><br><span class="line">    logger.error(e.getMessage(), e);</span><br><span class="line">&#125; <span class="keyword">finally</span> &#123; </span><br><span class="line">    <span class="keyword">if</span> (jedis != <span class="keyword">null</span>) &#123; </span><br><span class="line">       <span class="comment">//使用完后归还连接池</span></span><br><span class="line">       jedis.close(); </span><br><span class="line">    &#125; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<p><strong>注意：</strong>以上代码有点需要注意的是：使用 JedisPool 的时候，jedis.close() 不是关闭连接，而是表示归还连接池。</p>
+<p>看下 Jedis 对 close方法的实现就很清楚了：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">close</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (dataSource != <span class="keyword">null</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> (client.isBroken()) &#123;</span><br><span class="line">      <span class="keyword">this</span>.dataSource.returnBrokenResource(<span class="keyword">this</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="keyword">this</span>.dataSource.returnResource(<span class="keyword">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    client.close();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到 Jedis 对于 close 的实现，会先通过 dataSource 是否为 null 判断是否是使用连接池，若是，则调用归还资源函数，否则才真正执行关闭连接的操作。</p>
+<p><strong>GenericObjectPoolConfig 的重要属性如下图所示：</strong><br><img src="/images/2018081303.jpg" alt=""></p>
+<h2 id="五、Jedis直连方式和连接池方式对比"><a href="#五、Jedis直连方式和连接池方式对比" class="headerlink" title="五、Jedis直连方式和连接池方式对比"></a>五、Jedis直连方式和连接池方式对比</h2><blockquote>
+<p>You shouldn’t use the same instance from different threads because you’ll have strange errors. And sometimes creating lots of Jedis instances is not good enough because it means lots of sockets and connections, which leads to strange errors as well. A single Jedis instance is not threadsafe! To avoid these problems, you should use JedisPool, which is a threadsafe pool of network connections. You can use the pool to reliably create several Jedis instances, given you return the Jedis instance to the pool when done. This way you can overcome those strange errors and achieve great performance.</p>
+</blockquote>
+<p>单个Jedis对象是线程不安全的，我们不应该在多个线程中使用共用同一个Jedis对象，然而，如果通过直连方式创建多个Jedis对象，又意味着会创建大量的socket以及TCP连接，带来大量的开销。为了避免这个问题，Jedis 为我们提供了一个线程安全的线程池JedisPool，通过连接池的方式，可以预先可靠地创建好多个Jedis连接对象，然后每次需要的时候就从Jedis连接池借用，使用完之后归还即可。这种方式提供了更大的安全性以及灵活性，所以，生产环境推荐使用连接池方式。</p>
+<table>
+<thead>
+<tr>
+<th align="center"></th>
+<th align="center">优点</th>
+<th align="center">缺点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">直连</td>
+<td align="center">简单方便，适用于少量长期连接的场景</td>
+<td align="center">1）存在每次新建/关闭 TCP 连接开销<br/> 2）资源无法控制，可能会出现连接泄露  <br/> 3）Jedis对象线程不安全</td>
+</tr>
+<tr>
+<td align="center">连接池</td>
+<td align="center">1）无需每次连接都生成Jedis对象，降低开销<br/>2）使用连接池的方式控制和保护资源的使用</td>
+<td align="center">相对于直连，使用相对麻烦，尤其在资源的管理上需要很多参数来保证，一旦规则不合理也会出现问题</td>
+</tr>
+</tbody></table>
+<h2 id="六、Pipelining"><a href="#六、Pipelining" class="headerlink" title="六、Pipelining"></a>六、Pipelining</h2><blockquote>
+<p>Sometimes you need to send a bunch of different commands. A very cool way to do that, and have better performance than doing it the naive way, is to use pipelining. This way you send commands without waiting for response, and you actually read the responses at the end, which is faster.</p>
+</blockquote>
+<p>Redis 支持 Pipelining 特性，Pipeline在某些场景下非常有用，比如有时想批量提交多个命令，而且他们对相应结果没有互相依赖，而且对结果响应也无需立即获得，那么久可以利用 Pipelining 实现这种批量处理，一次性发送多条命令并在执行完后一次性将结果返回。pipeline通过减少客户端与redis的通信次数来实现降低往返延时时间。过程大致如下：</p>
+<p><img src="/images/2018081304.jpg" alt=""></p>
+<p><strong>通过Jedis使用 Pipelining 的示例如下：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">Pipeline p = jedis.pipelined();</span><br><span class="line">p.set(<span class="string">"fool"</span>, <span class="string">"bar"</span>); </span><br><span class="line">p.zadd(<span class="string">"foo"</span>, <span class="number">1</span>, <span class="string">"barowitch"</span>);  </span><br><span class="line">p.zadd(<span class="string">"foo"</span>, <span class="number">0</span>, <span class="string">"barinsky"</span>);</span><br><span class="line">p.zadd(<span class="string">"foo"</span>, <span class="number">0</span>, <span class="string">"barikoviev"</span>);</span><br><span class="line">Response&lt;String&gt; pipeString = p.get(<span class="string">"fool"</span>);</span><br><span class="line">Response&lt;Set&lt;String&gt;&gt; sose = p.zrange(<span class="string">"foo"</span>, <span class="number">0</span>, -<span class="number">1</span>);</span><br><span class="line">p.sync(); </span><br><span class="line"><span class="keyword">int</span> soseSize = sose.get().size();</span><br><span class="line">Set&lt;String&gt; setBack = sose.get();</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="七、发布-订阅（Publish-Subscribe）"><a href="#七、发布-订阅（Publish-Subscribe）" class="headerlink" title="七、发布/订阅（Publish/Subscribe）"></a>七、发布/订阅（Publish/Subscribe）</h2><p>Redis 通过 PUBLISH、SUBSCRIBE 等命令实现了订阅与发布模式，Redis 的 SUBSCRIBE 命令可以让客户端订阅任意数量的频道，每当有新信息 发布到被订阅的频道时， 信息就会被发送给所有订阅指定频道的客户端。</p>
+<p>整个模型过程如下图所示：</p>
+<p><img src="/images/2018081305.png" alt=""></p>
+<p>上图展示了频道 channel1 ，以及订阅这个频道的三个客户端 —— client2 、 client5 和 client1 之间的关系，当有新消息通过 PUBLISH 命令发送给频道 channel1 时， 这个消息就会被发送给订阅它的三个客户端。</p>
+<p><strong>使用场景：</strong></p>
+<p>Publish/Subscribe 是目前广泛使用的通信模型，有很多的使用场景，比如内容订阅的的场；<br>；比如分布式架构中实现读写分离的场景，在写入的过程中，就可以使用redis发布订阅，使得写入值及时发布到各个读的程序中，保证数据的完整一致性。场景还有很多，有待挖掘。</p>
+<p><strong>在 Jedis 使用 Publish/Subscribe 的示例，可以参考：</strong><a href="https://www.cnblogs.com/xinde123/p/8489054.html" target="_blank" rel="noopener">java实现 redis的发布订阅（简单易懂）</a></p>
+<h2 id="八、参考文献"><a href="#八、参考文献" class="headerlink" title="八、参考文献"></a>八、参考文献</h2><p>[1] 《Redis 开发与运维》付磊; 张益军著<br>[2] <a href="https://github.com/xetorthio/jedis/wiki/Getting-started" target="_blank" rel="noopener">Jedis WiKi</a><br>[3] <a href="https://xetorthio.github.io/jedis/" target="_blank" rel="noopener">Jedis API</a><br>[4] <a href="https://github.com/xetorthio/jedis" target="_blank" rel="noopener">Jedis 源码</a><br>[5] <a href="https://redisbook.readthedocs.io/en/latest/feature/pubsub.html#id2" target="_blank" rel="noopener">订阅与发布</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Redis/" rel="tag"># Redis</a>
+              <a href="/tags/Jedis/" rel="tag"># Jedis</a>
+              <a href="/tags/jedisPool/" rel="tag"># jedisPool</a>
+              <a href="/tags/Pipelining/" rel="tag"># Pipelining</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/08/24/redis-cluster-setup-and-operation/" rel="prev" title="Redis 开发与运维 4：Redis 集群的搭建与运维">
+      <i class="fa fa-chevron-left"></i> Redis 开发与运维 4：Redis 集群的搭建与运维
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/08/10/redis-shell/" rel="next" title="Redis 开发与运维 2：Redis环境搭建及Redis shell的使用">
+      Redis 开发与运维 2：Redis环境搭建及Redis shell的使用 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#一、概述"><span class="nav-number">1.</span> <span class="nav-text">一、概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二、获取-Jedis"><span class="nav-number">2.</span> <span class="nav-text">二、获取 Jedis</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#三、Jedis-直连-Redis"><span class="nav-number">3.</span> <span class="nav-text">三、Jedis 直连 Redis</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#四、Jedis-连接池方式"><span class="nav-number">4.</span> <span class="nav-text">四、Jedis 连接池方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#五、Jedis直连方式和连接池方式对比"><span class="nav-number">5.</span> <span class="nav-text">五、Jedis直连方式和连接池方式对比</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#六、Pipelining"><span class="nav-number">6.</span> <span class="nav-text">六、Pipelining</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#七、发布-订阅（Publish-Subscribe）"><span class="nav-number">7.</span> <span class="nav-text">七、发布&#x2F;订阅（Publish&#x2F;Subscribe）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#八、参考文献"><span class="nav-number">8.</span> <span class="nav-text">八、参考文献</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="crazyfzw"
+      src="/uploads/avatar.jpg">
+  <p class="site-author-name" itemprop="name">crazyfzw</p>
+  <div class="site-description" itemprop="description">做个有趣的技术人</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">35</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">12</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">133</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/crazyfzw" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;crazyfzw" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://book.douban.com/people/crazyfzw/" title="Booklist → https:&#x2F;&#x2F;book.douban.com&#x2F;people&#x2F;crazyfzw&#x2F;" rel="noopener" target="_blank"><i class="fab fa-skype fa-fw"></i>Booklist</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:crazyfzw@gmail.com" title="E-Mail → mailto:crazyfzw@gmail.com" rel="noopener" target="_blank"><i class="fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://plus.google.com/104894167431407693109" title="Google → https:&#x2F;&#x2F;plus.google.com&#x2F;104894167431407693109" rel="noopener" target="_blank"><i class="fab fa-google fa-fw"></i>Google</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.facebook.com/profile.php?id=100011315733045" title="Facebook → https:&#x2F;&#x2F;www.facebook.com&#x2F;profile.php?id&#x3D;100011315733045" rel="noopener" target="_blank"><i class="fab fa-facebook fa-fw"></i>Facebook</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/u/3829383159" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;3829383159" rel="noopener" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://ifeve.com/" title="http:&#x2F;&#x2F;ifeve.com&#x2F;" rel="noopener" target="_blank">并发编程网</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="http://www.importnew.com/" title="http:&#x2F;&#x2F;www.importnew.com&#x2F;" rel="noopener" target="_blank">ImportNew</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="http://jm.taobao.org/categories/" title="http:&#x2F;&#x2F;jm.taobao.org&#x2F;categories&#x2F;" rel="noopener" target="_blank">阿里中间件团队博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.ibm.com/developerworks/cn/java/" title="https:&#x2F;&#x2F;www.ibm.com&#x2F;developerworks&#x2F;cn&#x2F;java&#x2F;" rel="noopener" target="_blank">IBM developerworks</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tech.meituan.com/" title="https:&#x2F;&#x2F;tech.meituan.com&#x2F;" rel="noopener" target="_blank">美团点评技术团队</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="http://calvin1978.blogcn.com/" title="http:&#x2F;&#x2F;calvin1978.blogcn.com&#x2F;" rel="noopener" target="_blank">江南白衣的博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="http://blog.720ui.com/" title="http:&#x2F;&#x2F;blog.720ui.com" rel="noopener" target="_blank">梁桂钊的博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.jianshu.com/u/581f548ef0ec" title="https:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;581f548ef0ec" rel="noopener" target="_blank">李艳鹏的博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="http://jinnianshilongnian.iteye.com/" title="http:&#x2F;&#x2F;jinnianshilongnian.iteye.com&#x2F;" rel="noopener" target="_blank">张开涛的博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/zuoxiaolong" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;zuoxiaolong" rel="noopener" target="_blank">左潇龙的博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/xrq730/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;xrq730&#x2F;" rel="noopener" target="_blank">五月的仓颉</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://yikun.github.io/" title="https:&#x2F;&#x2F;yikun.github.io&#x2F;" rel="noopener" target="_blank">Yikun的博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="http://www.ruanyifeng.com/" title="http:&#x2F;&#x2F;www.ruanyifeng.com" rel="noopener" target="_blank">阮一峰的个人网站</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">crazyfzw</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">213k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">3:14</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : false,
+      appId      : 'jyxPxkBMeEmDfMMTuuyBdGdu-gzGzoHsz',
+      appKey     : '7SEECyfT4R10oTtj4zDMOdBt',
+      placeholder: "ヾﾉ≧∀≦)o 来呀！吐槽一番吧！",
+      avatar     : 'monsterid',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : '' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

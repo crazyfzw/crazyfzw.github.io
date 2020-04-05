@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"crazyfzw.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"valine","storage":true,"lazyload":true,"nav":null,"activeClass":"valine"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="本文以 MySQL 数据库为研究对象，讨论与数据库索引相关的一些话题。特别需要说明的是，MySQL支持诸多存储引擎，而各种存储引擎对索引的支持也各不相同，因此MySQL数据库支持多种索引类型，如BTree索引，哈希索引，全文索引等等。为了避免混乱，本文将只关注于BTree索引，因为这是平常使用MySQL时最经常用到的索引。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="数据存储 1：数据库索引的原理及使用策略">
+<meta property="og:url" content="https://crazyfzw.github.io/2018/07/18/RDBMS-INDEX/index.html">
+<meta property="og:site_name" content="Crazyfzw&#39;s blog">
+<meta property="og:description" content="本文以 MySQL 数据库为研究对象，讨论与数据库索引相关的一些话题。特别需要说明的是，MySQL支持诸多存储引擎，而各种存储引擎对索引的支持也各不相同，因此MySQL数据库支持多种索引类型，如BTree索引，哈希索引，全文索引等等。为了避免混乱，本文将只关注于BTree索引，因为这是平常使用MySQL时最经常用到的索引。">
+<meta property="og:image" content="https://crazyfzw.github.io/images/2018071801.png">
+<meta property="og:image" content="https://crazyfzw.github.io/images/2018071802.png">
+<meta property="og:image" content="https://crazyfzw.github.io/images/2018071803.png">
+<meta property="og:image" content="https://crazyfzw.github.io/images/20180718.jpg">
+<meta property="og:image" content="https://crazyfzw.github.io/images/2018071804.png">
+<meta property="og:image" content="https://crazyfzw.github.io/images/2018071805.png">
+<meta property="og:image" content="https://crazyfzw.github.io/images/2018071806.png">
+<meta property="og:image" content="https://crazyfzw.github.io/images/2018071807.png">
+<meta property="article:published_time" content="2018-07-18T13:05:05.000Z">
+<meta property="article:modified_time" content="2020-04-04T16:12:20.785Z">
+<meta property="article:author" content="crazyfzw">
+<meta property="article:tag" content="索引">
+<meta property="article:tag" content="索引原理">
+<meta property="article:tag" content="数据库索引">
+<meta property="article:tag" content="B+Tree">
+<meta property="article:tag" content="B-Tree">
+<meta property="article:tag" content="索引使用的注意事项">
+<meta property="article:tag" content="RDBMS">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://crazyfzw.github.io/images/2018071801.png">
+
+<link rel="canonical" href="https://crazyfzw.github.io/2018/07/18/RDBMS-INDEX/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-Hans'
+  };
+</script>
+
+  <title>数据存储 1：数据库索引的原理及使用策略 | Crazyfzw's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Crazyfzw's blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Crazyfzw's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Return to base, step by step.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="https://crazyfzw.github.io/2018/07/18/RDBMS-INDEX/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/uploads/avatar.jpg">
+      <meta itemprop="name" content="crazyfzw">
+      <meta itemprop="description" content="做个有趣的技术人">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Crazyfzw's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          数据存储 1：数据库索引的原理及使用策略
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-07-18 21:05:05" itemprop="dateCreated datePublished" datetime="2018-07-18T21:05:05+08:00">2018-07-18</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-04-05 00:12:20" itemprop="dateModified" datetime="2020-04-05T00:12:20+08:00">2020-04-05</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/RDBMS/" itemprop="url" rel="index"><span itemprop="name">RDBMS</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2018/07/18/RDBMS-INDEX/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2018/07/18/RDBMS-INDEX/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>13k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>12 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>本文以 MySQL 数据库为研究对象，讨论与数据库索引相关的一些话题。特别需要说明的是，MySQL支持诸多存储引擎，而各种存储引擎对索引的支持也各不相同，因此MySQL数据库支持多种索引类型，如BTree索引，哈希索引，全文索引等等。为了避免混乱，本文将只关注于BTree索引，因为这是平常使用MySQL时最经常用到的索引。</p>
+<a id="more"></a>
+
+<h2 id="一、数据库索引的原理"><a href="#一、数据库索引的原理" class="headerlink" title="一、数据库索引的原理"></a>一、数据库索引的原理</h2><blockquote>
+<p>这部分内容主要来源于互联网上关于索引的主流文章，本人在理解的基础上梳理整合成本部分内容，当是个人的一篇学习笔记，参考的文章可见参考文献一栏。</p>
+</blockquote>
+<h3 id="1-索引的本质"><a href="#1-索引的本质" class="headerlink" title="1. 索引的本质"></a>1. 索引的本质</h3><p>MySQL官方对索引的定义为：索引（Index）是帮助数据库高效获取数据的数据结构。提取句子主干，就可以得到索引的本质：索引是数据结构。</p>
+<p>说白了，索引就是一种可以应用高效查询算法的数据结构。</p>
+<p>之所以要建立索引，其实就是为了构建一种数据结构，然后可以在上面应用一种高效的查询算法，最终提高数据的查询速度。</p>
+<p>所以在讲索引的数据结构之前不妨先了解下比较常见的查询算法及其所要求的特定数据结构。</p>
+<h3 id="2-常见的查询算法"><a href="#2-常见的查询算法" class="headerlink" title="2. 常见的查询算法"></a>2. 常见的查询算法</h3><h4 id="2-1-顺序查找（linear-search-）"><a href="#2-1-顺序查找（linear-search-）" class="headerlink" title="2.1 顺序查找（linear search ）"></a>2.1 顺序查找（linear search ）</h4><p>最基本的查询算法当然是顺序查找（linear search），也就是对比每个元素的方法，不过这种算法在数据量大时效率极低。 </p>
+<p>数据结构：有序或无序队列 </p>
+<p>复杂度：O(n) </p>
+<p>实例代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//顺序查找</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">SequenceSearch</span><span class="params">(<span class="keyword">int</span> a[], <span class="keyword">int</span> value, <span class="keyword">int</span> n)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> i;</span><br><span class="line">    <span class="keyword">for</span>(i=<span class="number">0</span>; i&lt;n; i++)</span><br><span class="line">        <span class="keyword">if</span>(a[i]==value)</span><br><span class="line">            <span class="keyword">return</span> i;</span><br><span class="line">    <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-2-二分查找（binary-search）"><a href="#2-2-二分查找（binary-search）" class="headerlink" title="2.2 二分查找（binary search）"></a>2.2 二分查找（binary search）</h4><p>比顺序查找更快的查询方法应该就是二分查找了，二分查找的原理是查找过程从数组的中间元素开始，如果中间元素正好是要查找的元素，则搜素过程结束；如果某一特定元素大于或者小于中间元素，则在数组大于或小于中间元素的那一半中查找，而且跟开始一样从中间元素开始比较。如果在某一步骤数组为空，则代表找不到。 </p>
+<p>数据结构：有序数组 </p>
+<p>复杂度：O(logn) </p>
+<p>实例代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//二分查找，递归版本</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">BinarySearch2</span><span class="params">(<span class="keyword">int</span> a[], <span class="keyword">int</span> value, <span class="keyword">int</span> low, <span class="keyword">int</span> high)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> mid = low+(high-low)/<span class="number">2</span>;</span><br><span class="line">    <span class="keyword">if</span>(a[mid]==value)</span><br><span class="line">        <span class="keyword">return</span> mid;</span><br><span class="line">    <span class="keyword">if</span>(a[mid]&gt;value)</span><br><span class="line">        <span class="keyword">return</span> BinarySearch2(a, value, low, mid-<span class="number">1</span>);</span><br><span class="line">    <span class="keyword">if</span>(a[mid]&lt;value)</span><br><span class="line">        <span class="keyword">return</span> BinarySearch2(a, value, mid+<span class="number">1</span>, high);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="2-3-二叉排序树查找"><a href="#2-3-二叉排序树查找" class="headerlink" title="2.3 二叉排序树查找"></a>2.3 二叉排序树查找</h4><p>二叉排序树的特点是：</p>
+<p>若它的左子树不空，则左子树上所有结点的值均小于它的根结点的值；</p>
+<p>若它的右子树不空，则右子树上所有结点的值均大于它的根结点的值；</p>
+<p>它的左、右子树也分别为二叉排序树。</p>
+<p>搜索的原理：</p>
+<p>若b是空树，则搜索失败，否则;</p>
+<p>若x等于b的根节点的数据域之值，则查找成功；否则：</p>
+<p>若x小于b的根节点的数据域之值，则搜索左子树；否则：</p>
+<p>查找右子树。</p>
+<p>数据结构：二叉排序树 </p>
+<p>时间复杂度： O(log2N)</p>
+<h4 id="2-4-索引是为了应用某种高级查找算法而建立的一种数据结构："><a href="#2-4-索引是为了应用某种高级查找算法而建立的一种数据结构：" class="headerlink" title="2.4 索引是为了应用某种高级查找算法而建立的一种数据结构："></a>2.4 索引是为了应用某种高级查找算法而建立的一种数据结构：</h4><p>稍微分析以上查找算法会发现，每种查找算法都只能应用于特定的数据结构之上，例如二分查找要求被检索数据有序，而二叉树查找只能应用于二叉查找树上。但是数据库存储的数据本身的组织结构不可能完全满足各种数据结构（例如，理论上不可能同时将两列都按顺序进行组织），所以，在数据之外，数据库系统还维护着满足特定查找算法的数据结构，这些数据结构以某种方式引用（指向）数据，这样就可以在这些数据结构上实现高级查找算法。这种数据结构，就是索引。</p>
+<h3 id="3-多叉平衡查找树（B-tree-和-B-Tree）"><a href="#3-多叉平衡查找树（B-tree-和-B-Tree）" class="headerlink" title="3. 多叉平衡查找树（B-tree 和 B+Tree）"></a>3. 多叉平衡查找树（B-tree 和 B+Tree）</h3><p>上面讲到了二叉树，它的搜索时间复杂度为O(log2N)，所以它的搜索效率和树的深度有关，如果要提高查询速度，那么就要降低树的深度。要降低树的深度，很自然的方法就是采用多叉树，再结合平衡二叉树的思想，我们可以构建一个平衡多叉树结构，然后就可以在上面构建平衡多路查找算法，提高大数据量下的搜索效率。</p>
+<h4 id="3-1-B-Tree"><a href="#3-1-B-Tree" class="headerlink" title="3.1 B-Tree"></a>3.1 B-Tree</h4><blockquote>
+<p>具体讲解之前，有一点，再次强调下：B-树，也就是B树。因为B树的原英文名称为B-tree，而国内很多人喜欢把B-tree译作B-树，其实，这是个非常不好的直译，很容易让人产生误解，有人可能会以为B-树是一种树，而B树又是另一种树。而事实上是，B-tree指的就是B树。特此说明。</p>
+</blockquote>
+<p>为了描述B-Tree，首先定义一条数据记录为一个二元组[key, data]，key为记录的键值，对于不同数据记录，key是互不相同的；data为数据记录除key外的数据。</p>
+<p>下图是一个B-Tree示例：</p>
+<p><img src="/images/2018071801.png" alt="image"></p>
+<p>那么B-Tree是满足下列条件的数据结构：</p>
+<p>d为大于1的一个正整数，称为B-Tree的度。</p>
+<p>h为一个正整数，称为B-Tree的高度。</p>
+<p>每个非叶子节点由n-1个key和n个指针组成，其中d&lt;=n&lt;=2d。</p>
+<p>每个叶子节点最少包含一个key和两个指针，最多包含2d-1个key和2d个指针，叶节点的指针均为null 。</p>
+<p>所有叶节点具有相同的深度，等于树高h。</p>
+<p>key和指针互相间隔，节点两端是指针。</p>
+<p>一个节点中的key从左到右非递减排列。</p>
+<p>所有节点组成树结构。</p>
+<p>每个指针要么为null，要么指向另外一个节点。</p>
+<p>如果某个指针在节点node最左边且不为null，则其指向节点的所有key小于v(key1)，其中v(key1)为node的第一个key的值。</p>
+<p>如果某个指针在节点node最右边且不为null，则其指向节点的所有key大于v(keym)，其中v(keym)为node的最后一个key的值。</p>
+<p>如果某个指针在节点node的左右相邻key分别是keyi和keyi+1且不为null，则其指向节点的所有key小于v(keyi+1)且大于v(keyi)。</p>
+<p>由于B-Tree的特性，在B-Tree中按key检索数据的算法非常直观：首先从根节点进行二分查找，如果找到则返回对应节点的data，否则对相应区间的指针指向的节点递归进行查找，直到找到节点或找到null指针，前者查找成功，后者查找失败。B-Tree上查找算法的伪代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">BTree_Search(node, key) &#123;</span><br><span class="line">     <span class="keyword">if</span>(node == <span class="keyword">null</span>) <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">     foreach(node.key)&#123;</span><br><span class="line">          <span class="keyword">if</span>(node.key[i] == key) <span class="keyword">return</span> node.data[i];</span><br><span class="line">          <span class="keyword">if</span>(node.key[i] &gt; key) <span class="keyword">return</span> BTree_Search(point[i]-&gt;node);</span><br><span class="line">      &#125;</span><br><span class="line">     <span class="keyword">return</span> BTree_Search(point[i+<span class="number">1</span>]-&gt;node);</span><br><span class="line">  &#125;</span><br><span class="line">data = BTree_Search(root, my_key);</span><br></pre></td></tr></table></figure>
+
+<p>关于B-Tree有一系列有趣的性质，例如一个度为d的B-Tree，设其索引N个key，则其树高h的上限为logd((N+1)/2)，检索一个key，其查找节点个数的渐进复杂度为O(logdN)。从这点可以看出，B-Tree是一个非常有效率的索引数据结构。</p>
+<p>另外，由于插入删除新的数据记录会破坏B-Tree的性质，因此在插入删除时，需要对树进行一个分裂、合并、转移等操作以保持B-Tree性质，这也是索引会降低增删改数据性能的原因。</p>
+<h4 id="3-2-B-Tree"><a href="#3-2-B-Tree" class="headerlink" title="3.2 B+Tree"></a>3.2 B+Tree</h4><p>B-Tree有许多变种，其中最常见的是B+Tree，例如MySQL就普遍使用B+Tree实现其索引结构。</p>
+<p>与B-Tree相比，B+Tree有以下不同点：</p>
+<p>每个节点的指针上限为2d而不是2d+1。</p>
+<p>所有的叶子结点中包含了全部关键字的信息，及指向含有这些关键字记录的指针，且叶子结点本身依关键字的大小自小而大的顺序链接。 (而 B 树的叶子节点并没有包括全部需要查找的信息)</p>
+<p>内节点不存储data，只存储key；叶子节点不存储指针。所有的内节点点可以看成是索引部分，结点中仅含有其子树根结点中最大（或最小）关键字。 (而B 树的内节点也包含需要查找的有效信息)</p>
+<p>下图是一个简单的B+Tree示意</p>
+<p><img src="/images/2018071802.png" alt="image"></p>
+<h3 id="4-为什么索引用B-Tree实现"><a href="#4-为什么索引用B-Tree实现" class="headerlink" title="4. 为什么索引用B+Tree实现"></a>4. 为什么索引用B+Tree实现</h3><p>这里必须强调的是，数据库索引实际上用的是带有顺序的B+Tree。在经典B+Tree的基础上进行了优化，增加了顺序访问指针。 </p>
+<p>如下图所示：</p>
+<p><img src="/images/2018071803.png" alt="image"></p>
+<p>如图所示，在B+Tree的每个叶子节点增加一个指向相邻叶子节点的指针，就形成了带有顺序访问指针的B+Tree。做这个优化的目的是为了提高区间访问的性能。如图如果要查询key为从18到49的所有数据记录，当找到18后，只需顺着节点和指针顺序遍历就可以一次性访问到所有数据节点，极大提到了区间查询效率。</p>
+<h4 id="4-1-为什么索引采用B-Tree-B-Tree的性能会比采用红黑树好？"><a href="#4-1-为什么索引采用B-Tree-B-Tree的性能会比采用红黑树好？" class="headerlink" title="4.1 为什么索引采用B+Tree/B-Tree的性能会比采用红黑树好？"></a>4.1 为什么索引采用B+Tree/B-Tree的性能会比采用红黑树好？</h4><p>上文说过一般使用磁盘I/O次数评价索引结构的优劣。先从B-Tree分析，根据B-Tree的定义，可知检索一次最多需要访问h个节点。数据库系统的设计者巧妙利用了磁盘预读原理，将一个节点的大小设为等于一个页，这样每个节点只需要一次I/O就可以完全载入。为了达到这个目的，在实际实现B-Tree还需要使用如下技巧：</p>
+<p>每次新建节点时，直接申请一个页的空间，这样就保证一个节点物理上也存储在一个页里，加之计算机存储分配都是按页对齐的，就实现了一个node只需一次I/O。</p>
+<p>B-Tree中一次检索最多需要h-1次I/O（根节点常驻内存），渐进复杂度为O(h)=O(logdN)。一般实际应用中，出度d是非常大的数字，通常超过100，因此h非常小（通常不超过3）。</p>
+<p>综上所述，用B-Tree作为索引结构效率是非常高的。</p>
+<p>而红黑树这种结构，h明显要深的多。由于逻辑上很近的节点（父子）物理上可能很远，无法利用局部性，所以红黑树的I/O渐进复杂度也为O(h)，效率明显比B-Tree差很多。</p>
+<h4 id="4-2-为什么索引采用B-Tree的性能会比采用B-Tree好？"><a href="#4-2-为什么索引采用B-Tree的性能会比采用B-Tree好？" class="headerlink" title="4.2 为什么索引采用B+Tree的性能会比采用B-Tree好？"></a>4.2 为什么索引采用B+Tree的性能会比采用B-Tree好？</h4><p>B+Tree更适合外存索引，原因和内节点出度d有关。从上面分析可以看到，d越大索引的性能越好，而出度的上限取决于节点内key和data的大小：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dmax&#x3D;floor(pagesize&#x2F;(keysize+datasize+pointsize))</span><br></pre></td></tr></table></figure>
+<p>floor表示向下取整。由于B+Tree内节点去掉了data域，因此可以拥有更大的出度，拥有更好的性能。</p>
+<p>因为B+Tree 的内节点只存储只存储key，不存储Data，所以出度越大，索引性能越好。</p>
+<h3 id="5-B-Tree-的查找过程"><a href="#5-B-Tree-的查找过程" class="headerlink" title="5. B+Tree 的查找过程"></a>5. B+Tree 的查找过程</h3><p>B-树和B+树查找过程基本一致。</p>
+<p>下面以 B+Tree 树的数据结构举例说下查找过程：</p>
+<p><img src="/images/20180718.jpg" alt="image"></p>
+<p>如上图 B + Tree 的数据结构。是由一个一个的磁盘块组成的树形结构，每个磁盘块由数据项和指针组成。所有的数据都是存放在叶子节点，非叶子节点不存放数据。</p>
+<p><strong>查找过程：</strong><br>以磁盘块1为例，指针 P1 表示小于17的磁盘块，P2 表示在 17~35 之间的磁盘块，P3 则表示大于35的磁盘块。</p>
+<p>比如要查找数据项99，首先将磁盘块1 load 到内存中，发生 1 次 IO。接着通过二分查找发现 99 大于 35，所以找到了 P3 指针。通过P3 指针发生第二次 IO 将磁盘块4加载到内存。再通过二分查找发现大于87，通过 P3 指针发生了第三次 IO 将磁盘块11 加载到内存。最后再通过一次二分查找找到了数据项99。</p>
+<p>由此可见，如果一个几百万的数据查询只需要进行三次 IO 即可找到数据，那么整个效率将是非常高的。</p>
+<p>观察树的结构，发现查询需要经历几次 IO 是由树的高度来决定的，而树的高度又由磁盘块，数据项的大小决定的。</p>
+<p>磁盘块越大，数据项越小那么数的高度就越低。这也就是为什么索引字段要尽可能小的原因。</p>
+<h3 id="6-MySQL索引实现"><a href="#6-MySQL索引实现" class="headerlink" title="6. MySQL索引实现"></a>6. MySQL索引实现</h3><p>在MySQL中，索引属于存储引擎级别的概念，不同存储引擎对索引的实现方式是不同的，本文主要讨论MyISAM和InnoDB两个存储引擎的索引实现方式。</p>
+<h4 id="6-1-MyISAM索引实现"><a href="#6-1-MyISAM索引实现" class="headerlink" title="6.1 MyISAM索引实现"></a>6.1 MyISAM索引实现</h4><p>MyISAM引擎使用B+Tree作为索引结构，叶节点的data域存放的是数据记录的地址。数据存储在一个地方，索引存储在另一个地方，索引中索引的逻辑顺序与磁盘上行的物理存储顺序不同，这种索引方式称称为“非聚集索引”。</p>
+<p>下图是MyISAM索引的原理图：</p>
+<p><img src="/images/2018071804.png" alt="image"></p>
+<p>这里设表一共有三列，假设我们以Col1为主键，上图是一个MyISAM表的主索引（Primary key）示意。可以看出MyISAM的索引文件仅仅保存数据记录的地址。在MyISAM中，主索引和辅助索引（Secondary key）在结构上没有任何区别，只是主索引要求key是唯一的，而辅助索引的key可以重复。如果我们在Col2上建立一个辅助索引，则此索引的结构如下图所示：</p>
+<p><img src="/images/2018071805.png" alt="image"></p>
+<p>同样也是一颗B+Tree，data域保存数据记录的地址。因此，MyISAM中索引检索的算法为首先按照B+Tree搜索算法搜索索引，如果指定的Key存在，则取出其data域的值，然后以data域的值为地址，读取相应数据记录。</p>
+<p>MyISAM的索引方式也叫做“非聚集”的，之所以这么称呼是为了与InnoDB的聚集索引区分。</p>
+<h4 id="6-2-InnoDB索引实现"><a href="#6-2-InnoDB索引实现" class="headerlink" title="6.2 InnoDB索引实现"></a>6.2 InnoDB索引实现</h4><p>虽然InnoDB也使用B+Tree作为索引结构，但具体实现方式却与MyISAM截然不同。</p>
+<p>第一个重大区别是InnoDB的数据文件本身就是索引文件。从上文知道，MyISAM索引文件和数据文件是分离的，索引文件仅保存数据记录的地址。而在InnoDB中，表数据文件本身就是按B+Tree组织的一个索引结构，这棵树的叶节点data域保存了完整的数据记录。这个索引的key是数据表的主键，因此InnoDB表数据文件本身就是主索引。键值的逻辑顺序决定了表中相应行的物理顺序，这种索引方式称称为“聚集索引”。</p>
+<p>如下图所示：<br><img src="/images/2018071806.png" alt="image"></p>
+<p>上图是InnoDB主索引（同时也是数据文件）的示意图，可以看到叶节点包含了完整的数据记录。这种索引叫做聚集索引。因为InnoDB的数据文件本身要按主键聚集，所以InnoDB要求表必须有主键（MyISAM可以没有），如果没有显式指定，则MySQL系统会自动选择一个可以唯一标识数据记录的列作为主键，如果不存在这种列，则MySQL自动为InnoDB表生成一个隐含字段作为主键，这个字段长度为6个字节，类型为长整形。</p>
+<p>第二个与MyISAM索引的不同是InnoDB的辅助索引data域存储相应记录主键的值而不是地址。换句话说，InnoDB的所有辅助索引都引用主键作为data域。例如，下图为定义在Col3上的一个辅助索引：<br><img src="/images/2018071807.png" alt="image"></p>
+<p>这里以英文字符的ASCII码作为比较准则。聚集索引这种实现方式使得按主键的搜索十分高效，但是辅助索引搜索需要检索两遍索引：首先检索辅助索引获得主键，然后用主键到主索引中检索获得记录。</p>
+<p>了解不同存储引擎的索引实现方式对于正确使用和优化索引都非常有帮助，例如知道了InnoDB的索引实现后，就很容易明白为什么不建议使用过长的字段作为主键，因为所有辅助索引都引用主索引，过长的主索引会令辅助索引变得过大。再例如，用非单调的字段作为主键在InnoDB中不是个好主意，因为InnoDB数据文件本身是一颗B+Tree，非单调的主键会造成在插入新记录时数据文件为了维持B+Tree的特性而频繁的分裂调整，十分低效，而使用自增字段作为主键则是一个很好的选择。</p>
+<h3 id="7-聚集索引与非聚集索引的区别"><a href="#7-聚集索引与非聚集索引的区别" class="headerlink" title="7. 聚集索引与非聚集索引的区别"></a>7. 聚集索引与非聚集索引的区别</h3><p>前面已经通过MySQL索引实现中已经讲到InnoDB索引实现用的是“聚集索引”，而MyISAM索引实现的实现用的是“非聚集索引”，那么 聚集索引与非聚集索引到底有什么区别呢？</p>
+<p><strong>聚集索引和非聚集索引的根本区别是表记录的排列顺序和与索引的排列顺序是否一致。</strong></p>
+<h4 id="7-1-聚集索引"><a href="#7-1-聚集索引" class="headerlink" title="7.1 聚集索引"></a>7.1 聚集索引</h4><p>聚集索引表记录的排列顺序与索引的排列顺序一致</p>
+<p><strong>优点：</strong>查询速度快，因为一旦具有第一个索引值的纪录被找到，具有连续索引值的记录也一定物理的紧跟其后。</p>
+<p><strong>缺点：</strong>对表进行修改速度较慢，这是为了保持表中的记录的物理顺序与索引的顺序一致，而把记录插入到数据页的相应位置，必须在数据页中进行数据重排，从而降低了执行速度。</p>
+<h4 id="7-2-非聚集索引"><a href="#7-2-非聚集索引" class="headerlink" title="7.2 非聚集索引"></a>7.2 非聚集索引</h4><p>叶节点的data域存放的是数据记录的地址。数据存储在一个地方，索引存储在另一个地方，索引中索引的逻辑顺序与磁盘上行的物理存储顺序不同。</p>
+<p><strong>优点：</strong>对数据更新影响较小。</p>
+<p><strong>缺点：</strong>聚集索引检索效率比聚集索引低,必须先查到查到每一项数据对应的页码，然后再根据页码查到具体内容。</p>
+<h4 id="7-3-如何选择使用聚集索引或非聚集索引（很重要）："><a href="#7-3-如何选择使用聚集索引或非聚集索引（很重要）：" class="headerlink" title="7.3 如何选择使用聚集索引或非聚集索引（很重要）："></a>7.3 如何选择使用聚集索引或非聚集索引（很重要）：</h4><table>
+<thead>
+<tr>
+<th>动作描述</th>
+<th>使用聚集索引</th>
+<th>使用非聚集索引</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>列经常被分组排序</td>
+<td>应</td>
+<td>应</td>
+</tr>
+<tr>
+<td>返回某范围内的数据</td>
+<td>应</td>
+<td>不应</td>
+</tr>
+<tr>
+<td>一个或极少不同值</td>
+<td>不应</td>
+<td>不应</td>
+</tr>
+<tr>
+<td>小数目的不同值</td>
+<td>应</td>
+<td>不应</td>
+</tr>
+<tr>
+<td>大数目的不同值</td>
+<td>不应</td>
+<td>应</td>
+</tr>
+<tr>
+<td>频繁更新的列</td>
+<td>不应</td>
+<td>应</td>
+</tr>
+<tr>
+<td>外键列</td>
+<td>应</td>
+<td>应</td>
+</tr>
+<tr>
+<td>主键列</td>
+<td>应</td>
+<td>应</td>
+</tr>
+<tr>
+<td>频繁修改索引列</td>
+<td>不应</td>
+<td>应</td>
+</tr>
+</tbody></table>
+<h2 id="二、如何设计索引"><a href="#二、如何设计索引" class="headerlink" title="二、如何设计索引"></a>二、如何设计索引</h2><p>既然索引可以加快查询速度，那么是不是只要是查询语句需要，就建上索引？答案是否定的。因为索引虽然加快了查询速度，但索引也是有代价的：索引文件本身要消耗存储空间，同时索引会加重插入、删除和修改记录时的负担，另外，数据库在运行时也要消耗资源维护索引，因此索引并不是越多越好。</p>
+<h3 id="1-一般两种情况下不建议建索引："><a href="#1-一般两种情况下不建议建索引：" class="headerlink" title="1. 一般两种情况下不建议建索引："></a>1. 一般两种情况下不建议建索引：</h3><p>第一种情况是表记录比较少，例如一两千条甚至只有几百条记录的表，没必要建索引，让查询做全表扫描就好了。至于多少条记录才算多，这个个人有个人的看法，我个人的经验是以2000作为分界线，记录数不超过 2000可以考虑不建索引，超过2000条可以酌情考虑索引。</p>
+<p>另一种不建议建索引的情况是索引的选择性较低。所谓索引的选择性（Selectivity），是指不重复的索引值（也叫基数，Cardinality）与表记录数（#T）的比值：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Index Selectivity &#x3D; 字段对应不重复的值 &#x2F; 表总记录数</span><br></pre></td></tr></table></figure>
+
+<p>显然选择性的取值范围为(0, 1]，值越大，即选择性越高的索引价值越大，这是由B+Tree的性质决定的。</p>
+<p>例如，可以应用求一个字段的Selectivity，判断是否有必要给这个这个字段加索引，以及</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">SELECT count(DISTINCT(title))&#x2F;count(*) AS Selectivity FROM Table1;</span><br><span class="line">+-------------+</span><br><span class="line">| Selectivity |</span><br><span class="line">+-------------+</span><br><span class="line">|      0.0000 |</span><br><span class="line">+-------------+</span><br></pre></td></tr></table></figure>
+
+<p>title的选择性不足0.0001（精确值为0.00001579），所以实在没有什么必要为其单独建索引。</p>
+<h3 id="2-设计索引一般需要考虑以下3点："><a href="#2-设计索引一般需要考虑以下3点：" class="headerlink" title="2. 设计索引一般需要考虑以下3点："></a>2. 设计索引一般需要考虑以下3点：</h3><ol>
+<li>看数据量，根据记录数，看是否有建索引的必要；</li>
+<li>根据计算字段的索引选择性判断给某个字段加索引是否比较有价值；</li>
+<li>看能否使用前缀索引取代全列索引，综合考虑索引选择性与key的长度，做个折中，尽可能使得前缀索引的选择性接近全列索引，同时又减段索引key的长度，从而减少了索引文件的大小和维护开销。</li>
+</ol>
+<p>举个例子：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">SELECT count(DISTINCT(concat(first_name, last_name)))&#x2F;count(*) AS Selectivity FROM Table1;</span><br><span class="line">+-------------+</span><br><span class="line">| Selectivity |</span><br><span class="line">+-------------+</span><br><span class="line">|      0.9313 |</span><br><span class="line">+-------------+</span><br></pre></td></tr></table></figure>
+
+<p>&lt;first_name, last_name&gt;选择性很好，但是first_name和last_name加起来长度为30，有没有兼顾长度和选择性的办法？可以考虑用first_name和last_name的前几个字符建立索引，例如&lt;first_name, left(last_name, 3)&gt;，看看其选择性：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">SELECT count(DISTINCT(concat(first_name, left(last_name, 3))))&#x2F;count(*) AS Selectivity FROM Table1;</span><br><span class="line">+-------------+</span><br><span class="line">| Selectivity |</span><br><span class="line">+-------------+</span><br><span class="line">|      0.7879 |</span><br><span class="line">+-------------+</span><br></pre></td></tr></table></figure>
+
+<p>择性还不错，但离0.9313还是有点距离，那么把last_name前缀加到4：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">SELECT count(DISTINCT(concat(first_name, left(last_name, 4))))&#x2F;count(*) AS Selectivity FROM Table1;</span><br><span class="line">+-------------+</span><br><span class="line">| Selectivity |</span><br><span class="line">+-------------+</span><br><span class="line">|      0.9007 |</span><br><span class="line">+-------------+</span><br></pre></td></tr></table></figure>
+
+<p>这时选择性已经很理想了，而这个索引的长度只有18，比&lt;first_name, last_name&gt;短了接近一半，我们把这个前缀索引建上：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ALTER TABLE Table1</span><br><span class="line">ADD INDEX &#96;first_name_last_name4&#96; (first_name, last_name(4));</span><br></pre></td></tr></table></figure>
+
+<p>此时再执行一遍按名字查询，比较分析一下与建索引前的结果：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">SHOW PROFILES;</span><br><span class="line">+----------+------------+---------------------------------------------------------------------------------+</span><br><span class="line">| Query_ID | Duration   | Query                                                                           |</span><br><span class="line">+----------+------------+---------------------------------------------------------------------------------+</span><br><span class="line">|       87 | 0.11941700 | SELECT * FROM Table1 WHERE first_name&#x3D;&#39;Eric&#39; AND last_name&#x3D;&#39;Anido&#39; |</span><br><span class="line">|       90 | 0.00092400 | SELECT * FROM Table1 WHERE first_name&#x3D;&#39;Eric&#39; AND last_name&#x3D;&#39;Anido&#39; |</span><br></pre></td></tr></table></figure>
+
+<p>性能的提升是显著的，查询速度提高了120多倍。</p>
+<p>有一点需要注意的是：前缀索引兼顾索引大小和查询速度，但是其缺点是不能用于ORDER BY和GROUP BY操作，也不能用于Covering index（即当索引本身包含查询所需全部数据时，不再访问数据文件本身）。</p>
+<h2 id="三、索引使用的注意事项-策略及优化"><a href="#三、索引使用的注意事项-策略及优化" class="headerlink" title="三、索引使用的注意事项(策略及优化)"></a>三、索引使用的注意事项(策略及优化)</h2><p>并不是建立索引就能显著提高查询速度，在索引的使用过程中，存在一些使用细节和注意事项，因为稍不留心，就可能导致在查询过程中索引失效。</p>
+<p>一下列举一些需要注意的事项：</p>
+<h3 id="1-不要在列上使用函数"><a href="#1-不要在列上使用函数" class="headerlink" title="1. 不要在列上使用函数"></a>1. 不要在列上使用函数</h3><p>不要在列上使用函数，这将导致索引失效而进行全表扫描。</p>
+<p>如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select * from news where year(publish_time) &lt; 2018</span><br></pre></td></tr></table></figure>
+
+<p>应改为：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select * from news where publish_time &lt; &#39;2018-01-01&#39;</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="2-不要在列上进行计算"><a href="#2-不要在列上进行计算" class="headerlink" title="2. 不要在列上进行计算"></a>2. 不要在列上进行计算</h3><p>不要在列上进行运算，这也将导致索引失效而进行全表扫描。</p>
+<p>如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select * from news where id &#x2F; 100 &#x3D; 1</span><br></pre></td></tr></table></figure>
+
+<p>应改为：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select * from news where id &#x3D; 1 * 100</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-尽量避免使用-或-not-in或-lt-gt-等否定操作符"><a href="#3-尽量避免使用-或-not-in或-lt-gt-等否定操作符" class="headerlink" title="3. 尽量避免使用 != 或 not in或 &lt;&gt; 等否定操作符"></a>3. 尽量避免使用 != 或 not in或 &lt;&gt; 等否定操作符</h3><p>应该尽量避免在 where 子句中使用 != 或 not in 或 &lt;&gt;操作符，<br>这些负向查询也会导致索引失效而进行全表扫描。</p>
+<p>如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select name from user where id not in (1,3,4);</span><br></pre></td></tr></table></figure>
+
+<p>应改为:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select name from user where id in (2,5,6);</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-尽量避免使用-or-来连接条件"><a href="#4-尽量避免使用-or-来连接条件" class="headerlink" title="4. 尽量避免使用 or 来连接条件"></a>4. 尽量避免使用 or 来连接条件</h3><p>应该尽量避免在 where 子句中使用 or来连接条件，因为这会导致索引失效而进行全表扫描。</p>
+<p>如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select * from CRM_CUSTOMER_INFO where id&#x3D; 1 or id &#x3D;2</span><br></pre></td></tr></table></figure>
+
+<p>应改为</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select * from CRM_CUSTOMER_INFO where id in(1,2)</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-字段的默认值不要为-null"><a href="#5-字段的默认值不要为-null" class="headerlink" title="5. 字段的默认值不要为 null"></a>5. 字段的默认值不要为 null</h3><p>只要列中包含有 NULL 值都将不会被包含在索引中，复合索引中只要有一列含有 NULL值，那么这一列对于此复合索引就是无效的。</p>
+<p>因此，在数据库设计时，除非有一个很特别的原因使用 NULL 值，不然尽量不要让字段的默认值为 NULL。</p>
+<h3 id="6-不要让数据库帮我们做隐式类型转换"><a href="#6-不要让数据库帮我们做隐式类型转换" class="headerlink" title="6. 不要让数据库帮我们做隐式类型转换"></a>6. 不要让数据库帮我们做隐式类型转换</h3><p>当查询条件左右两侧类型不匹配的时候会发生隐式转换，隐式转换带来的影响就是可能导致索引失效而进行全表扫描。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select name from user where telno&#x3D;1888888888</span><br></pre></td></tr></table></figure>
+
+<p>这样虽然可以查出数据，但是会导致全表扫描。</p>
+<p>应改为</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select name from user where telno&#x3D;&#39;1888888888&#39;</span><br></pre></td></tr></table></figure>
+
+<h3 id="7-前导模糊查询会导致索引失效"><a href="#7-前导模糊查询会导致索引失效" class="headerlink" title="7. 前导模糊查询会导致索引失效"></a>7. 前导模糊查询会导致索引失效</h3><p>like 的方式进行查询，在 like “value%” 可以使用索引，但是对于 like “%value%” 这样的方式，执行全表查询，这在数据量小的表，不存在性能问题，但是对于海量数据，全表扫描是非常可怕的事情。所以，根据业务需求，考虑使用 ElasticSearch 或 Solr 是个不错的方案。</p>
+<h3 id="8-数据区分不明显的不建议创建索引"><a href="#8-数据区分不明显的不建议创建索引" class="headerlink" title="8. 数据区分不明显的不建议创建索引"></a>8. 数据区分不明显的不建议创建索引</h3><p>如 user 表中的性别字段，可以明显区分的才建议创建索引，如身份证等字段</p>
+<h3 id="9-可以用复合索引替代多个单列索引"><a href="#9-可以用复合索引替代多个单列索引" class="headerlink" title="9. 可以用复合索引替代多个单列索引"></a>9. 可以用复合索引替代多个单列索引</h3><p>MySQL 只能使用一个索引，会从多个索引中选择一个限制最为严格的索引，因此，为多个列创建单列索引，并不能提高 MySQL 的查询性能。</p>
+<p>假设，有两个单列索引，分别为 news_year_idx(news_year) 和 news_month_idx(news_month)。现在，有一个场景需要针对资讯的年份和月份进行查询，那么，SQL 语句可以写成：</p>
+<p>select * from news where news_year = 2017 and news_month = 1<br>事实上，MySQL 只能使用一个单列索引。为了提高性能，可以使用复合索引 news_year_month_idx(news_year, news_month) 保证 news_year 和 news_month 两个列都被索引覆盖。</p>
+<h3 id="10-覆盖索引的好处"><a href="#10-覆盖索引的好处" class="headerlink" title="10. 覆盖索引的好处"></a>10. 覆盖索引的好处</h3><p>如果一个索引包含所有需要的查询的字段的值，直接根据索引的查询结果返回数据，而无需读表，能够极大的提高性能。因此，可以定义一个让索引包含的额外的列，即使这个列对于索引而言是无用的。</p>
+<h3 id="11-范围查询对多列查询的影响"><a href="#11-范围查询对多列查询的影响" class="headerlink" title="11. 范围查询对多列查询的影响"></a>11. 范围查询对多列查询的影响</h3><p>查询中的某个列有范围查询，则其右边所有列都无法使用索引优化查找。</p>
+<p>举个例子，假设有一个场景需要查询本周发布的资讯文章，其中的条件是必须是启用状态，且发布时间在这周内。那么，SQL 语句可以写成：</p>
+<p>select * from news where publish_time &gt;= ‘2017-01-02’ and publish_time &lt;= ‘2017-01-08’ and enable = 1<br>这种情况下，因为范围查询对多列查询的影响，将导致 news_publish_idx(publish_time, enable) 索引中 publish_time 右边所有列都无法使用索引优化查找。换句话说，news_publish_idx(publish_time, enable) 索引等价于 news_publish_idx(publish_time) 。</p>
+<p>对于这种情况，我的建议：对于范围查询，务必要注意它带来的副作用，并且尽量少用范围查询，可以通过曲线救国的方式满足业务场景。</p>
+<p>例如，上面案例的需求是查询本周发布的资讯文章，因此可以创建一个news_weekth 字段用来存储资讯文章的周信息，使得范围查询变成普通的查询，SQL 可以改写成：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select * from news where news_weekth &#x3D; 1 and enable &#x3D; 1</span><br></pre></td></tr></table></figure>
+<p>然而，并不是所有的范围查询都可以进行改造，对于必须使用范围查询但无法改造的情况，我的建议：不必试图用 SQL 来解决所有问题，可以使用其他数据存储技术控制时间轴，例如 Redis 的 SortedSet 有序集合保存时间，或者通过缓存方式缓存查询结果从而提高性能。</p>
+<h3 id="12-复合索引（联合索引）"><a href="#12-复合索引（联合索引）" class="headerlink" title="12. 复合索引（联合索引）"></a>12. 复合索引（联合索引）</h3><p>首先介绍一下联合索引。联合索引其实很简单，相对于一般索引只有一个字段，联合索引可以为多个字段创建一个索引。它的原理也很简单，比如，我们在（a,b,c）字段上创建一个联合索引，则索引记录会首先按照A字段排序，然后再按照B字段排序然后再是C字段，因此，联合索引的特点就是：</p>
+<p>第一个字段一定是有序的<br>当第一个字段值相等的时候，第二个字段又是有序的，比如下表中当A=2时所有B的值是有序排列的，依次类推，当同一个B值得所有C字段是有序排列的</p>
+<table>
+<thead>
+<tr>
+<th>A</th>
+<th>B</th>
+<th>C</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+</tr>
+<tr>
+<td>1</td>
+<td>4</td>
+<td>2</td>
+</tr>
+<tr>
+<td>1</td>
+<td>1</td>
+<td>4</td>
+</tr>
+<tr>
+<td>2</td>
+<td>3</td>
+<td>5</td>
+</tr>
+<tr>
+<td>2</td>
+<td>4</td>
+<td>4</td>
+</tr>
+<tr>
+<td>2</td>
+<td>4</td>
+<td>6</td>
+</tr>
+<tr>
+<td>2</td>
+<td>5</td>
+<td>5</td>
+</tr>
+</tbody></table>
+<p>其实联合索引的查找就跟查字典是一样的，先根据第一个字母查，然后再根据第二个字母查，或者只根据第一个字母查，但是不能跳过第一个字母从第二个字母开始查。这就是所谓的最左前缀原理。</p>
+<h3 id="13-复合索引的最左前缀原理"><a href="#13-复合索引的最左前缀原理" class="headerlink" title="13. 复合索引的最左前缀原理"></a>13. 复合索引的最左前缀原理</h3><p>在复合索引的基础上，再来详细介绍一下联合索引的查询。还是复合索引中的例子，我们在（a,b,c）字段上建了一个联合索引，所以这个索引是先按a 再按b 再按c进行排列的，所以：</p>
+<p>以下的查询方式都可以用到索引</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">select * from table where a&#x3D;1；</span><br><span class="line">select * from table where a&#x3D;1 and b&#x3D;2；</span><br><span class="line">select * from table where a&#x3D;1 and b&#x3D;2 and c&#x3D;3；</span><br></pre></td></tr></table></figure>
+<p>上面三个查询按照 （a ）, （a，b ）,（a，b，c ）的顺序都可以利用到索引，这就是最左前缀匹配。</p>
+<p>如果查询语句是：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select * from table where a&#x3D;1 and c&#x3D;3； 那么只会用到索引a。</span><br></pre></td></tr></table></figure>
+
+<p>如果查询语句是：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select * from table where b&#x3D;2 and c&#x3D;3； 因为没有用到最左前缀a，所以这个查询是用户到索引的。</span><br></pre></td></tr></table></figure>
+<p>如果用到了最左前缀，但是顺序颠倒会用到索引吗？</p>
+<p>比如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">select * from table where b&#x3D;2 and a&#x3D;1；</span><br><span class="line">select * from table where b&#x3D;2 and a&#x3D;1 and c&#x3D;3；</span><br></pre></td></tr></table></figure>
+<p>如果用到了最左前缀而只是颠倒了顺序，也是可以用到索引的，因为mysql查询优化器会判断纠正这条sql语句该以什么样的顺序执行效率最高，最后才生成真正的执行计划。但我们还是最好按照索引顺序来查询，这样查询优化器就不用重新编译了。</p>
+<h2 id="四、参考文献"><a href="#四、参考文献" class="headerlink" title="四、参考文献"></a>四、参考文献</h2><p>[1] MySQL索引背后的数据结构及算法原理 <a href="http://blog.codinglabs.org/articles/theory-of-mysql-index.html" target="_blank" rel="noopener">http://blog.codinglabs.org/articles/theory-of-mysql-index.html</a><br>[2] 从B树、B+树、B* 树谈到 R树 <a href="https://blog.csdn.net/v_july_v/article/details/6530142" target="_blank" rel="noopener">https://blog.csdn.net/v_july_v/article/details/6530142</a><br>[3] 聚集索引和非聚集索引 <a href="https://www.cnblogs.com/aspnethot/articles/1504082.html" target="_blank" rel="noopener">https://www.cnblogs.com/aspnethot/articles/1504082.html</a><br>[4] 你知道数据库索引的工作原理吗？<a href="http://www.ituring.com.cn/article/986" target="_blank" rel="noopener">http://www.ituring.com.cn/article/986</a><br>[5] 如何设计索引 <a href="http://blog.720ui.com/2017/mysql_core_03_how_use_index/" target="_blank" rel="noopener">http://blog.720ui.com/2017/mysql_core_03_how_use_index/</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E7%B4%A2%E5%BC%95/" rel="tag"># 索引</a>
+              <a href="/tags/%E7%B4%A2%E5%BC%95%E5%8E%9F%E7%90%86/" rel="tag"># 索引原理</a>
+              <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93%E7%B4%A2%E5%BC%95/" rel="tag"># 数据库索引</a>
+              <a href="/tags/B-Tree/" rel="tag"># B+Tree</a>
+              <a href="/tags/B-Tree/" rel="tag"># B-Tree</a>
+              <a href="/tags/%E7%B4%A2%E5%BC%95%E4%BD%BF%E7%94%A8%E7%9A%84%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9/" rel="tag"># 索引使用的注意事项</a>
+              <a href="/tags/RDBMS/" rel="tag"># RDBMS</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/07/21/unique-id-generate/" rel="prev" title="数据存储 2：分布式系统全局唯一ID生成方案">
+      <i class="fa fa-chevron-left"></i> 数据存储 2：分布式系统全局唯一ID生成方案
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/07/11/jvm-memory-division/" rel="next" title="java 虚拟机 5：Java内存区域划分以及对象创建的过程">
+      java 虚拟机 5：Java内存区域划分以及对象创建的过程 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#一、数据库索引的原理"><span class="nav-number">1.</span> <span class="nav-text">一、数据库索引的原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-索引的本质"><span class="nav-number">1.1.</span> <span class="nav-text">1. 索引的本质</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-常见的查询算法"><span class="nav-number">1.2.</span> <span class="nav-text">2. 常见的查询算法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-顺序查找（linear-search-）"><span class="nav-number">1.2.1.</span> <span class="nav-text">2.1 顺序查找（linear search ）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-二分查找（binary-search）"><span class="nav-number">1.2.2.</span> <span class="nav-text">2.2 二分查找（binary search）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-二叉排序树查找"><span class="nav-number">1.2.3.</span> <span class="nav-text">2.3 二叉排序树查找</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-4-索引是为了应用某种高级查找算法而建立的一种数据结构："><span class="nav-number">1.2.4.</span> <span class="nav-text">2.4 索引是为了应用某种高级查找算法而建立的一种数据结构：</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-多叉平衡查找树（B-tree-和-B-Tree）"><span class="nav-number">1.3.</span> <span class="nav-text">3. 多叉平衡查找树（B-tree 和 B+Tree）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#3-1-B-Tree"><span class="nav-number">1.3.1.</span> <span class="nav-text">3.1 B-Tree</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-2-B-Tree"><span class="nav-number">1.3.2.</span> <span class="nav-text">3.2 B+Tree</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-为什么索引用B-Tree实现"><span class="nav-number">1.4.</span> <span class="nav-text">4. 为什么索引用B+Tree实现</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#4-1-为什么索引采用B-Tree-B-Tree的性能会比采用红黑树好？"><span class="nav-number">1.4.1.</span> <span class="nav-text">4.1 为什么索引采用B+Tree&#x2F;B-Tree的性能会比采用红黑树好？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-2-为什么索引采用B-Tree的性能会比采用B-Tree好？"><span class="nav-number">1.4.2.</span> <span class="nav-text">4.2 为什么索引采用B+Tree的性能会比采用B-Tree好？</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-B-Tree-的查找过程"><span class="nav-number">1.5.</span> <span class="nav-text">5. B+Tree 的查找过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-MySQL索引实现"><span class="nav-number">1.6.</span> <span class="nav-text">6. MySQL索引实现</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#6-1-MyISAM索引实现"><span class="nav-number">1.6.1.</span> <span class="nav-text">6.1 MyISAM索引实现</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#6-2-InnoDB索引实现"><span class="nav-number">1.6.2.</span> <span class="nav-text">6.2 InnoDB索引实现</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-聚集索引与非聚集索引的区别"><span class="nav-number">1.7.</span> <span class="nav-text">7. 聚集索引与非聚集索引的区别</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#7-1-聚集索引"><span class="nav-number">1.7.1.</span> <span class="nav-text">7.1 聚集索引</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#7-2-非聚集索引"><span class="nav-number">1.7.2.</span> <span class="nav-text">7.2 非聚集索引</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#7-3-如何选择使用聚集索引或非聚集索引（很重要）："><span class="nav-number">1.7.3.</span> <span class="nav-text">7.3 如何选择使用聚集索引或非聚集索引（很重要）：</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二、如何设计索引"><span class="nav-number">2.</span> <span class="nav-text">二、如何设计索引</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-一般两种情况下不建议建索引："><span class="nav-number">2.1.</span> <span class="nav-text">1. 一般两种情况下不建议建索引：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-设计索引一般需要考虑以下3点："><span class="nav-number">2.2.</span> <span class="nav-text">2. 设计索引一般需要考虑以下3点：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#三、索引使用的注意事项-策略及优化"><span class="nav-number">3.</span> <span class="nav-text">三、索引使用的注意事项(策略及优化)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-不要在列上使用函数"><span class="nav-number">3.1.</span> <span class="nav-text">1. 不要在列上使用函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-不要在列上进行计算"><span class="nav-number">3.2.</span> <span class="nav-text">2. 不要在列上进行计算</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-尽量避免使用-或-not-in或-lt-gt-等否定操作符"><span class="nav-number">3.3.</span> <span class="nav-text">3. 尽量避免使用 !&#x3D; 或 not in或 &lt;&gt; 等否定操作符</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-尽量避免使用-or-来连接条件"><span class="nav-number">3.4.</span> <span class="nav-text">4. 尽量避免使用 or 来连接条件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-字段的默认值不要为-null"><span class="nav-number">3.5.</span> <span class="nav-text">5. 字段的默认值不要为 null</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-不要让数据库帮我们做隐式类型转换"><span class="nav-number">3.6.</span> <span class="nav-text">6. 不要让数据库帮我们做隐式类型转换</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-前导模糊查询会导致索引失效"><span class="nav-number">3.7.</span> <span class="nav-text">7. 前导模糊查询会导致索引失效</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-数据区分不明显的不建议创建索引"><span class="nav-number">3.8.</span> <span class="nav-text">8. 数据区分不明显的不建议创建索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-可以用复合索引替代多个单列索引"><span class="nav-number">3.9.</span> <span class="nav-text">9. 可以用复合索引替代多个单列索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-覆盖索引的好处"><span class="nav-number">3.10.</span> <span class="nav-text">10. 覆盖索引的好处</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#11-范围查询对多列查询的影响"><span class="nav-number">3.11.</span> <span class="nav-text">11. 范围查询对多列查询的影响</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#12-复合索引（联合索引）"><span class="nav-number">3.12.</span> <span class="nav-text">12. 复合索引（联合索引）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#13-复合索引的最左前缀原理"><span class="nav-number">3.13.</span> <span class="nav-text">13. 复合索引的最左前缀原理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#四、参考文献"><span class="nav-number">4.</span> <span class="nav-text">四、参考文献</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="crazyfzw"
+      src="/uploads/avatar.jpg">
+  <p class="site-author-name" itemprop="name">crazyfzw</p>
+  <div class="site-description" itemprop="description">做个有趣的技术人</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">35</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">12</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">133</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/crazyfzw" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;crazyfzw" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://book.douban.com/people/crazyfzw/" title="Booklist → https:&#x2F;&#x2F;book.douban.com&#x2F;people&#x2F;crazyfzw&#x2F;" rel="noopener" target="_blank"><i class="fab fa-skype fa-fw"></i>Booklist</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:crazyfzw@gmail.com" title="E-Mail → mailto:crazyfzw@gmail.com" rel="noopener" target="_blank"><i class="fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://plus.google.com/104894167431407693109" title="Google → https:&#x2F;&#x2F;plus.google.com&#x2F;104894167431407693109" rel="noopener" target="_blank"><i class="fab fa-google fa-fw"></i>Google</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.facebook.com/profile.php?id=100011315733045" title="Facebook → https:&#x2F;&#x2F;www.facebook.com&#x2F;profile.php?id&#x3D;100011315733045" rel="noopener" target="_blank"><i class="fab fa-facebook fa-fw"></i>Facebook</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/u/3829383159" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;3829383159" rel="noopener" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://ifeve.com/" title="http:&#x2F;&#x2F;ifeve.com&#x2F;" rel="noopener" target="_blank">并发编程网</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="http://www.importnew.com/" title="http:&#x2F;&#x2F;www.importnew.com&#x2F;" rel="noopener" target="_blank">ImportNew</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="http://jm.taobao.org/categories/" title="http:&#x2F;&#x2F;jm.taobao.org&#x2F;categories&#x2F;" rel="noopener" target="_blank">阿里中间件团队博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.ibm.com/developerworks/cn/java/" title="https:&#x2F;&#x2F;www.ibm.com&#x2F;developerworks&#x2F;cn&#x2F;java&#x2F;" rel="noopener" target="_blank">IBM developerworks</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tech.meituan.com/" title="https:&#x2F;&#x2F;tech.meituan.com&#x2F;" rel="noopener" target="_blank">美团点评技术团队</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="http://calvin1978.blogcn.com/" title="http:&#x2F;&#x2F;calvin1978.blogcn.com&#x2F;" rel="noopener" target="_blank">江南白衣的博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="http://blog.720ui.com/" title="http:&#x2F;&#x2F;blog.720ui.com" rel="noopener" target="_blank">梁桂钊的博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.jianshu.com/u/581f548ef0ec" title="https:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;581f548ef0ec" rel="noopener" target="_blank">李艳鹏的博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="http://jinnianshilongnian.iteye.com/" title="http:&#x2F;&#x2F;jinnianshilongnian.iteye.com&#x2F;" rel="noopener" target="_blank">张开涛的博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/zuoxiaolong" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;zuoxiaolong" rel="noopener" target="_blank">左潇龙的博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/xrq730/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;xrq730&#x2F;" rel="noopener" target="_blank">五月的仓颉</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://yikun.github.io/" title="https:&#x2F;&#x2F;yikun.github.io&#x2F;" rel="noopener" target="_blank">Yikun的博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="http://www.ruanyifeng.com/" title="http:&#x2F;&#x2F;www.ruanyifeng.com" rel="noopener" target="_blank">阮一峰的个人网站</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">crazyfzw</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">213k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">3:14</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : false,
+      appId      : 'jyxPxkBMeEmDfMMTuuyBdGdu-gzGzoHsz',
+      appKey     : '7SEECyfT4R10oTtj4zDMOdBt',
+      placeholder: "ヾﾉ≧∀≦)o 来呀！吐槽一番吧！",
+      avatar     : 'monsterid',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : '' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>
