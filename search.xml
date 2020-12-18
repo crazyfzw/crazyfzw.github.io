@@ -1785,6 +1785,9 @@ http://www.cnblogs.com/TimeStory/p/3858479.html
 <p>[3]<a href="http://dubbo.apache.org/zh-cn/blog/introduction-to-dubbo-spi.html" target="_blank" rel="noopener">Dubbo可扩展机制实战</a></p>
 <p>[4]<a href="http://dubbo.apache.org/zh-cn/blog/introduction-to-dubbo-spi-2.html" target="_blank" rel="noopener">Dubbo可扩展机制源码解析</a></p>
 ]]></content>
+      <categories>
+        <category>Java</category>
+      </categories>
       <tags>
         <tag>进阶实战</tag>
         <tag>Java SPI</tag>
@@ -5020,6 +5023,9 @@ http://www.cnblogs.com/TimeStory/p/3858479.html
 <p>[7]<a href="https://mp.weixin.qq.com/s/JLEzNqQsx-Lec03eAsXFOQ" target="_blank" rel="noopener">Redlock实现分布式锁</a></p>
 <p>[8]<a href="https://mp.weixin.qq.com/s/iaZcc7QGbGHkZkfLeYp1yg" target="_blank" rel="noopener">Redisson实现Redis分布式锁</a></p>
 ]]></content>
+      <categories>
+        <category>distributed</category>
+      </categories>
       <tags>
         <tag>Redis</tag>
         <tag>Redisson</tag>
