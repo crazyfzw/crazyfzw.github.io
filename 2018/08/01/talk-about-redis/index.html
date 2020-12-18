@@ -42,7 +42,7 @@
 <meta property="og:image" content="https://crazyfzw.github.io/images/20180808013.png">
 <meta property="og:image" content="https://crazyfzw.github.io/images/20180808014.png">
 <meta property="article:published_time" content="2018-08-01T12:51:03.000Z">
-<meta property="article:modified_time" content="2020-04-04T16:11:19.094Z">
+<meta property="article:modified_time" content="2020-12-18T05:06:35.324Z">
 <meta property="article:author" content="crazyfzw">
 <meta property="article:tag" content="Redis">
 <meta property="article:tag" content="Redis有哪些数据类型">
@@ -248,7 +248,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-04-05 00:11:19" itemprop="dateModified" datetime="2020-04-05T00:11:19+08:00">2020-04-05</time>
+                <time title="修改时间：2020-12-18 13:06:35" itemprop="dateModified" datetime="2020-12-18T13:06:35+08:00">2020-12-18</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -755,7 +755,7 @@
 <h2 id="四、Redis的数据淘汰策略-内存淘汰机制"><a href="#四、Redis的数据淘汰策略-内存淘汰机制" class="headerlink" title="四、Redis的数据淘汰策略(内存淘汰机制)"></a>四、Redis的数据淘汰策略(内存淘汰机制)</h2><h3 id="内存淘汰的过程"><a href="#内存淘汰的过程" class="headerlink" title="内存淘汰的过程"></a>内存淘汰的过程</h3><p>首先，客户端发起了需要申请更多内存的命令（如set）。</p>
 <p>然后，Redis检查内存使用情况，如果已使用的内存大于 maxmemory 则开始根据用户配置的不同淘汰策略来淘汰内存（key），从而换取一定的内存。</p>
 <p>最后，如果上面都没问题，则这个命令执行成功。</p>
-<h3 id="6种淘汰策略"><a href="#6种淘汰策略" class="headerlink" title="6种淘汰策略"></a>6种淘汰策略</h3><p>当Redis所用内存达到maxmemory上限时会触发相应的溢出控制策略。具体策略受maxmemory-policy参数控制，Redis支持以下6种策略：</p>
+<h3 id="8-种淘汰策略"><a href="#8-种淘汰策略" class="headerlink" title="8 种淘汰策略"></a>8 种淘汰策略</h3><p>当Redis所用内存达到maxmemory上限时会触发相应的溢出控制策略。具体策略受maxmemory-policy参数控制，Redis支持以下6种策略：</p>
 <table>
 <thead>
 <tr>
@@ -764,28 +764,36 @@
 </tr>
 </thead>
 <tbody><tr>
-<td align="center">volatile-lru</td>
-<td align="center">从已设置过期时间的数据集中挑选最近最少使用的数据淘汰</td>
+<td align="center">noeviction</td>
+<td align="center">当内存达到限制的时候，不淘汰任何数据，不可写入任何数据集，所有引起申请内存的命令会报错</td>
 </tr>
 <tr>
 <td align="center">volatile-ttl</td>
 <td align="center">从已设置过期时间的数据集中挑选将要过期的数据淘汰</td>
 </tr>
 <tr>
-<td align="center">volatile-random</td>
-<td align="center">从已设置过期时间的数据集中任意选择数据淘汰</td>
-</tr>
-<tr>
 <td align="center">allkeys-lru</td>
 <td align="center">从所有数据集中挑选最近最少使用的数据淘汰</td>
+</tr>
+<tr>
+<td align="center">volatile-lru</td>
+<td align="center">从已设置过期时间的数据集中挑选最近最少使用的数据淘汰</td>
 </tr>
 <tr>
 <td align="center">allkeys-random</td>
 <td align="center">从所有数据集中任意选择数据进行淘汰</td>
 </tr>
 <tr>
-<td align="center">noeviction</td>
-<td align="center">当内存达到限制的时候，不淘汰任何数据，不可写入任何数据集，所有引起申请内存的命令会报错</td>
+<td align="center">volatile-random</td>
+<td align="center">从已设置过期时间的数据集中任意选择数据淘汰</td>
+</tr>
+<tr>
+<td align="center">allkeys-lfu</td>
+<td align="center">从所有键中驱逐使用频率最少的键</td>
+</tr>
+<tr>
+<td align="center">volatile-lfu</td>
+<td align="center">从已设置过期时间的数据集中挑选使用频率最少的键</td>
 </tr>
 </tbody></table>
 <p>需要注意的是：作为内存数据库，出于对性能和内存消耗的考虑，Redis 的淘汰算法实际实现上并非针对所有 key，而是抽样一小部分并且从中选出被淘汰的 key。</p>
@@ -999,7 +1007,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#一、概述"><span class="nav-number">1.</span> <span class="nav-text">一、概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二、Redis提供的五种数据结构"><span class="nav-number">2.</span> <span class="nav-text">二、Redis提供的五种数据结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#STRING"><span class="nav-number">2.1.</span> <span class="nav-text">STRING</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HASH"><span class="nav-number">2.2.</span> <span class="nav-text">HASH</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LIST"><span class="nav-number">2.3.</span> <span class="nav-text">LIST</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SET"><span class="nav-number">2.4.</span> <span class="nav-text">SET</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ZSET（sorted-set）"><span class="nav-number">2.5.</span> <span class="nav-text">ZSET（sorted set）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#三、Redis的使用场景"><span class="nav-number">3.</span> <span class="nav-text">三、Redis的使用场景</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#缓存"><span class="nav-number">3.1.</span> <span class="nav-text">缓存</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#共享Session（会话缓存）"><span class="nav-number">3.2.</span> <span class="nav-text">共享Session（会话缓存）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#计数器"><span class="nav-number">3.3.</span> <span class="nav-text">计数器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#排行榜以及热门列表"><span class="nav-number">3.4.</span> <span class="nav-text">排行榜以及热门列表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#社交列表"><span class="nav-number">3.5.</span> <span class="nav-text">社交列表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#记录用户判定信息"><span class="nav-number">3.6.</span> <span class="nav-text">记录用户判定信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#交集、并集和差集"><span class="nav-number">3.7.</span> <span class="nav-text">交集、并集和差集</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#时效性"><span class="nav-number">3.8.</span> <span class="nav-text">时效性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#消息队列"><span class="nav-number">3.9.</span> <span class="nav-text">消息队列</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#分布式锁实现"><span class="nav-number">3.10.</span> <span class="nav-text">分布式锁实现</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#四、Redis的数据淘汰策略-内存淘汰机制"><span class="nav-number">4.</span> <span class="nav-text">四、Redis的数据淘汰策略(内存淘汰机制)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#内存淘汰的过程"><span class="nav-number">4.1.</span> <span class="nav-text">内存淘汰的过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6种淘汰策略"><span class="nav-number">4.2.</span> <span class="nav-text">6种淘汰策略</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如何选择淘汰策略"><span class="nav-number">4.3.</span> <span class="nav-text">如何选择淘汰策略</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如何配置最大内存及淘汰策略"><span class="nav-number">4.4.</span> <span class="nav-text">如何配置最大内存及淘汰策略</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#五、Redis-的持久化机制"><span class="nav-number">5.</span> <span class="nav-text">五、Redis 的持久化机制</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#RDB-快照持久化"><span class="nav-number">5.1.</span> <span class="nav-text">RDB 快照持久化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#AOF-日志持久化"><span class="nav-number">5.2.</span> <span class="nav-text">AOF 日志持久化</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#命令写入"><span class="nav-number">5.2.1.</span> <span class="nav-text">命令写入</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#文件同步"><span class="nav-number">5.2.2.</span> <span class="nav-text">文件同步</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#重写机制"><span class="nav-number">5.2.3.</span> <span class="nav-text">重写机制</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#重启加载-数据恢复"><span class="nav-number">5.3.</span> <span class="nav-text">重启加载(数据恢复)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#六、Redis-为什么速度快"><span class="nav-number">6.</span> <span class="nav-text">六、Redis 为什么速度快</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#七、Redis-为什么采用单线程"><span class="nav-number">7.</span> <span class="nav-text">七、Redis 为什么采用单线程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#八、Redis的内部结构"><span class="nav-number">8.</span> <span class="nav-text">八、Redis的内部结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#九、Redis-集群方案与实现"><span class="nav-number">9.</span> <span class="nav-text">九、Redis 集群方案与实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#十、Redis-与-Memcached-的差异"><span class="nav-number">10.</span> <span class="nav-text">十、Redis 与 Memcached 的差异</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#数据类型支持不同"><span class="nav-number">10.1.</span> <span class="nav-text">数据类型支持不同</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#内存管理机制不同"><span class="nav-number">10.2.</span> <span class="nav-text">内存管理机制不同</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数据持久化支持"><span class="nav-number">10.3.</span> <span class="nav-text">数据持久化支持</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#集群管理的不同"><span class="nav-number">10.4.</span> <span class="nav-text">集群管理的不同</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#十一、参考文献"><span class="nav-number">11.</span> <span class="nav-text">十一、参考文献</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#一、概述"><span class="nav-number">1.</span> <span class="nav-text">一、概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二、Redis提供的五种数据结构"><span class="nav-number">2.</span> <span class="nav-text">二、Redis提供的五种数据结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#STRING"><span class="nav-number">2.1.</span> <span class="nav-text">STRING</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HASH"><span class="nav-number">2.2.</span> <span class="nav-text">HASH</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LIST"><span class="nav-number">2.3.</span> <span class="nav-text">LIST</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SET"><span class="nav-number">2.4.</span> <span class="nav-text">SET</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ZSET（sorted-set）"><span class="nav-number">2.5.</span> <span class="nav-text">ZSET（sorted set）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#三、Redis的使用场景"><span class="nav-number">3.</span> <span class="nav-text">三、Redis的使用场景</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#缓存"><span class="nav-number">3.1.</span> <span class="nav-text">缓存</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#共享Session（会话缓存）"><span class="nav-number">3.2.</span> <span class="nav-text">共享Session（会话缓存）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#计数器"><span class="nav-number">3.3.</span> <span class="nav-text">计数器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#排行榜以及热门列表"><span class="nav-number">3.4.</span> <span class="nav-text">排行榜以及热门列表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#社交列表"><span class="nav-number">3.5.</span> <span class="nav-text">社交列表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#记录用户判定信息"><span class="nav-number">3.6.</span> <span class="nav-text">记录用户判定信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#交集、并集和差集"><span class="nav-number">3.7.</span> <span class="nav-text">交集、并集和差集</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#时效性"><span class="nav-number">3.8.</span> <span class="nav-text">时效性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#消息队列"><span class="nav-number">3.9.</span> <span class="nav-text">消息队列</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#分布式锁实现"><span class="nav-number">3.10.</span> <span class="nav-text">分布式锁实现</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#四、Redis的数据淘汰策略-内存淘汰机制"><span class="nav-number">4.</span> <span class="nav-text">四、Redis的数据淘汰策略(内存淘汰机制)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#内存淘汰的过程"><span class="nav-number">4.1.</span> <span class="nav-text">内存淘汰的过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-种淘汰策略"><span class="nav-number">4.2.</span> <span class="nav-text">8 种淘汰策略</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如何选择淘汰策略"><span class="nav-number">4.3.</span> <span class="nav-text">如何选择淘汰策略</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如何配置最大内存及淘汰策略"><span class="nav-number">4.4.</span> <span class="nav-text">如何配置最大内存及淘汰策略</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#五、Redis-的持久化机制"><span class="nav-number">5.</span> <span class="nav-text">五、Redis 的持久化机制</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#RDB-快照持久化"><span class="nav-number">5.1.</span> <span class="nav-text">RDB 快照持久化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#AOF-日志持久化"><span class="nav-number">5.2.</span> <span class="nav-text">AOF 日志持久化</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#命令写入"><span class="nav-number">5.2.1.</span> <span class="nav-text">命令写入</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#文件同步"><span class="nav-number">5.2.2.</span> <span class="nav-text">文件同步</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#重写机制"><span class="nav-number">5.2.3.</span> <span class="nav-text">重写机制</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#重启加载-数据恢复"><span class="nav-number">5.3.</span> <span class="nav-text">重启加载(数据恢复)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#六、Redis-为什么速度快"><span class="nav-number">6.</span> <span class="nav-text">六、Redis 为什么速度快</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#七、Redis-为什么采用单线程"><span class="nav-number">7.</span> <span class="nav-text">七、Redis 为什么采用单线程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#八、Redis的内部结构"><span class="nav-number">8.</span> <span class="nav-text">八、Redis的内部结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#九、Redis-集群方案与实现"><span class="nav-number">9.</span> <span class="nav-text">九、Redis 集群方案与实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#十、Redis-与-Memcached-的差异"><span class="nav-number">10.</span> <span class="nav-text">十、Redis 与 Memcached 的差异</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#数据类型支持不同"><span class="nav-number">10.1.</span> <span class="nav-text">数据类型支持不同</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#内存管理机制不同"><span class="nav-number">10.2.</span> <span class="nav-text">内存管理机制不同</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数据持久化支持"><span class="nav-number">10.3.</span> <span class="nav-text">数据持久化支持</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#集群管理的不同"><span class="nav-number">10.4.</span> <span class="nav-text">集群管理的不同</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#十一、参考文献"><span class="nav-number">11.</span> <span class="nav-text">十一、参考文献</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
