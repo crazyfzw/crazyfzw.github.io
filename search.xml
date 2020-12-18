@@ -2917,6 +2917,9 @@ http://www.cnblogs.com/TimeStory/p/3858479.html
 <p>[4]<a href="https://redisbook.readthedocs.io/en/latest/feature/pubsub.html" target="_blank" rel="noopener">Redis设计与实现第一版-订阅与发布</a></p>
 <p>[5]<a href="https://www.cnblogs.com/tinywan/p/5903988.html" target="_blank" rel="noopener">Redis实践操作之—— keyspace notification（键空间通知</a></p>
 ]]></content>
+      <categories>
+        <category>Redis</category>
+      </categories>
       <tags>
         <tag>Redis</tag>
         <tag>Pub/Sub</tag>
