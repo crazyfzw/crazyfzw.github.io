@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"crazyfzw.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"valine","storage":true,"lazyload":true,"nav":null,"activeClass":"valine"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="概述结构型模式主要总结了一些类或对象组合在一起的经典结构，这些经典的结构可以解决特定应用场景的问题。结构型模式包括：代理模式、桥接模式、装饰器模式、适配器模式、门面模式、组合模式、享元模式。 代理模式：代理在RPC、缓存、监控等场景中的应用Proxy Design Pattern">
+<meta property="og:type" content="article">
+<meta property="og:title" content="设计模式之美-笔记Part6：设计模式与范式-结构型">
+<meta property="og:url" content="https://crazyfzw.github.io/2020/10/09/design-pattern-structural-pattern/index.html">
+<meta property="og:site_name" content="Crazyfzw&#39;s blog">
+<meta property="og:description" content="概述结构型模式主要总结了一些类或对象组合在一起的经典结构，这些经典的结构可以解决特定应用场景的问题。结构型模式包括：代理模式、桥接模式、装饰器模式、适配器模式、门面模式、组合模式、享元模式。 代理模式：代理在RPC、缓存、监控等场景中的应用Proxy Design Pattern">
+<meta property="og:image" content="evernotecid://B93CACCF-EBD1-4485-9709-207B83E62B19/appyinxiangcom/22404617/ENResource/p2470">
+<meta property="og:image" content="evernotecid://B93CACCF-EBD1-4485-9709-207B83E62B19/appyinxiangcom/22404617/ENResource/p2471">
+<meta property="og:image" content="evernotecid://B93CACCF-EBD1-4485-9709-207B83E62B19/appyinxiangcom/22404617/ENResource/p2472">
+<meta property="og:image" content="evernotecid://B93CACCF-EBD1-4485-9709-207B83E62B19/appyinxiangcom/22404617/ENResource/p2473">
+<meta property="article:published_time" content="2020-10-09T14:37:56.000Z">
+<meta property="article:modified_time" content="2020-12-22T05:21:43.152Z">
+<meta property="article:author" content="crazyfzw">
+<meta property="article:tag" content="Design Pattern Structural-Pattern">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="evernotecid://B93CACCF-EBD1-4485-9709-207B83E62B19/appyinxiangcom/22404617/ENResource/p2470">
+
+<link rel="canonical" href="https://crazyfzw.github.io/2020/10/09/design-pattern-structural-pattern/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-Hans'
+  };
+</script>
+
+  <title>设计模式之美-笔记Part6：设计模式与范式-结构型 | Crazyfzw's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Crazyfzw's blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Crazyfzw's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Return to base, step by step.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="https://crazyfzw.github.io/2020/10/09/design-pattern-structural-pattern/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/uploads/avatar.jpg">
+      <meta itemprop="name" content="crazyfzw">
+      <meta itemprop="description" content="做个有趣的技术人">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Crazyfzw's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          设计模式之美-笔记Part6：设计模式与范式-结构型
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-10-09 22:37:56" itemprop="dateCreated datePublished" datetime="2020-10-09T22:37:56+08:00">2020-10-09</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-12-22 13:21:43" itemprop="dateModified" datetime="2020-12-22T13:21:43+08:00">2020-12-22</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Design-Pattern/" itemprop="url" rel="index"><span itemprop="name">Design Pattern</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2020/10/09/design-pattern-structural-pattern/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/10/09/design-pattern-structural-pattern/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>44k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>40 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>结构型模式主要总结了一些类或对象组合在一起的经典结构，这些经典的结构可以解决特定应用场景的问题。结构型模式包括：代理模式、桥接模式、装饰器模式、适配器模式、门面模式、组合模式、享元模式。</p>
+<h2 id="代理模式：代理在RPC、缓存、监控等场景中的应用"><a href="#代理模式：代理在RPC、缓存、监控等场景中的应用" class="headerlink" title="代理模式：代理在RPC、缓存、监控等场景中的应用"></a>代理模式：代理在RPC、缓存、监控等场景中的应用</h2><p>Proxy Design Pattern</p>
+<a id="more"></a>
+
+<h3 id="代理模式的原理与实现"><a href="#代理模式的原理与实现" class="headerlink" title="代理模式的原理与实现"></a>代理模式的原理与实现</h3><p>在不改变原始类（或叫被代理类）的情况下，通过引入代理类来给原始类附加功能。一般情况下，我们让代理类和原始类实现同样的接口。但是，如果原始类并没有定义接口，并且原始类代码并不是我们开发维护的。在这种情况下，我们可以通过让代理类继承原始类的方法来实现代理模式。</p>
+<h3 id="代理模式的具体实现"><a href="#代理模式的具体实现" class="headerlink" title="代理模式的具体实现"></a>代理模式的具体实现</h3><h4 id="1-让代理类和原始类实现同样的接口"><a href="#1-让代理类和原始类实现同样的接口" class="headerlink" title="1.让代理类和原始类实现同样的接口"></a>1.让代理类和原始类实现同样的接口</h4><p>如果原始类已经定义了接口，则代理类实现与原始类同样的接口</p>
+<p>案例代码（收集接口的请求信息）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line">public interface IUserController &#123;</span><br><span class="line">  UserVo login(String telephone, String password);</span><br><span class="line">  UserVo register(String telephone, String password);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class UserController implements IUserController &#123;</span><br><span class="line">  &#x2F;&#x2F;...省略其他属性和方法...</span><br><span class="line"></span><br><span class="line">  @Override</span><br><span class="line">  public UserVo login(String telephone, String password) &#123;</span><br><span class="line">    &#x2F;&#x2F;...省略login逻辑...</span><br><span class="line">    &#x2F;&#x2F;...返回UserVo数据...</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  @Override</span><br><span class="line">  public UserVo register(String telephone, String password) &#123;</span><br><span class="line">    &#x2F;&#x2F;...省略register逻辑...</span><br><span class="line">    &#x2F;&#x2F;...返回UserVo数据...</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class UserControllerProxy implements IUserController &#123;</span><br><span class="line">  private MetricsCollector metricsCollector;</span><br><span class="line">  private UserController userController;</span><br><span class="line"></span><br><span class="line">  public UserControllerProxy(UserController userController) &#123;</span><br><span class="line">    this.userController &#x3D; userController;</span><br><span class="line">    this.metricsCollector &#x3D; new MetricsCollector();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  @Override</span><br><span class="line">  public UserVo login(String telephone, String password) &#123;</span><br><span class="line">    long startTimestamp &#x3D; System.currentTimeMillis();</span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F; 委托</span><br><span class="line">    UserVo userVo &#x3D; userController.login(telephone, password);</span><br><span class="line"></span><br><span class="line">    long endTimeStamp &#x3D; System.currentTimeMillis();</span><br><span class="line">    long responseTime &#x3D; endTimeStamp - startTimestamp;</span><br><span class="line">    RequestInfo requestInfo &#x3D; new RequestInfo(&quot;login&quot;, responseTime, startTimestamp);</span><br><span class="line">    metricsCollector.recordRequest(requestInfo);</span><br><span class="line"></span><br><span class="line">    return userVo;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  @Override</span><br><span class="line">  public UserVo register(String telephone, String password) &#123;</span><br><span class="line">    long startTimestamp &#x3D; System.currentTimeMillis();</span><br><span class="line"></span><br><span class="line">    UserVo userVo &#x3D; userController.register(telephone, password);</span><br><span class="line"></span><br><span class="line">    long endTimeStamp &#x3D; System.currentTimeMillis();</span><br><span class="line">    long responseTime &#x3D; endTimeStamp - startTimestamp;</span><br><span class="line">    RequestInfo requestInfo &#x3D; new RequestInfo(&quot;register&quot;, responseTime, startTimestamp);</span><br><span class="line">    metricsCollector.recordRequest(requestInfo);</span><br><span class="line"></span><br><span class="line">    return userVo;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;UserControllerProxy使用举例</span><br><span class="line">&#x2F;&#x2F;因为原始类和代理类实现相同的接口，是基于接口而非实现编程</span><br><span class="line">&#x2F;&#x2F;将UserController类对象替换为UserControllerProxy类对象，不需要改动太多代码</span><br><span class="line">IUserController userController &#x3D; new UserControllerProxy(new UserController());</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-让代理类继承原始类的方法来实现代理模式"><a href="#2-让代理类继承原始类的方法来实现代理模式" class="headerlink" title="2.让代理类继承原始类的方法来实现代理模式"></a>2.让代理类继承原始类的方法来实现代理模式</h4><p>如果原始类并没有定义接口，并且原始类代码并不是我们开发维护的。在这种情况下，我们可以通过让代理类继承原始类的方法来实现代理模式。</p>
+<p>案例代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">public class UserControllerProxy extends UserController &#123;</span><br><span class="line">  private MetricsCollector metricsCollector;</span><br><span class="line"></span><br><span class="line">  public UserControllerProxy() &#123;</span><br><span class="line">    this.metricsCollector &#x3D; new MetricsCollector();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  public UserVo login(String telephone, String password) &#123;</span><br><span class="line">    long startTimestamp &#x3D; System.currentTimeMillis();</span><br><span class="line"></span><br><span class="line">    UserVo userVo &#x3D; super.login(telephone, password);</span><br><span class="line"></span><br><span class="line">    long endTimeStamp &#x3D; System.currentTimeMillis();</span><br><span class="line">    long responseTime &#x3D; endTimeStamp - startTimestamp;</span><br><span class="line">    RequestInfo requestInfo &#x3D; new RequestInfo(&quot;login&quot;, responseTime, startTimestamp);</span><br><span class="line">    metricsCollector.recordRequest(requestInfo);</span><br><span class="line"></span><br><span class="line">    return userVo;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  public UserVo register(String telephone, String password) &#123;</span><br><span class="line">    long startTimestamp &#x3D; System.currentTimeMillis();</span><br><span class="line"></span><br><span class="line">    UserVo userVo &#x3D; super.register(telephone, password);</span><br><span class="line"></span><br><span class="line">    long endTimeStamp &#x3D; System.currentTimeMillis();</span><br><span class="line">    long responseTime &#x3D; endTimeStamp - startTimestamp;</span><br><span class="line">    RequestInfo requestInfo &#x3D; new RequestInfo(&quot;register&quot;, responseTime, startTimestamp);</span><br><span class="line">    metricsCollector.recordRequest(requestInfo);</span><br><span class="line"></span><br><span class="line">    return userVo;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">&#x2F;&#x2F;UserControllerProxy使用举例</span><br><span class="line">UserController userController &#x3D; new UserControllerProxy();</span><br></pre></td></tr></table></figure>
+
+<h4 id="两种实现方式的对比"><a href="#两种实现方式的对比" class="headerlink" title="两种实现方式的对比"></a>两种实现方式的对比</h4><ul>
+<li><p>组合模式的优点在于更加灵活，对于接口的所有子类都可以代理，缺点在于不需要扩展的方法也需要进行代理。</p>
+</li>
+<li><p>继承模式的优点在于只需要针对需要扩展的方法进行代理，缺点在于只能针对单一父类进行代理。</p>
+</li>
+</ul>
+<h3 id="动态代理的原理与实现"><a href="#动态代理的原理与实现" class="headerlink" title="动态代理的原理与实现"></a>动态代理的原理与实现</h3><p>静态代理需要针对每个类都创建一个代理类，并且每个代理类中的代码都有点像模板式的“重复”代码，增加了维护成本和开发成本。对于静态代理存在的问题，我们可以通过动态代理来解决。</p>
+<p>所谓动态代理（Dynamic Proxy），就是我们不事先为每个原始类编写代理类，而是在运行的时候动态地创建原始类对应的代理类，然后在系统中用代理类替换掉原始类。</p>
+<p>Java 语言本身就已经提供了动态代理的语法（实际上，动态代理底层依赖的就是 Java 的反射语法）。</p>
+<p>代码例子：（收集所有类的接口请求信息）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;MetricsCollectorProxy 作为一个动态代理类，动态地给每个需要收集接口请求信息的类创建代理类。</span><br><span class="line">public class MetricsCollectorProxy &#123;</span><br><span class="line">  private MetricsCollector metricsCollector;</span><br><span class="line"></span><br><span class="line">  public MetricsCollectorProxy() &#123;</span><br><span class="line">    this.metricsCollector &#x3D; new MetricsCollector();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  public Object createProxy(Object proxiedObject) &#123;</span><br><span class="line">    Class&lt;?&gt;[] interfaces &#x3D; proxiedObject.getClass().getInterfaces();</span><br><span class="line">    DynamicProxyHandler handler &#x3D; new DynamicProxyHandler(proxiedObject);</span><br><span class="line">    return Proxy.newProxyInstance(proxiedObject.getClass().getClassLoader(), interfaces, handler);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  private class DynamicProxyHandler implements InvocationHandler &#123;</span><br><span class="line">    private Object proxiedObject;</span><br><span class="line"></span><br><span class="line">    public DynamicProxyHandler(Object proxiedObject) &#123;</span><br><span class="line">      this.proxiedObject &#x3D; proxiedObject;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable &#123;</span><br><span class="line">      long startTimestamp &#x3D; System.currentTimeMillis();</span><br><span class="line">      Object result &#x3D; method.invoke(proxiedObject, args);</span><br><span class="line">      long endTimeStamp &#x3D; System.currentTimeMillis();</span><br><span class="line">      long responseTime &#x3D; endTimeStamp - startTimestamp;</span><br><span class="line">      String apiName &#x3D; proxiedObject.getClass().getName() + &quot;:&quot; + method.getName();</span><br><span class="line">      RequestInfo requestInfo &#x3D; new RequestInfo(apiName, responseTime, startTimestamp);</span><br><span class="line">      metricsCollector.recordRequest(requestInfo);</span><br><span class="line">      return result;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;MetricsCollectorProxy使用举例</span><br><span class="line">MetricsCollectorProxy proxy &#x3D; new MetricsCollectorProxy();</span><br><span class="line">IUserController userController &#x3D; (IUserController) proxy.createProxy(new UserController());</span><br></pre></td></tr></table></figure>
+
+<p><strong>Spring AOP 底层的实现原理就是基于动态代理。用户配置好需要给哪些类创建代理，并定义好在执行原始类的业务代码前后执行哪些附加功能。Spring 为这些类创建动态代理对象，并在 JVM 中替代原始类对象。原本在代码中执行的原始类的方法，被换作执行代理类的方法，也就实现了给原始类添加附加功能的目的。</strong></p>
+<h3 id="代理模式的应用场景"><a href="#代理模式的应用场景" class="headerlink" title="代理模式的应用场景"></a>代理模式的应用场景</h3><h4 id="1-业务系统的非功能性需求开发"><a href="#1-业务系统的非功能性需求开发" class="headerlink" title="1. 业务系统的非功能性需求开发"></a>1. 业务系统的非功能性需求开发</h4><p>代理模式常用在业务系统中开发一些非功能性需求，比如：监控、统计、鉴权、限流、事务、幂等、日志。我们将这些附加功能与业务功能解耦，放到代理类统一处理，让程序员只需要关注业务方面的开发。前面举的搜集接口请求信息的例子，就是这个应用场景的一个典型例子。</p>
+<h4 id="2-代理模式在-RPC中的应用"><a href="#2-代理模式在-RPC中的应用" class="headerlink" title="2. 代理模式在 RPC中的应用"></a>2. 代理模式在 RPC中的应用</h4><p>RPC 框架也可以看作一种代理模式，通过远程代理，将网络通信、数据编解码等细节隐藏起来。客户端在使用 RPC 服务的时候，就像使用本地函数一样，无需了解跟服务器交互的细节。除此之外，RPC 服务的开发者也只需要开发业务逻辑，就像开发本地使用的函数一样，不需要关注跟客户端的交互细节。</p>
+<h4 id="3-代理模式在缓存中的应用"><a href="#3-代理模式在缓存中的应用" class="headerlink" title="3. 代理模式在缓存中的应用"></a>3. 代理模式在缓存中的应用</h4><p>比如我们要开发一个接口请求的缓存功能，对于某些接口请求，如果入参相同，在设定的过期时间内，直接返回缓存结果，而不用重新进行逻辑处理。</p>
+<p>最简单的实现方法就是给每个需要支持缓存的查询需求都开发两个不同的接口，一个支持缓存，一个支持实时查询。但是，这样做显然增加了开发成本，而且会让代码看起来非常臃肿（接口个数成倍增加），也不方便缓存接口的集中管理（增加、删除缓存接口）、集中配置（比如配置每个接口缓存过期时间）。</p>
+<p>如果是基于 Spring 框架来开发的话，那就可以在 AOP 切面中完成接口缓存的功能。在应用启动的时候，我们从配置文件中加载需要支持缓存的接口，以及相应的缓存策略（比如过期时间）等。当请求到来的时候，我们在 AOP 切面中拦截请求，如果请求中带有支持缓存的字段（比如 http://…?..&amp;cached=true），我们便从缓存（内存缓存或者 Redis 缓存等）中获取数据直接返回。</p>
+<h2 id="桥接模式：如何实现支持不同类型和渠道的消息推送系统？"><a href="#桥接模式：如何实现支持不同类型和渠道的消息推送系统？" class="headerlink" title="桥接模式：如何实现支持不同类型和渠道的消息推送系统？"></a>桥接模式：如何实现支持不同类型和渠道的消息推送系统？</h2><p>桥接模式的代码实现非常简单，但是理解起来稍微有点难度，并且应用场景也比较局限，所以，相当于代理模式来说，桥接模式在实际的项目中并没有那么常用，只需要简单了解，见到能认识就可以。</p>
+<h3 id="桥接模式的原理解析"><a href="#桥接模式的原理解析" class="headerlink" title="桥接模式的原理解析"></a>桥接模式的原理解析</h3><p>在 GoF 的《设计模式》一书中，桥接模式是这么定义的：</p>
+<blockquote>
+<p>Decouple an abstraction from its implementation so that the two can vary independently。</p>
+</blockquote>
+<p>翻译成中文就是：将抽象和实现解耦，让它们可以独立变化。<br>弄懂定义中“抽象”和“实现”两个概念，是理解它的关键。定义中的“抽象”，指的并非“抽象类”或“接口”，而是被抽象出来的一套“类库”，它只包含骨架代码，真正的业务逻辑需要委派给定义中的“实现”来完成。而定义中的“实现”，也并非“接口的实现类”，而是一套独立的“类库”。“抽象”和“实现”独立开发，通过对象之间的组合关系，组装在一起。</p>
+<p>还有另外一种更加简单的理解方式：“一个类存在两个（或多个）独立变化的维度，我们通过组合的方式，让这两个（或多个）维度可以独立进行扩展。”它非常类似我们之前讲过的“组合优于继承”设计原则，通过组合关系来替代继承关系，避免继承层次的指数级爆炸。</p>
+<h3 id="JDBC利用桥接模式优雅实现数据库切换"><a href="#JDBC利用桥接模式优雅实现数据库切换" class="headerlink" title="JDBC利用桥接模式优雅实现数据库切换"></a>JDBC利用桥接模式优雅实现数据库切换</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">Class.forName(&quot;com.mysql.jdbc.Driver&quot;);&#x2F;&#x2F;加载及注册JDBC驱动程序</span><br><span class="line">String url &#x3D; &quot;jdbc:mysql:&#x2F;&#x2F;localhost:3306&#x2F;sample_db?user&#x3D;root&amp;password&#x3D;your_password&quot;;</span><br><span class="line">Connection con &#x3D; DriverManager.getConnection(url);</span><br><span class="line">Statement stmt &#x3D; con.createStatement()；</span><br><span class="line">String query &#x3D; &quot;select * from test&quot;;</span><br><span class="line">ResultSet rs&#x3D;stmt.executeQuery(query);</span><br><span class="line">while(rs.next()) &#123;</span><br><span class="line">  rs.getString(1);</span><br><span class="line">  rs.getInt(2);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果我们想要把 MySQL 数据库换成 Oracle 数据库，只需要把第一行代码中的 com.mysql.jdbc.Driver 换成 oracle.jdbc.driver.OracleDriver 就可以了。</p>
+<p>先看下 com.mysql.jdbc.Driver 的代码</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">package com.mysql.jdbc;</span><br><span class="line">import java.sql.SQLException;</span><br><span class="line"></span><br><span class="line">public class Driver extends NonRegisteringDriver implements java.sql.Driver &#123;</span><br><span class="line">  static &#123;</span><br><span class="line">    try &#123;</span><br><span class="line">      java.sql.DriverManager.registerDriver(new Driver());</span><br><span class="line">    &#125; catch (SQLException E) &#123;</span><br><span class="line">      throw new RuntimeException(&quot;Can&#39;t register driver!&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  &#x2F;**</span><br><span class="line">   * Construct a new driver and register it with DriverManager</span><br><span class="line">   * @throws SQLException if a database error occurs.</span><br><span class="line">   *&#x2F;</span><br><span class="line">  public Driver() throws SQLException &#123;</span><br><span class="line">    &#x2F;&#x2F; Required for Class.forName().newInstance()</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>结合 com.mysql.jdbc.Driver 的代码实现，我们可以发现，当执行 Class.forName(“com.mysql.jdbc.Driver”) 这条语句的时候，实际上是做了两件事情。</p>
+<ul>
+<li>第一件事情是要求 JVM 查找并加载指定的 Driver 类</li>
+<li>第二件事情是执行该类的静态代码，也就是将 MySQL Driver 注册到 DriverManager 类中。</li>
+</ul>
+<p>Drivermanage代码</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">public class DriverManager &#123;</span><br><span class="line">  private final static CopyOnWriteArrayList&lt;DriverInfo&gt; registeredDrivers &#x3D; new CopyOnWriteArrayList&lt;DriverInfo&gt;();</span><br><span class="line"></span><br><span class="line">  &#x2F;&#x2F;...</span><br><span class="line">  static &#123;</span><br><span class="line">    loadInitialDrivers();</span><br><span class="line">    println(&quot;JDBC DriverManager initialized&quot;);</span><br><span class="line">  &#125;</span><br><span class="line">  &#x2F;&#x2F;...</span><br><span class="line"></span><br><span class="line">  public static synchronized void registerDriver(java.sql.Driver driver) throws SQLException &#123;</span><br><span class="line">    if (driver !&#x3D; null) &#123;</span><br><span class="line">      registeredDrivers.addIfAbsent(new DriverInfo(driver));</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">      throw new NullPointerException();</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  public static Connection getConnection(String url, String user, String password) throws SQLException &#123;</span><br><span class="line">    java.util.Properties info &#x3D; new java.util.Properties();</span><br><span class="line">    if (user !&#x3D; null) &#123;</span><br><span class="line">      info.put(&quot;user&quot;, user);</span><br><span class="line">    &#125;</span><br><span class="line">    if (password !&#x3D; null) &#123;</span><br><span class="line">      info.put(&quot;password&quot;, password);</span><br><span class="line">    &#125;</span><br><span class="line">    return (getConnection(url, info, Reflection.getCallerClass()));</span><br><span class="line">  &#125;</span><br><span class="line">  &#x2F;&#x2F;...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当我们把具体的 Driver 实现类（比如，com.mysql.jdbc.Driver）注册到 DriverManager 之后，后续所有对 JDBC 接口的调用，都会委派到对具体的 Driver 实现类来执行。而 Driver 实现类都实现了相同的接口（java.sql.Driver ），这也是可以灵活切换 Driver 的原因。</p>
+<p><img src="evernotecid://B93CACCF-EBD1-4485-9709-207B83E62B19/appyinxiangcom/22404617/ENResource/p2470" alt="812234b0717043a67c2d62ea8e783b40.jpeg"></p>
+<p>JDBC 本身就相当于“抽象”。注意，这里所说的“抽象”，指的并非“抽象类”或“接口”，而是跟具体的数据库无关的、被抽象出来的一套“类库”。具体的 Driver（比如，com.mysql.jdbc.Driver）就相当于“实现”。注意，这里所说的“实现”，也并非指“接口的实现类”，而是跟具体数据库相关的一套“类库”。JDBC 和 Driver 独立开发，通过对象之间的组合关系，组装在一起。JDBC 的所有逻辑操作，最终都委托给 Driver 来执行。</p>
+<h3 id="如何实现支持不同类型和渠道的消息推送系统？"><a href="#如何实现支持不同类型和渠道的消息推送系统？" class="headerlink" title="如何实现支持不同类型和渠道的消息推送系统？"></a>如何实现支持不同类型和渠道的消息推送系统？</h3><p>一个 API 接口监控告警的例子：根据不同的告警规则，触发不同类型的告警。告警支持多种通知渠道，包括：邮件、短信、微信、自动语音电话。通知的紧急程度有多种类型，包括：SEVERE（严重）、URGENCY（紧急）、NORMAL（普通）、TRIVIAL（无关紧要）。不同的紧急程度对应不同的通知渠道。比如，SERVE（严重）级别的消息会通过“自动语音电话”告知相关人员。</p>
+<p>有两个维度，一个是不同规则，一个是不同渠道。</p>
+<p>先看下最简单直接的代码实现</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line">public enum NotificationEmergencyLevel &#123;</span><br><span class="line">  SEVERE, URGENCY, NORMAL, TRIVIAL</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class Notification &#123;</span><br><span class="line">  private List&lt;String&gt; emailAddresses;</span><br><span class="line">  private List&lt;String&gt; telephones;</span><br><span class="line">  private List&lt;String&gt; wechatIds;</span><br><span class="line"></span><br><span class="line">  public Notification() &#123;&#125;</span><br><span class="line"></span><br><span class="line">  public void setEmailAddress(List&lt;String&gt; emailAddress) &#123;</span><br><span class="line">    this.emailAddresses &#x3D; emailAddress;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  public void setTelephones(List&lt;String&gt; telephones) &#123;</span><br><span class="line">    this.telephones &#x3D; telephones;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  public void setWechatIds(List&lt;String&gt; wechatIds) &#123;</span><br><span class="line">    this.wechatIds &#x3D; wechatIds;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  public void notify(NotificationEmergencyLevel level, String message) &#123;</span><br><span class="line">    if (level.equals(NotificationEmergencyLevel.SEVERE)) &#123;</span><br><span class="line">      &#x2F;&#x2F;...自动语音电话</span><br><span class="line">    &#125; else if (level.equals(NotificationEmergencyLevel.URGENCY)) &#123;</span><br><span class="line">      &#x2F;&#x2F;...发微信</span><br><span class="line">    &#125; else if (level.equals(NotificationEmergencyLevel.NORMAL)) &#123;</span><br><span class="line">      &#x2F;&#x2F;...发邮件</span><br><span class="line">    &#125; else if (level.equals(NotificationEmergencyLevel.TRIVIAL)) &#123;</span><br><span class="line">      &#x2F;&#x2F;...发邮件</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;在API监控告警的例子中，我们如下方式来使用Notification类：</span><br><span class="line">public class ErrorAlertHandler extends AlertHandler &#123;</span><br><span class="line">  public ErrorAlertHandler(AlertRule rule, Notification notification)&#123;</span><br><span class="line">    super(rule, notification);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  @Override</span><br><span class="line">  public void check(ApiStatInfo apiStatInfo) &#123;</span><br><span class="line">    if (apiStatInfo.getErrorCount() &gt; rule.getMatchedRule(apiStatInfo.getApi()).getMaxErrorCount()) &#123;</span><br><span class="line">      notification.notify(NotificationEmergencyLevel.SEVERE, &quot;...&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>针对 Notification 的代码，我们将不同渠道的发送逻辑剥离出来，形成独立的消息发送类（MsgSender 相关类）。其中，Notification 类相当于抽象，MsgSender 类相当于实现，两者可以独立开发，通过组合关系（也就是桥梁）任意组合在一起。所谓任意组合的意思就是，不同紧急程度的消息和发送渠道之间的对应关系，不是在代码中固定写死的，我们可以动态地去指定（比如，通过读取配置来获取对应关系）。</p>
+<p>按这个思路，对代码进行重构</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line">public interface MsgSender &#123;</span><br><span class="line">  void send(String message);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class TelephoneMsgSender implements MsgSender &#123;</span><br><span class="line">  private List&lt;String&gt; telephones;</span><br><span class="line"></span><br><span class="line">  public TelephoneMsgSender(List&lt;String&gt; telephones) &#123;</span><br><span class="line">    this.telephones &#x3D; telephones;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  @Override</span><br><span class="line">  public void send(String message) &#123;</span><br><span class="line">    &#x2F;&#x2F;...</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class EmailMsgSender implements MsgSender &#123;</span><br><span class="line">  &#x2F;&#x2F; 与TelephoneMsgSender代码结构类似，所以省略...</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class WechatMsgSender implements MsgSender &#123;</span><br><span class="line">  &#x2F;&#x2F; 与TelephoneMsgSender代码结构类似，所以省略...</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public abstract class Notification &#123;</span><br><span class="line">  protected MsgSender msgSender;</span><br><span class="line"></span><br><span class="line">  public Notification(MsgSender msgSender) &#123;</span><br><span class="line">    this.msgSender &#x3D; msgSender;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  public abstract void notify(String message);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class SevereNotification extends Notification &#123;</span><br><span class="line">  public SevereNotification(MsgSender msgSender) &#123;</span><br><span class="line">    super(msgSender);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  @Override</span><br><span class="line">  public void notify(String message) &#123;</span><br><span class="line">    msgSender.send(message);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class UrgencyNotification extends Notification &#123;</span><br><span class="line">  &#x2F;&#x2F; 与SevereNotification代码结构类似，所以省略...</span><br><span class="line">&#125;</span><br><span class="line">public class NormalNotification extends Notification &#123;</span><br><span class="line">  &#x2F;&#x2F; 与SevereNotification代码结构类似，所以省略...</span><br><span class="line">&#125;</span><br><span class="line">public class TrivialNotification extends Notification &#123;</span><br><span class="line">  &#x2F;&#x2F; 与SevereNotification代码结构类似，所以省略...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h3><p>桥接模式有两种理解方式。第一种理解方式是“将抽象和实现解耦，让它们能独立开发”。这种理解方式比较特别，应用场景也不多。另一种理解方式更加简单，类似“组合优于继承”设计原则，这种理解方式更加通用，应用场景比较多。</p>
+<h3 id="精彩评论"><a href="#精彩评论" class="headerlink" title="精彩评论"></a>精彩评论</h3><p>桥接看着就像是面向接口编程这一原则的原旨—将实现与抽象分离。</p>
+<p>多个纬度独立变化那个解释倒是比较容易理解。文中举的警报的例子很贴切。紧急程度和警报的方式可以是两个不同的纬度。可以有不同的组合方式。</p>
+<p>这与slf4j这一日志门面的设计有异曲同工之妙。slf4j其中有三个核心概念，logger,appender和encoder。分别指这个日志记录器负责哪个类的日志，日志打印到哪里以及日志打印的格式。三个纬度上可以有不同的实现，使用者可以在每一纬度上定义多个实现，配置文件中将各个纬度的某一个实现组合在一起就ok了。</p>
+<p>一句话就是，桥接就是面向接口编程的集大成者。面向接口编程只是说在系统的某一个功能上将接口和实现解藕，而桥接是详细的分析系统功能，将各个独立的纬度都抽象出来，使用时按需组合。</p>
+<h2 id="装饰器模式：通过剖析Java-IO类库源码学习装饰器模式"><a href="#装饰器模式：通过剖析Java-IO类库源码学习装饰器模式" class="headerlink" title="装饰器模式：通过剖析Java IO类库源码学习装饰器模式"></a>装饰器模式：通过剖析Java IO类库源码学习装饰器模式</h2><p>Decorator Pattern</p>
+<h3 id="装饰器模式的理解"><a href="#装饰器模式的理解" class="headerlink" title="装饰器模式的理解"></a>装饰器模式的理解</h3><p>装饰器模式主要解决继承关系过于复杂的问题，通过组合来替代继承。它主要的作用是给原始类添加增强功能。这也是判断是否该用装饰器模式的一个重要的依据。除此之外，装饰器模式还有一个特点，那就是可以对原始类嵌套使用多个装饰器。为了满足这个应用场景，在设计的时候，装饰器类需要跟原始类继承相同的抽象类或者接口。</p>
+<h3 id="装饰器的模版代码"><a href="#装饰器的模版代码" class="headerlink" title="装饰器的模版代码"></a>装饰器的模版代码</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; 装饰器模式的代码结构(下面的接口也可以替换成抽象类)</span><br><span class="line">public interface IA &#123;</span><br><span class="line">  void f();</span><br><span class="line">&#125;</span><br><span class="line">public class A implements IA &#123;</span><br><span class="line">  public void f() &#123; &#x2F;&#x2F;... &#125;</span><br><span class="line">&#125;</span><br><span class="line">public class ADecorator implements IA &#123;</span><br><span class="line">  private IA a;</span><br><span class="line">  public ADecorator(IA a) &#123;</span><br><span class="line">    this.a &#x3D; a;</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  public void f() &#123;</span><br><span class="line">    &#x2F;&#x2F; 功能增强代码</span><br><span class="line">    a.f();</span><br><span class="line">    &#x2F;&#x2F; 功能增强代码</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="Java-IO类库源码对装饰器模式的应用"><a href="#Java-IO类库源码对装饰器模式的应用" class="headerlink" title="Java IO类库源码对装饰器模式的应用"></a>Java IO类库源码对装饰器模式的应用</h3><p>Java IO 类库非常庞大和复杂，有几十个类，负责 IO 数据的读取和写入。如果对 Java IO 类做一下分类，我们可以从下面两个维度将它划分为四类。</p>
+<p><img src="evernotecid://B93CACCF-EBD1-4485-9709-207B83E62B19/appyinxiangcom/22404617/ENResource/p2471" alt="507526c2e4b255a45c60722df14f9a05.jpeg"></p>
+<p>避免代码重复，Java IO 抽象出了一个装饰器父类 FilterInputStream，代码实现如下所示。InputStream 的所有的装饰器类（BufferedInputStream、DataInputStream）都继承自这个装饰器父类。这样，装饰器类只需要实现它需要增强的方法就可以了，其他方法继承装饰器父类的默认实现。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br></pre></td><td class="code"><pre><span class="line">public abstract class InputStream &#123;</span><br><span class="line">  &#x2F;&#x2F;...</span><br><span class="line">  public int read(byte b[]) throws IOException &#123;</span><br><span class="line">    return read(b, 0, b.length);</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  public int read(byte b[], int off, int len) throws IOException &#123;</span><br><span class="line">    &#x2F;&#x2F;...</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  public long skip(long n) throws IOException &#123;</span><br><span class="line">    &#x2F;&#x2F;...</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  public int available() throws IOException &#123;</span><br><span class="line">    return 0;</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  public void close() throws IOException &#123;&#125;</span><br><span class="line"></span><br><span class="line">  public synchronized void mark(int readlimit) &#123;&#125;</span><br><span class="line">    </span><br><span class="line">  public synchronized void reset() throws IOException &#123;</span><br><span class="line">    throw new IOException(&quot;mark&#x2F;reset not supported&quot;);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  public boolean markSupported() &#123;</span><br><span class="line">    return false;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">public class FilterInputStream extends InputStream &#123;</span><br><span class="line">  protected volatile InputStream in;</span><br><span class="line"></span><br><span class="line">  protected FilterInputStream(InputStream in) &#123;</span><br><span class="line">    this.in &#x3D; in;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  public int read() throws IOException &#123;</span><br><span class="line">    return in.read();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  public int read(byte b[]) throws IOException &#123;</span><br><span class="line">    return read(b, 0, b.length);</span><br><span class="line">  &#125;</span><br><span class="line">   </span><br><span class="line">  public int read(byte b[], int off, int len) throws IOException &#123;</span><br><span class="line">    return in.read(b, off, len);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  public long skip(long n) throws IOException &#123;</span><br><span class="line">    return in.skip(n);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  public int available() throws IOException &#123;</span><br><span class="line">    return in.available();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  public void close() throws IOException &#123;</span><br><span class="line">    in.close();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  public synchronized void mark(int readlimit) &#123;</span><br><span class="line">    in.mark(readlimit);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  public synchronized void reset() throws IOException &#123;</span><br><span class="line">    in.reset();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  public boolean markSupported() &#123;</span><br><span class="line">    return in.markSupported();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">public class BufferedInputStream extends FilterInputStream &#123;</span><br><span class="line">  protected volatile InputStream in;</span><br><span class="line"></span><br><span class="line">  protected BufferedInputStream(InputStream in) &#123;</span><br><span class="line">    this.in &#x3D; in;</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  &#x2F;&#x2F;...实现基于缓存的读数据接口...  </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class DataInputStream extends FilterInputStream &#123;</span><br><span class="line">  protected volatile InputStream in;</span><br><span class="line"></span><br><span class="line">  protected DataInputStream(InputStream in) &#123;</span><br><span class="line">    this.in &#x3D; in;</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  &#x2F;&#x2F;...实现读取基本类型数据的接口</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>针对不同的读取和写入场景，Java IO 又在这四个父类基础之上，扩展出了很多子类。具体如下所示<br><img src="evernotecid://B93CACCF-EBD1-4485-9709-207B83E62B19/appyinxiangcom/22404617/ENResource/p2472" alt="5082df8e7d5a4d44a34811b9f562d613.jpeg"></p>
+<h3 id="装饰器模式与代理模式的区别"><a href="#装饰器模式与代理模式的区别" class="headerlink" title="装饰器模式与代理模式的区别"></a>装饰器模式与代理模式的区别</h3><ul>
+<li>代理模式中，代理类附加的是跟原始类无关的功能，侧重于业务无关的功能，隐藏了实现细节，是不需要使用者关注的</li>
+</ul>
+<ul>
+<li>装饰器模式中，装饰器类附加的是跟原始类相关的增强功能，定制化诉求高，柔和了业务属性，后面可能改动频繁</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; 代理模式的代码结构(下面的接口也可以替换成抽象类)</span><br><span class="line">public interface IA &#123;</span><br><span class="line">  void f();</span><br><span class="line">&#125;</span><br><span class="line">public class A impelements IA &#123;</span><br><span class="line">  public void f() &#123; &#x2F;&#x2F;... &#125;</span><br><span class="line">&#125;</span><br><span class="line">public class AProxy implements IA &#123;</span><br><span class="line">  private IA a;</span><br><span class="line">  public AProxy(IA a) &#123;</span><br><span class="line">    this.a &#x3D; a;</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  public void f() &#123;</span><br><span class="line">    &#x2F;&#x2F; 新添加的代理逻辑</span><br><span class="line">    a.f();</span><br><span class="line">    &#x2F;&#x2F; 新添加的代理逻辑</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; 装饰器模式的代码结构(下面的接口也可以替换成抽象类)</span><br><span class="line">public interface IA &#123;</span><br><span class="line">  void f();</span><br><span class="line">&#125;</span><br><span class="line">public class A implements IA &#123;</span><br><span class="line">  public void f() &#123; &#x2F;&#x2F;... &#125;</span><br><span class="line">&#125;</span><br><span class="line">public class ADecorator implements IA &#123;</span><br><span class="line">  private IA a;</span><br><span class="line">  public ADecorator(IA a) &#123;</span><br><span class="line">    this.a &#x3D; a;</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  public void f() &#123;</span><br><span class="line">    &#x2F;&#x2F; 功能增强代码</span><br><span class="line">    a.f();</span><br><span class="line">    &#x2F;&#x2F; 功能增强代码</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>使用，对 FileInputStream 嵌套了两个装饰器类：BufferedInputStream 和 DataInputStream，让它既支持缓存读取，又支持按照基本数据类型来读取数据。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">InputStream in &#x3D; new FileInputStream(&quot;&#x2F;user&#x2F;wangzheng&#x2F;test.txt&quot;);</span><br><span class="line">InputStream bin &#x3D; new BufferedInputStream(in);</span><br><span class="line">DataInputStream din &#x3D; new DataInputStream(bin);</span><br><span class="line">int data &#x3D; din.readInt();</span><br></pre></td></tr></table></figure>
+
+<h3 id="添加缓存场景应该使用代理模式还说装饰者模式？"><a href="#添加缓存场景应该使用代理模式还说装饰者模式？" class="headerlink" title="添加缓存场景应该使用代理模式还说装饰者模式？"></a>添加缓存场景应该使用代理模式还说装饰者模式？</h3><ul>
+<li><p>对于添加缓存这个应用场景使用哪种模式，要看设计者的意图，如果设计者不需要用户关注是否使用缓存功能，要隐藏实现细节，也就是说用户只能看到和使用代理类，那么就使用proxy模式；反之，如果设计者需要用户自己决定是否使用缓存的功能，需要用户自己新建原始对象并动态添加缓存功能，那么就使用decorator模式。</p>
+</li>
+<li><p>缓存这件事一般都是高度抽象，全业务通用，基本不会改动的东西，所以一般也是采用代理模式，让业务开发从缓存代码的重复劳动中解放出来。但如果当前业务的缓存实现需要特殊化定制，需要揉入业务属性，那么就该采用装饰者模式。因为其定制性强，其他业务也用不着，而且业务是频繁变动的，所以改动的可能也大，相对于动代，装饰者在调整（修改和重组）代码这件事上显得更灵活。</p>
+</li>
+</ul>
+<h3 id="小结-1"><a href="#小结-1" class="headerlink" title="小结"></a>小结</h3><ul>
+<li>代理模式和装饰者模式都是 代码增强这一件事的落地方案。前者个人认为偏重业务无关，高度抽象，和稳定性较高的场景（性能其实可以抛开不谈）。后者偏重业务相关，定制化诉求高，改动较频繁的场景。</li>
+</ul>
+<ul>
+<li>Decorator关注为对象动态的添加功能, Proxy关注对象的信息隐藏及访问控制.Decorator体现多态性, Proxy体现封装性.reference:<br><a href="https://stackoverflow.com/questions/18618779/differences-between-proxy-and-decorator-pattern" target="_blank" rel="noopener">https://stackoverflow.com/questions/18618779/differences-between-proxy-and-decorator-pattern</a></li>
+</ul>
+<h2 id="适配器模式：代理、适配器、桥接、装饰，这四个模式有何区别？"><a href="#适配器模式：代理、适配器、桥接、装饰，这四个模式有何区别？" class="headerlink" title="适配器模式：代理、适配器、桥接、装饰，这四个模式有何区别？"></a>适配器模式：代理、适配器、桥接、装饰，这四个模式有何区别？</h2><p>Adapter Design Pattern</p>
+<h3 id="适配器模式的原理与实现"><a href="#适配器模式的原理与实现" class="headerlink" title="适配器模式的原理与实现"></a>适配器模式的原理与实现</h3><p>适配器模式的英文翻译是 Adapter Design Pattern。顾名思义，这个模式就是用来做适配的，它将不兼容的接口转换为可兼容的接口，让原本由于接口不兼容而不能一起工作的类可以一起工作。有一个经常被拿来解释它的例子，就是 USB 转接头充当适配器，把两种不兼容的接口，通过转接变得可以一起工作。</p>
+<p>适配器模式有两种实现方式：类适配器和对象适配器。其中，类适配器使用继承关系来实现，对象适配器使用组合关系来实现。</p>
+<p>一般来说，适配器模式可以看作一种“补偿模式”，用来补救设计上的缺陷。应用这种模式算是“无奈之举”，如果在设计初期，我们就能协调规避接口不兼容的问题，那这种模式就没有应用的机会了。</p>
+<p>ITarget 表示要转化成的接口定义。Adaptee 是一组不兼容 ITarget 接口定义的接口，Adaptor 将 Adaptee 转化成一组符合 ITarget 接口定义的接口。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; 类适配器: 基于继承</span><br><span class="line">public interface ITarget &#123;</span><br><span class="line">  void f1();</span><br><span class="line">  void f2();</span><br><span class="line">  void fc();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class Adaptee &#123;</span><br><span class="line">  public void fa() &#123; &#x2F;&#x2F;... &#125;</span><br><span class="line">  public void fb() &#123; &#x2F;&#x2F;... &#125;</span><br><span class="line">  public void fc() &#123; &#x2F;&#x2F;... &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class Adaptor extends Adaptee implements ITarget &#123;</span><br><span class="line">  public void f1() &#123;</span><br><span class="line">    super.fa();</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  public void f2() &#123;</span><br><span class="line">    &#x2F;&#x2F;...重新实现f2()...</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  &#x2F;&#x2F; 这里fc()不需要实现，直接继承自Adaptee，这是跟对象适配器最大的不同点</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; 对象适配器：基于组合</span><br><span class="line">public interface ITarget &#123;</span><br><span class="line">  void f1();</span><br><span class="line">  void f2();</span><br><span class="line">  void fc();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class Adaptee &#123;</span><br><span class="line">  public void fa() &#123; &#x2F;&#x2F;... &#125;</span><br><span class="line">  public void fb() &#123; &#x2F;&#x2F;... &#125;</span><br><span class="line">  public void fc() &#123; &#x2F;&#x2F;... &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class Adaptor implements ITarget &#123;</span><br><span class="line">  private Adaptee adaptee;</span><br><span class="line">  </span><br><span class="line">  public Adaptor(Adaptee adaptee) &#123;</span><br><span class="line">    this.adaptee &#x3D; adaptee;</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  public void f1() &#123;</span><br><span class="line">    adaptee.fa(); &#x2F;&#x2F;委托给Adaptee</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  public void f2() &#123;</span><br><span class="line">    &#x2F;&#x2F;...重新实现f2()...</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  public void fc() &#123;</span><br><span class="line">    adaptee.fc();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="适配器模式应用场景总结"><a href="#适配器模式应用场景总结" class="headerlink" title="适配器模式应用场景总结"></a>适配器模式应用场景总结</h3><p>适配器模式可以看作一种“补偿模式”，用来补救设计上的缺陷。应用这种模式算是“无奈之举”。</p>
+<h4 id="1-封装有缺陷的接口设计"><a href="#1-封装有缺陷的接口设计" class="headerlink" title="1. 封装有缺陷的接口设计"></a>1. 封装有缺陷的接口设计</h4><p>当我们依赖的外部系统在接口设计方面有缺陷（比如包含大量静态方法），引入之后会影响到我们自身代码的可测试性。为了隔离设计上的缺陷，我们希望对外部系统提供的接口进行二次封装，抽象出更好的接口设计，这个时候就可以使用适配器模式了。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">public class CD &#123; &#x2F;&#x2F;这个类来自外部sdk，我们无权修改它的代码</span><br><span class="line">  &#x2F;&#x2F;...</span><br><span class="line">  public static void staticFunction1() &#123; &#x2F;&#x2F;... &#125;</span><br><span class="line">  </span><br><span class="line">  public void uglyNamingFunction2() &#123; &#x2F;&#x2F;... &#125;</span><br><span class="line"></span><br><span class="line">  public void tooManyParamsFunction3(int paramA, int paramB, ...) &#123; &#x2F;&#x2F;... &#125;</span><br><span class="line">  </span><br><span class="line">   public void lowPerformanceFunction4() &#123; &#x2F;&#x2F;... &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; 使用适配器模式进行重构</span><br><span class="line">public class ITarget &#123;</span><br><span class="line">  void function1();</span><br><span class="line">  void function2();</span><br><span class="line">  void fucntion3(ParamsWrapperDefinition paramsWrapper);</span><br><span class="line">  void function4();</span><br><span class="line">  &#x2F;&#x2F;...</span><br><span class="line">&#125;</span><br><span class="line">&#x2F;&#x2F; 注意：适配器类的命名不一定非得末尾带Adaptor</span><br><span class="line">public class CDAdaptor extends CD implements ITarget &#123;</span><br><span class="line">  &#x2F;&#x2F;...</span><br><span class="line">  public void function1() &#123;</span><br><span class="line">     super.staticFunction1();</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  public void function2() &#123;</span><br><span class="line">    super.uglyNamingFucntion2();</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  public void function3(ParamsWrapperDefinition paramsWrapper) &#123;</span><br><span class="line">     super.tooManyParamsFunction3(paramsWrapper.getParamA(), ...);</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  public void function4() &#123;</span><br><span class="line">    &#x2F;&#x2F;...reimplement it...</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-统一多个类的接口设计"><a href="#2-统一多个类的接口设计" class="headerlink" title="2. 统一多个类的接口设计"></a>2. 统一多个类的接口设计</h4><p>某个功能的实现依赖多个外部系统（或者说类）。通过适配器模式，将它们的接口适配为统一的接口定义，然后我们就可以使用多态的特性来复用代码逻辑。具体</p>
+<p>例子：假设我们的系统要对用户输入的文本内容做敏感词过滤，，我们引入了多款第三方敏感词过滤系统，依次对用户输入的内容进行过滤，过滤掉尽可能多的敏感词。但是，每个系统提供的过滤接口都是不同的。这就意味着我们没法复用一套逻辑来调用各个系统。这个时候，我们就可以使用适配器模式，将所有系统的接口适配为统一的接口定义，这样我们可以复用调用敏感词过滤的代码。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><span class="line">public class ASensitiveWordsFilter &#123; &#x2F;&#x2F; A敏感词过滤系统提供的接口</span><br><span class="line">  &#x2F;&#x2F;text是原始文本，函数输出用***替换敏感词之后的文本</span><br><span class="line">  public String filterSexyWords(String text) &#123;</span><br><span class="line">    &#x2F;&#x2F; ...</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  public String filterPoliticalWords(String text) &#123;</span><br><span class="line">    &#x2F;&#x2F; ...</span><br><span class="line">  &#125; </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class BSensitiveWordsFilter  &#123; &#x2F;&#x2F; B敏感词过滤系统提供的接口</span><br><span class="line">  public String filter(String text) &#123;</span><br><span class="line">    &#x2F;&#x2F;...</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class CSensitiveWordsFilter &#123; &#x2F;&#x2F; C敏感词过滤系统提供的接口</span><br><span class="line">  public String filter(String text, String mask) &#123;</span><br><span class="line">    &#x2F;&#x2F;...</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; 未使用适配器模式之前的代码：代码的可测试性、扩展性不好</span><br><span class="line">public class RiskManagement &#123;</span><br><span class="line">  private ASensitiveWordsFilter aFilter &#x3D; new ASensitiveWordsFilter();</span><br><span class="line">  private BSensitiveWordsFilter bFilter &#x3D; new BSensitiveWordsFilter();</span><br><span class="line">  private CSensitiveWordsFilter cFilter &#x3D; new CSensitiveWordsFilter();</span><br><span class="line">  </span><br><span class="line">  public String filterSensitiveWords(String text) &#123;</span><br><span class="line">    String maskedText &#x3D; aFilter.filterSexyWords(text);</span><br><span class="line">    maskedText &#x3D; aFilter.filterPoliticalWords(maskedText);</span><br><span class="line">    maskedText &#x3D; bFilter.filter(maskedText);</span><br><span class="line">    maskedText &#x3D; cFilter.filter(maskedText, &quot;***&quot;);</span><br><span class="line">    return maskedText;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; 使用适配器模式进行改造</span><br><span class="line">public interface ISensitiveWordsFilter &#123; &#x2F;&#x2F; 统一接口定义</span><br><span class="line">  String filter(String text);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class ASensitiveWordsFilterAdaptor implements ISensitiveWordsFilter &#123;</span><br><span class="line">  private ASensitiveWordsFilter aFilter;</span><br><span class="line">  public String filter(String text) &#123;</span><br><span class="line">    String maskedText &#x3D; aFilter.filterSexyWords(text);</span><br><span class="line">    maskedText &#x3D; aFilter.filterPoliticalWords(maskedText);</span><br><span class="line">    return maskedText;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">&#x2F;&#x2F;...省略BSensitiveWordsFilterAdaptor、CSensitiveWordsFilterAdaptor...</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; 扩展性更好，更加符合开闭原则，如果添加一个新的敏感词过滤系统，</span><br><span class="line">&#x2F;&#x2F; 这个类完全不需要改动；而且基于接口而非实现编程，代码的可测试性更好。</span><br><span class="line">public class RiskManagement &#123; </span><br><span class="line">  private List&lt;ISensitiveWordsFilter&gt; filters &#x3D; new ArrayList&lt;&gt;();</span><br><span class="line"> </span><br><span class="line">  public void addSensitiveWordsFilter(ISensitiveWordsFilter filter) &#123;</span><br><span class="line">    filters.add(filter);</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  public String filterSensitiveWords(String text) &#123;</span><br><span class="line">    String maskedText &#x3D; text;</span><br><span class="line">    for (ISensitiveWordsFilter filter : filters) &#123;</span><br><span class="line">      maskedText &#x3D; filter.filter(maskedText);</span><br><span class="line">    &#125;</span><br><span class="line">    return maskedText;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="3-替换依赖的外部系统"><a href="#3-替换依赖的外部系统" class="headerlink" title="3. 替换依赖的外部系统"></a>3. 替换依赖的外部系统</h4><p>当我们把项目中依赖的一个外部系统替换为另一个外部系统的时候，利用适配器模式，可以减少对代码的改动。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; 外部系统A</span><br><span class="line">public interface IA &#123;</span><br><span class="line">  &#x2F;&#x2F;...</span><br><span class="line">  void fa();</span><br><span class="line">&#125;</span><br><span class="line">public class A implements IA &#123;</span><br><span class="line">  &#x2F;&#x2F;...</span><br><span class="line">  public void fa() &#123; &#x2F;&#x2F;... &#125;</span><br><span class="line">&#125;</span><br><span class="line">&#x2F;&#x2F; 在我们的项目中，外部系统A的使用示例</span><br><span class="line">public class Demo &#123;</span><br><span class="line">  private IA a;</span><br><span class="line">  public Demo(IA a) &#123;</span><br><span class="line">    this.a &#x3D; a;</span><br><span class="line">  &#125;</span><br><span class="line">  &#x2F;&#x2F;...</span><br><span class="line">&#125;</span><br><span class="line">Demo d &#x3D; new Demo(new A());</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; 将外部系统A替换成外部系统B</span><br><span class="line">public class BAdaptor implemnts IA &#123;</span><br><span class="line">  private B b;</span><br><span class="line">  public BAdaptor(B b) &#123;</span><br><span class="line">    this.b&#x3D; b;</span><br><span class="line">  &#125;</span><br><span class="line">  public void fa() &#123;</span><br><span class="line">    &#x2F;&#x2F;...</span><br><span class="line">    b.fb();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">&#x2F;&#x2F; 借助BAdaptor，Demo的代码中，调用IA接口的地方都无需改动，</span><br><span class="line">&#x2F;&#x2F; 只需要将BAdaptor如下注入到Demo即可。</span><br><span class="line">Demo d &#x3D; new Demo(new BAdaptor(new B()));</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="4-兼容老版本接口"><a href="#4-兼容老版本接口" class="headerlink" title="4. 兼容老版本接口"></a>4. 兼容老版本接口</h4><p>在做版本升级的时候，对于一些要废弃的接口，我们不直接将其删除，而是暂时保留，并且标注为 deprecated，并将内部实现逻辑委托为新的接口实现。这样做的好处是，让使用它的项目有个过渡期，而不是强制进行代码修改。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">public class Collections &#123;</span><br><span class="line">  public static Emueration emumeration(final Collection c) &#123;</span><br><span class="line">    return new Enumeration() &#123;</span><br><span class="line">      Iterator i &#x3D; c.iterator();</span><br><span class="line">      </span><br><span class="line">      public boolean hasMoreElments() &#123;</span><br><span class="line">        return i.hashNext();</span><br><span class="line">      &#125;</span><br><span class="line">      </span><br><span class="line">      public Object nextElement() &#123;</span><br><span class="line">        return i.next():</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="5-适配不同格式的数据"><a href="#5-适配不同格式的数据" class="headerlink" title="5. 适配不同格式的数据"></a>5. 适配不同格式的数据</h4><p>适配器模式主要用于接口的适配，实际上，它还可以用在不同格式的数据之间的适配。比如，把从不同征信系统拉取的不同格式的征信数据，统一为相同的格式，以方便存储和使用。再比如，Java 中的 Arrays.asList() 也可以看作一种数据适配器，将数组类型的数据转化为集合容器类型。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">List&lt;String&gt; stooges &#x3D; Arrays.asList(&quot;Larry&quot;, &quot;Moe&quot;, &quot;Curly&quot;);</span><br></pre></td></tr></table></figure>
+
+<h3 id="剖析适配器模式在-Java-日志中的应用（Slf4j）"><a href="#剖析适配器模式在-Java-日志中的应用（Slf4j）" class="headerlink" title="剖析适配器模式在 Java 日志中的应用（Slf4j）"></a>剖析适配器模式在 Java 日志中的应用（Slf4j）</h3><p>Java 中有很多日志框架，在项目开发中，我们常常用它们来打印日志信息。其中，比较常用的有 log4j、logback，以及 JDK 提供的 JUL(java.util.logging) 和 Apache 的 JCL(Jakarta Commons Logging) 等。</p>
+<p>大部分日志框架都提供了相似的功能，比如按照不同级别（debug、info、warn、erro……）打印日志等，但它们却并没有实现统一的接口。这主要可能是历史的原因，它不像 JDBC 那样，一开始就制定了数据库操作的接口规范。</p>
+<p>如果我们开发的是一个集成到其他系统的组件、框架、类库等，那日志框架的选择就没那么随意了。比如引入多个组件，每个组件使用的日志框架都不一样，那日志本身的管理工作就变得非常复杂。所以，为了解决这个问题，我们需要统一日志打印框架。</p>
+<p>Slf4j 就是为了解决这个问题而产生的，它相当于 JDBC 规范，提供了一套打印日志的统一接口规范。不过，它只定义了接口，并没有提供具体的实现，需要配合其他日志框架（log4j、logback……）来使用。Slf4j 的出现晚于 JUL、JCL、log4j 等日志框架，所以，它不仅仅提供了统一的接口定义，还提供了针对不同日志框架的适配器。对不同日志框架的接口进行二次封装，适配成统一的 Slf4j 接口定义。</p>
+<p>Slf4j 的适配器实现就是一个很好的适配器模式例子：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; slf4j统一的接口定义</span><br><span class="line">package org.slf4j;</span><br><span class="line">public interface Logger &#123;</span><br><span class="line">  public boolean isTraceEnabled();</span><br><span class="line">  public void trace(String msg);</span><br><span class="line">  public void trace(String format, Object arg);</span><br><span class="line">  public void trace(String format, Object arg1, Object arg2);</span><br><span class="line">  public void trace(String format, Object[] argArray);</span><br><span class="line">  public void trace(String msg, Throwable t);</span><br><span class="line"> </span><br><span class="line">  public boolean isDebugEnabled();</span><br><span class="line">  public void debug(String msg);</span><br><span class="line">  public void debug(String format, Object arg);</span><br><span class="line">  public void debug(String format, Object arg1, Object arg2)</span><br><span class="line">  public void debug(String format, Object[] argArray)</span><br><span class="line">  public void debug(String msg, Throwable t);</span><br><span class="line"></span><br><span class="line">  &#x2F;&#x2F;...省略info、warn、error等一堆接口</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; log4j日志框架的适配器</span><br><span class="line">&#x2F;&#x2F; Log4jLoggerAdapter实现了LocationAwareLogger接口，</span><br><span class="line">&#x2F;&#x2F; 其中LocationAwareLogger继承自Logger接口，</span><br><span class="line">&#x2F;&#x2F; 也就相当于Log4jLoggerAdapter实现了Logger接口。</span><br><span class="line">package org.slf4j.impl;</span><br><span class="line">public final class Log4jLoggerAdapter extends MarkerIgnoringBase</span><br><span class="line">  implements LocationAwareLogger, Serializable &#123;</span><br><span class="line">  final transient org.apache.log4j.Logger logger; &#x2F;&#x2F; log4j</span><br><span class="line"> </span><br><span class="line">  public boolean isDebugEnabled() &#123;</span><br><span class="line">    return logger.isDebugEnabled();</span><br><span class="line">  &#125;</span><br><span class="line"> </span><br><span class="line">  public void debug(String msg) &#123;</span><br><span class="line">    logger.log(FQCN, Level.DEBUG, msg, null);</span><br><span class="line">  &#125;</span><br><span class="line"> </span><br><span class="line">  public void debug(String format, Object arg) &#123;</span><br><span class="line">    if (logger.isDebugEnabled()) &#123;</span><br><span class="line">      FormattingTuple ft &#x3D; MessageFormatter.format(format, arg);</span><br><span class="line">      logger.log(FQCN, Level.DEBUG, ft.getMessage(), ft.getThrowable());</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"> </span><br><span class="line">  public void debug(String format, Object arg1, Object arg2) &#123;</span><br><span class="line">    if (logger.isDebugEnabled()) &#123;</span><br><span class="line">      FormattingTuple ft &#x3D; MessageFormatter.format(format, arg1, arg2);</span><br><span class="line">      logger.log(FQCN, Level.DEBUG, ft.getMessage(), ft.getThrowable());</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"> </span><br><span class="line">  public void debug(String format, Object[] argArray) &#123;</span><br><span class="line">    if (logger.isDebugEnabled()) &#123;</span><br><span class="line">      FormattingTuple ft &#x3D; MessageFormatter.arrayFormat(format, argArray);</span><br><span class="line">      logger.log(FQCN, Level.DEBUG, ft.getMessage(), ft.getThrowable());</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"> </span><br><span class="line">  public void debug(String msg, Throwable t) &#123;</span><br><span class="line">    logger.log(FQCN, Level.DEBUG, msg, t);</span><br><span class="line">  &#125;</span><br><span class="line">  &#x2F;&#x2F;...省略一堆接口的实现...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="代理、桥接、装饰器、适配器-4-种设计模式的区别"><a href="#代理、桥接、装饰器、适配器-4-种设计模式的区别" class="headerlink" title="代理、桥接、装饰器、适配器 4 种设计模式的区别"></a>代理、桥接、装饰器、适配器 4 种设计模式的区别</h3><p>代理、桥接、装饰器、适配器，这 4 种模式是比较常用的结构型设计模式。它们的代码结构非常相似。笼统来说，它们都可以称为 Wrapper 模式，也就是通过 Wrapper 类二次封装原始类。</p>
+<p>尽管代码结构相似，但这 4 种设计模式的用意完全不同，也就是说要解决的问题、应用场景不同，这也是它们的主要区别。</p>
+<ul>
+<li><p>代理模式：代理模式在不改变原始类接口的条件下，为原始类定义一个代理类，主要目的是控制访问，而非加强功能，这是它跟装饰器模式最大的不同。</p>
+</li>
+<li><p>桥接模式：桥接模式的目的是将接口部分和实现部分分离，从而让它们可以较为容易、也相对独立地加以改变。</p>
+</li>
+<li><p>装饰器模式：装饰者模式在不改变原始类接口的情况下，对原始类功能进行增强，并且支持多个装饰器的嵌套使用。</p>
+</li>
+<li><p>适配器模式：适配器模式是一种事后的补救策略。适配器提供跟原始类不同的接口，而代理模式、装饰器模式提供的都是跟原始类相同的接口。</p>
+</li>
+</ul>
+<h2 id="门面模式：如何设计合理的接口粒度以兼顾接口的易用性和通用性？"><a href="#门面模式：如何设计合理的接口粒度以兼顾接口的易用性和通用性？" class="headerlink" title="门面模式：如何设计合理的接口粒度以兼顾接口的易用性和通用性？"></a>门面模式：如何设计合理的接口粒度以兼顾接口的易用性和通用性？</h2><p>Facade Design Pattern</p>
+<h3 id="门面模式的原理与实现"><a href="#门面模式的原理与实现" class="headerlink" title="门面模式的原理与实现"></a>门面模式的原理与实现</h3><p>接口力度太大，则会不通用，接口力度太小，又影响易用性，门面模式就是用来解决接口的可复用性（通用性）和易用性之间的矛盾的。</p>
+<p>门面模式，也叫外观模式，英文全称是 Facade Design Pattern。</p>
+<blockquote>
+<p>Provide a unified interface to a set of interfaces in a subsystem. Facade Pattern defines a higher-level interface that makes the subsystem easier to use.</p>
+</blockquote>
+<p>翻译成中文就是：门面模式为子系统提供一组统一的接口，定义一组高层接口让子系统更易用。</p>
+<p>具体的做法就是：设计接口的时候还优先考虑复用性设计成比较单一职责的细粒度接口，然后额外根据外部系统的使用场景包装一层，提供一组更加简单易用、更高层的接口，从而让接口更易用。</p>
+<p>比如A系统提供了a b c d 4个 接口，现在系统B 完成某个业务功能需要调用系统的 a b d 接口，考虑易用性，提供一个包裹 a、b、d 接口调用的门面接口 x，给系统 B 直接使用。这就是门面模式的应用了。</p>
+<h3 id="门面模式的应用场景举例"><a href="#门面模式的应用场景举例" class="headerlink" title="门面模式的应用场景举例"></a>门面模式的应用场景举例</h3><h4 id="1-解决易用性问题"><a href="#1-解决易用性问题" class="headerlink" title="1. 解决易用性问题"></a>1. 解决易用性问题</h4><p>门面模式可以用来封装系统的底层实现，隐藏系统的复杂性，提供一组更加简单易用、更高层的接口。比如Linux 的 Shell 命令，实际上也可以看作一种门面模式的应用。它继续封装系统调用，提供更加友好、简单的命令，让我们可以直接通过执行命令来跟操作系统交互。</p>
+<p>实际上，从隐藏实现复杂性，提供更易用接口这个意图来看，门面模式有点类似之前讲到的迪米特法则（最少知识原则）和接口隔离原则：两个有交互的系统，只暴露有限的必要的接口。除此之外，门面模式还有点类似之前提到封装、抽象的设计思想，提供更抽象的接口，封装底层实现细节。</p>
+<h4 id="2-解决性能问题"><a href="#2-解决性能问题" class="headerlink" title="2.解决性能问题"></a>2.解决性能问题</h4><p>通过将多个接口调用替换为一个门面接口调用，减少网络通信成本，提高客户端的响应速度。</p>
+<h4 id="3-解决分布式事务问题"><a href="#3-解决分布式事务问题" class="headerlink" title="3. 解决分布式事务问题"></a>3. 解决分布式事务问题</h4><p>比如这样一个场景，在用户注册的时候，我们不仅会创建用户（在数据库 User 表中），还会给用户创建一个钱包（在数据库的 Wallet 表中）。</p>
+<p>要支持两个接口调用在一个事务中执行，是比较难实现的，这涉及分布式事务问题。虽然我们可以通过引入分布式事务框架或者事后补偿的机制来解决，但代码实现都比较复杂。而最简单的解决方案是，利用数据库事务或者 Spring 框架提供的事务（如果是 Java 语言的话），在一个事务中，执行创建用户和创建钱包这两个 SQL 操作。这就要求两个 SQL 操作要在一个接口中完成，所以，我们可以借鉴门面模式的思想，再设计一个包裹这两个操作的新接口，让新接口在一个事务中执行两个 SQL 操作。</p>
+<h3 id="如何组织门面接口和非门面接口？"><a href="#如何组织门面接口和非门面接口？" class="headerlink" title="如何组织门面接口和非门面接口？"></a>如何组织门面接口和非门面接口？</h3><ul>
+<li>如果门面接口不多，我们完全可以将它跟非门面接口放到一块，也不需要特殊标记，当作普通接口来用即可。</li>
+<li>如果门面接口很多，我们可以在已有的接口之上，再重新抽象出一层，专门放置门面接口，从类、包的命名上跟原来的接口层做区分。如果门面接口特别多，并且很多都是跨多个子系统的，我们可以将门面接口放到一个新的子系统中。</li>
+</ul>
+<h3 id="适配器模式和门面模式的区别"><a href="#适配器模式和门面模式的区别" class="headerlink" title="适配器模式和门面模式的区别"></a>适配器模式和门面模式的区别</h3><p>适配器模式和门面模式的共同点是，将不好用的接口适配成好用的接口。那他们的区别是什么？</p>
+<ul>
+<li>适配器是做接口转换，解决的是原接口和目标接口不匹配的问题。是一种“补偿模式”。</li>
+<li>门面模式做接口整合，解决的是多接口调用带来的问题。是一种事前行为，是接口设计时该考虑的。</li>
+</ul>
+<h3 id="小结-2"><a href="#小结-2" class="headerlink" title="小结"></a>小结</h3><ul>
+<li>完成接口设计，就相当于完成了一半的开发任务。只要接口设计得好，那代码就差不到哪里去。</li>
+<li>尽量保持接口的可复用性，但针对特殊情况，允许提供冗余的门面接口，来提供更易用的接口。</li>
+</ul>
+<h2 id="组合模式：如何设计实现支持递归遍历的文件系统目录树结构？"><a href="#组合模式：如何设计实现支持递归遍历的文件系统目录树结构？" class="headerlink" title="组合模式：如何设计实现支持递归遍历的文件系统目录树结构？"></a>组合模式：如何设计实现支持递归遍历的文件系统目录树结构？</h2><p>组合模式（Composite Design Pattern）</p>
+<h3 id="组合模式的理解："><a href="#组合模式的理解：" class="headerlink" title="组合模式的理解："></a>组合模式的理解：</h3><p>将一组对象组织（Compose）成树形结构，以表示一种“部分 - 整体”的层次结构。组合让客户端（在很多设计模式书籍中，“客户端”代指代码的使用者。）可以统一单个对象和组合对象的处理逻辑。业务场景的一种数据结构和算法的抽象。其中，数据可以表示成树这种数据结构，业务需求可以通过在树上的递归遍历算法来实现。</p>
+<h3 id="使用场景："><a href="#使用场景：" class="headerlink" title="使用场景："></a>使用场景：</h3><p>业务场景必须能够表示成树形结构。</p>
+<h3 id="实现方式："><a href="#实现方式：" class="headerlink" title="实现方式："></a>实现方式：</h3><p>组合模式，将一组对象组织成树形结构，将单个对象和组合对象都看做树中的节点，以统一处理逻辑，并且它利用树形结构的特点，递归地处理每个子树，依次简化代码实现。（在这里一般可以抽象出一个抽象类，叶子节点和中间节点（根节点）继承与抽象类，对中间节点（根节点）处理就是递归的调用）</p>
+<h3 id="如何设计实现支持递归遍历的文件系统目录树结构？"><a href="#如何设计实现支持递归遍历的文件系统目录树结构？" class="headerlink" title="如何设计实现支持递归遍历的文件系统目录树结构？"></a>如何设计实现支持递归遍历的文件系统目录树结构？</h3><p>假设我们有这样一个需求：设计一个类来表示文件系统中的目录，能方便地实现下面这些功能：</p>
+<ul>
+<li>动态地添加、删除某个目录下的子目录或文件；</li>
+<li>统计指定目录下的文件个数；</li>
+<li>统计指定目录下的文件总大小。</li>
+</ul>
+<p>FileSystemNode 类来表示，并且通过 isFile 属性来区分。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line">public class FileSystemNode &#123;</span><br><span class="line">  private String path;</span><br><span class="line">  private boolean isFile;</span><br><span class="line">  private List&lt;FileSystemNode&gt; subNodes &#x3D; new ArrayList&lt;&gt;();</span><br><span class="line"></span><br><span class="line">  public FileSystemNode(String path, boolean isFile) &#123;</span><br><span class="line">    this.path &#x3D; path;</span><br><span class="line">    this.isFile &#x3D; isFile;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  public int countNumOfFiles() &#123;</span><br><span class="line">    if (isFile) &#123;</span><br><span class="line">      return 1;</span><br><span class="line">    &#125;</span><br><span class="line">    int numOfFiles &#x3D; 0;</span><br><span class="line">    for (FileSystemNode fileOrDir : subNodes) &#123;</span><br><span class="line">      numOfFiles +&#x3D; fileOrDir.countNumOfFiles();</span><br><span class="line">    &#125;</span><br><span class="line">    return numOfFiles;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  public long countSizeOfFiles() &#123;</span><br><span class="line">    if (isFile) &#123;</span><br><span class="line">      File file &#x3D; new File(path);</span><br><span class="line">      if (!file.exists()) return 0;</span><br><span class="line">      return file.length();</span><br><span class="line">    &#125;</span><br><span class="line">    long sizeofFiles &#x3D; 0;</span><br><span class="line">    for (FileSystemNode fileOrDir : subNodes) &#123;</span><br><span class="line">      sizeofFiles +&#x3D; fileOrDir.countSizeOfFiles();</span><br><span class="line">    &#125;</span><br><span class="line">    return sizeofFiles;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  public String getPath() &#123;</span><br><span class="line">    return path;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  public void addSubNode(FileSystemNode fileOrDir) &#123;</span><br><span class="line">    subNodes.add(fileOrDir);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  public void removeSubNode(FileSystemNode fileOrDir) &#123;</span><br><span class="line">    int size &#x3D; subNodes.size();</span><br><span class="line">    int i &#x3D; 0;</span><br><span class="line">    for (; i &lt; size; ++i) &#123;</span><br><span class="line">      if (subNodes.get(i).getPath().equalsIgnoreCase(fileOrDir.getPath())) &#123;</span><br><span class="line">        break;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    if (i &lt; size) &#123;</span><br><span class="line">      subNodes.remove(i);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br></pre></td><td class="code"><pre><span class="line">public abstract class FileSystemNode &#123;</span><br><span class="line">  protected String path;</span><br><span class="line"></span><br><span class="line">  public FileSystemNode(String path) &#123;</span><br><span class="line">    this.path &#x3D; path;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  public abstract int countNumOfFiles();</span><br><span class="line">  public abstract long countSizeOfFiles();</span><br><span class="line"></span><br><span class="line">  public String getPath() &#123;</span><br><span class="line">    return path;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class File extends FileSystemNode &#123;</span><br><span class="line">  public File(String path) &#123;</span><br><span class="line">    super(path);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  @Override</span><br><span class="line">  public int countNumOfFiles() &#123;</span><br><span class="line">    return 1;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  @Override</span><br><span class="line">  public long countSizeOfFiles() &#123;</span><br><span class="line">    java.io.File file &#x3D; new java.io.File(path);</span><br><span class="line">    if (!file.exists()) return 0;</span><br><span class="line">    return file.length();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class Directory extends FileSystemNode &#123;</span><br><span class="line">  private List&lt;FileSystemNode&gt; subNodes &#x3D; new ArrayList&lt;&gt;();</span><br><span class="line"></span><br><span class="line">  public Directory(String path) &#123;</span><br><span class="line">    super(path);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  @Override</span><br><span class="line">  public int countNumOfFiles() &#123;</span><br><span class="line">    int numOfFiles &#x3D; 0;</span><br><span class="line">    for (FileSystemNode fileOrDir : subNodes) &#123;</span><br><span class="line">      numOfFiles +&#x3D; fileOrDir.countNumOfFiles();</span><br><span class="line">    &#125;</span><br><span class="line">    return numOfFiles;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  @Override</span><br><span class="line">  public long countSizeOfFiles() &#123;</span><br><span class="line">    long sizeofFiles &#x3D; 0;</span><br><span class="line">    for (FileSystemNode fileOrDir : subNodes) &#123;</span><br><span class="line">      sizeofFiles +&#x3D; fileOrDir.countSizeOfFiles();</span><br><span class="line">    &#125;</span><br><span class="line">    return sizeofFiles;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  public void addSubNode(FileSystemNode fileOrDir) &#123;</span><br><span class="line">    subNodes.add(fileOrDir);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  public void removeSubNode(FileSystemNode fileOrDir) &#123;</span><br><span class="line">    int size &#x3D; subNodes.size();</span><br><span class="line">    int i &#x3D; 0;</span><br><span class="line">    for (; i &lt; size; ++i) &#123;</span><br><span class="line">      if (subNodes.get(i).getPath().equalsIgnoreCase(fileOrDir.getPath())) &#123;</span><br><span class="line">        break;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    if (i &lt; size) &#123;</span><br><span class="line">      subNodes.remove(i);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br></pre></td><td class="code"><pre><span class="line">public abstract class FileSystemNode &#123;</span><br><span class="line">  protected String path;</span><br><span class="line"></span><br><span class="line">  public FileSystemNode(String path) &#123;</span><br><span class="line">    this.path &#x3D; path;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  public abstract int countNumOfFiles();</span><br><span class="line">  public abstract long countSizeOfFiles();</span><br><span class="line"></span><br><span class="line">  public String getPath() &#123;</span><br><span class="line">    return path;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class File extends FileSystemNode &#123;</span><br><span class="line">  public File(String path) &#123;</span><br><span class="line">    super(path);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  @Override</span><br><span class="line">  public int countNumOfFiles() &#123;</span><br><span class="line">    return 1;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  @Override</span><br><span class="line">  public long countSizeOfFiles() &#123;</span><br><span class="line">    java.io.File file &#x3D; new java.io.File(path);</span><br><span class="line">    if (!file.exists()) return 0;</span><br><span class="line">    return file.length();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class Directory extends FileSystemNode &#123;</span><br><span class="line">  private List&lt;FileSystemNode&gt; subNodes &#x3D; new ArrayList&lt;&gt;();</span><br><span class="line"></span><br><span class="line">  public Directory(String path) &#123;</span><br><span class="line">    super(path);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  @Override</span><br><span class="line">  public int countNumOfFiles() &#123;</span><br><span class="line">    int numOfFiles &#x3D; 0;</span><br><span class="line">    for (FileSystemNode fileOrDir : subNodes) &#123;</span><br><span class="line">      numOfFiles +&#x3D; fileOrDir.countNumOfFiles();</span><br><span class="line">    &#125;</span><br><span class="line">    return numOfFiles;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  @Override</span><br><span class="line">  public long countSizeOfFiles() &#123;</span><br><span class="line">    long sizeofFiles &#x3D; 0;</span><br><span class="line">    for (FileSystemNode fileOrDir : subNodes) &#123;</span><br><span class="line">      sizeofFiles +&#x3D; fileOrDir.countSizeOfFiles();</span><br><span class="line">    &#125;</span><br><span class="line">    return sizeofFiles;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  public void addSubNode(FileSystemNode fileOrDir) &#123;</span><br><span class="line">    subNodes.add(fileOrDir);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  public void removeSubNode(FileSystemNode fileOrDir) &#123;</span><br><span class="line">    int size &#x3D; subNodes.size();</span><br><span class="line">    int i &#x3D; 0;</span><br><span class="line">    for (; i &lt; size; ++i) &#123;</span><br><span class="line">      if (subNodes.get(i).getPath().equalsIgnoreCase(fileOrDir.getPath())) &#123;</span><br><span class="line">        break;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    if (i &lt; size) &#123;</span><br><span class="line">      subNodes.remove(i);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>文件和目录类都设计好了，我们来看，如何用它们来表示一个文件系统中的目录树结构。具体的代码示例如下所示：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">public class Demo &#123;</span><br><span class="line">  public static void main(String[] args) &#123;</span><br><span class="line">    &#x2F;**</span><br><span class="line">     * &#x2F;</span><br><span class="line">     * &#x2F;wz&#x2F;</span><br><span class="line">     * &#x2F;wz&#x2F;a.txt</span><br><span class="line">     * &#x2F;wz&#x2F;b.txt</span><br><span class="line">     * &#x2F;wz&#x2F;movies&#x2F;</span><br><span class="line">     * &#x2F;wz&#x2F;movies&#x2F;c.avi</span><br><span class="line">     * &#x2F;xzg&#x2F;</span><br><span class="line">     * &#x2F;xzg&#x2F;docs&#x2F;</span><br><span class="line">     * &#x2F;xzg&#x2F;docs&#x2F;d.txt</span><br><span class="line">     *&#x2F;</span><br><span class="line">    Directory fileSystemTree &#x3D; new Directory(&quot;&#x2F;&quot;);</span><br><span class="line">    Directory node_wz &#x3D; new Directory(&quot;&#x2F;wz&#x2F;&quot;);</span><br><span class="line">    Directory node_xzg &#x3D; new Directory(&quot;&#x2F;xzg&#x2F;&quot;);</span><br><span class="line">    fileSystemTree.addSubNode(node_wz);</span><br><span class="line">    fileSystemTree.addSubNode(node_xzg);</span><br><span class="line"></span><br><span class="line">    File node_wz_a &#x3D; new File(&quot;&#x2F;wz&#x2F;a.txt&quot;);</span><br><span class="line">    File node_wz_b &#x3D; new File(&quot;&#x2F;wz&#x2F;b.txt&quot;);</span><br><span class="line">    Directory node_wz_movies &#x3D; new Directory(&quot;&#x2F;wz&#x2F;movies&#x2F;&quot;);</span><br><span class="line">    node_wz.addSubNode(node_wz_a);</span><br><span class="line">    node_wz.addSubNode(node_wz_b);</span><br><span class="line">    node_wz.addSubNode(node_wz_movies);</span><br><span class="line"></span><br><span class="line">    File node_wz_movies_c &#x3D; new File(&quot;&#x2F;wz&#x2F;movies&#x2F;c.avi&quot;);</span><br><span class="line">    node_wz_movies.addSubNode(node_wz_movies_c);</span><br><span class="line"></span><br><span class="line">    Directory node_xzg_docs &#x3D; new Directory(&quot;&#x2F;xzg&#x2F;docs&#x2F;&quot;);</span><br><span class="line">    node_xzg.addSubNode(node_xzg_docs);</span><br><span class="line"></span><br><span class="line">    File node_xzg_docs_d &#x3D; new File(&quot;&#x2F;xzg&#x2F;docs&#x2F;d.txt&quot;);</span><br><span class="line">    node_xzg_docs.addSubNode(node_xzg_docs_d);</span><br><span class="line"></span><br><span class="line">    System.out.println(&quot;&#x2F; files num:&quot; + fileSystemTree.countNumOfFiles());</span><br><span class="line">    System.out.println(&quot;&#x2F;wz&#x2F; files num:&quot; + node_wz.countNumOfFiles());</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="享元模式"><a href="#享元模式" class="headerlink" title="享元模式"></a>享元模式</h2><p>享元模式 Flyweight Design Pattern</p>
+<h3 id="享元模式原理与实现"><a href="#享元模式原理与实现" class="headerlink" title="享元模式原理与实现"></a>享元模式原理与实现</h3><p>所谓“享元”，顾名思义就是被共享的单元。享元模式的意图是复用对象，节省内存，前提是享元对象是不可变对象。具体来讲，当一个系统中存在大量重复对象的时候，我们就可以利用享元模式，将对象设计成享元，在内存中只保留一份实例，供多处代码引用，这样可以减少内存中对象的数量，以起到节省内存的目的。实际上，不仅仅相同对象可以设计成享元，对于相似对象，我们也可以将这些对象中相同的部分（字段），提取出来设计成享元，让这些大量相似对象引用这些享元。</p>
+<h3 id="享元模式的实现"><a href="#享元模式的实现" class="headerlink" title="享元模式的实现"></a>享元模式的实现</h3><p>享元模式的代码实现非常简单，主要是通过工厂模式，在工厂类中，通过一个 Map 或者 List 来缓存已经创建好的享元对象，以达到复用的目的。</p>
+<p>以利用享元模式在棋局游戏中节省内存为例：</p>
+<p>代码示例：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">&#x2F;&#x2F; 享元类</span><br><span class="line">public class ChessPieceUnit &#123;</span><br><span class="line">  private int id;</span><br><span class="line">  private String text;</span><br><span class="line">  private Color color;</span><br><span class="line"></span><br><span class="line">  public ChessPieceUnit(int id, String text, Color color) &#123;</span><br><span class="line">    this.id &#x3D; id;</span><br><span class="line">    this.text &#x3D; text;</span><br><span class="line">    this.color &#x3D; color;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  public static enum Color &#123;</span><br><span class="line">    RED, BLACK</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  &#x2F;&#x2F; ...省略其他属性和getter方法...</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class ChessPieceUnitFactory &#123;</span><br><span class="line">  private static final Map&lt;Integer, ChessPieceUnit&gt; pieces &#x3D; new HashMap&lt;&gt;();</span><br><span class="line"></span><br><span class="line">  static &#123;</span><br><span class="line">    pieces.put(1, new ChessPieceUnit(1, &quot;車&quot;, ChessPieceUnit.Color.BLACK));</span><br><span class="line">    pieces.put(2, new ChessPieceUnit(2,&quot;馬&quot;, ChessPieceUnit.Color.BLACK));</span><br><span class="line">    &#x2F;&#x2F;...省略摆放其他棋子的代码...</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  public static ChessPieceUnit getChessPiece(int chessPieceId) &#123;</span><br><span class="line">    return pieces.get(chessPieceId);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class ChessPiece &#123;</span><br><span class="line">  private ChessPieceUnit chessPieceUnit;</span><br><span class="line">  private int positionX;</span><br><span class="line">  private int positionY;</span><br><span class="line"></span><br><span class="line">  public ChessPiece(ChessPieceUnit unit, int positionX, int positionY) &#123;</span><br><span class="line">    this.chessPieceUnit &#x3D; unit;</span><br><span class="line">    this.positionX &#x3D; positionX;</span><br><span class="line">    this.positionY &#x3D; positionY;</span><br><span class="line">  &#125;</span><br><span class="line">  &#x2F;&#x2F; 省略getter、setter方法</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class ChessBoard &#123;</span><br><span class="line">  private Map&lt;Integer, ChessPiece&gt; chessPieces &#x3D; new HashMap&lt;&gt;();</span><br><span class="line"></span><br><span class="line">  public ChessBoard() &#123;</span><br><span class="line">    init();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  private void init() &#123;</span><br><span class="line">    chessPieces.put(1, new ChessPiece(</span><br><span class="line">            ChessPieceUnitFactory.getChessPiece(1), 0,0));</span><br><span class="line">    chessPieces.put(1, new ChessPiece(</span><br><span class="line">            ChessPieceUnitFactory.getChessPiece(2), 1,0));</span><br><span class="line">    &#x2F;&#x2F;...省略摆放其他棋子的代码...</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  public void move(int chessPieceId, int toPositionX, int toPositionY) &#123;</span><br><span class="line">    &#x2F;&#x2F;...省略...</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>工厂类来缓存 ChessPieceUnit 信息（也就是 id、text、color）。通过工厂类获取到的 ChessPieceUnit 就是享元。所有的 ChessBoard 对象共享这 30 个 ChessPieceUnit 对象（因为象棋中只有 30 个棋子）。在使用享元模式之前，记录 1 万个棋局，我们要创建 30 万（30*1 万）个棋子的 ChessPieceUnit 对象。利用享元模式，我们只需要创建 30 个享元对象供所有棋局共享使用即可，大大节省了内存。</p>
+<h3 id="如何利用享元模式优化文本编辑器的内存占用？"><a href="#如何利用享元模式优化文本编辑器的内存占用？" class="headerlink" title="如何利用享元模式优化文本编辑器的内存占用？"></a>如何利用享元模式优化文本编辑器的内存占用？</h3><p>以下代码，在文本编辑器中，我们每敲一个文字，都会调用 Editor 类中的 appendCharacter() 方法，创建一个新的 Character 对象，保存到 chars 数组中。如果一个文本文件中，有上万、十几万、几十万的文字，那我们就要在内存中存储这么多 Character 对象。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">public class Character &#123;&#x2F;&#x2F;文字</span><br><span class="line">  private char c;</span><br><span class="line"></span><br><span class="line">  private Font font;</span><br><span class="line">  private int size;</span><br><span class="line">  private int colorRGB;</span><br><span class="line"></span><br><span class="line">  public Character(char c, Font font, int size, int colorRGB) &#123;</span><br><span class="line">    this.c &#x3D; c;</span><br><span class="line">    this.font &#x3D; font;</span><br><span class="line">    this.size &#x3D; size;</span><br><span class="line">    this.colorRGB &#x3D; colorRGB;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class Editor &#123;</span><br><span class="line">  private List&lt;Character&gt; chars &#x3D; new ArrayList&lt;&gt;();</span><br><span class="line"></span><br><span class="line">  public void appendCharacter(char c, Font font, int size, int colorRGB) &#123;</span><br><span class="line">    Character character &#x3D; new Character(c, font, size, colorRGB);</span><br><span class="line">    chars.add(character);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>优化方案：</strong><br>在一个文本文件中，用到的字体格式不会太多，毕竟不大可能有人把每个文字都设置成不同的格式。所以，对于字体格式，我们可以将它设计成享元，让不同的文字共享使用。</p>
+<p>代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line">public class CharacterStyle &#123;</span><br><span class="line">  private Font font;</span><br><span class="line">  private int size;</span><br><span class="line">  private int colorRGB;</span><br><span class="line"></span><br><span class="line">  public CharacterStyle(Font font, int size, int colorRGB) &#123;</span><br><span class="line">    this.font &#x3D; font;</span><br><span class="line">    this.size &#x3D; size;</span><br><span class="line">    this.colorRGB &#x3D; colorRGB;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  @Override</span><br><span class="line">  public boolean equals(Object o) &#123;</span><br><span class="line">    CharacterStyle otherStyle &#x3D; (CharacterStyle) o;</span><br><span class="line">    return font.equals(otherStyle.font)</span><br><span class="line">            &amp;&amp; size &#x3D;&#x3D; otherStyle.size</span><br><span class="line">            &amp;&amp; colorRGB &#x3D;&#x3D; otherStyle.colorRGB;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class CharacterStyleFactory &#123;</span><br><span class="line">  private static final List&lt;CharacterStyle&gt; styles &#x3D; new ArrayList&lt;&gt;();</span><br><span class="line"></span><br><span class="line">  public static CharacterStyle getStyle(Font font, int size, int colorRGB) &#123;</span><br><span class="line">    CharacterStyle newStyle &#x3D; new CharacterStyle(font, size, colorRGB);</span><br><span class="line">    for (CharacterStyle style : styles) &#123;</span><br><span class="line">      if (style.equals(newStyle)) &#123;</span><br><span class="line">        return style;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    styles.add(newStyle);</span><br><span class="line">    return newStyle;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class Character &#123;</span><br><span class="line">  private char c;</span><br><span class="line">  private CharacterStyle style;</span><br><span class="line"></span><br><span class="line">  public Character(char c, CharacterStyle style) &#123;</span><br><span class="line">    this.c &#x3D; c;</span><br><span class="line">    this.style &#x3D; style;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class Editor &#123;</span><br><span class="line">  private List&lt;Character&gt; chars &#x3D; new ArrayList&lt;&gt;();</span><br><span class="line"></span><br><span class="line">  public void appendCharacter(char c, Font font, int size, int colorRGB) &#123;</span><br><span class="line">    Character character &#x3D; new Character(c, CharacterStyleFactory.getStyle(font, size, colorRGB));</span><br><span class="line">    chars.add(character);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="享元模式-VS-单例、缓存、对象池-的区别"><a href="#享元模式-VS-单例、缓存、对象池-的区别" class="headerlink" title="享元模式 VS 单例、缓存、对象池 的区别"></a>享元模式 VS 单例、缓存、对象池 的区别</h3><p>区别两种设计模式，不能光看代码实现，而是要看设计意图，也就是要解决的问题。这里的区别也不例外。</p>
+<ul>
+<li><p>应用单例模式是为了保证对象全局唯一。</p>
+</li>
+<li><p>应用享元模式是为了实现对象复用，节省内存。享元模式中的“复用”可以理解为“共享使用”。</p>
+</li>
+<li><p>缓存是为了提高访问效率，而非复用。</p>
+</li>
+<li><p>池化技术中的“复用”理解为“重复使用”，主要是为了节省时间。比如对象池，线程池</p>
+</li>
+</ul>
+<p>池化技术中的“复用”可以理解为“重复使用”，主要目的是节省时间（比如从数据库池中取一个连接，不需要重新创建）。在任意时刻，每一个对象、连接、线程，并不会被多处使用，而是被一个使用者独占，当使用完成之后，放回到池中，再由其他使用者重复利用。享元模式中的“复用”可以理解为“共享使用”，在整个生命周期中，都是被所有使用者共享的，主要目的是节省空间。</p>
+<h3 id="剖析享元模式在Java-Integer、String中的应用"><a href="#剖析享元模式在Java-Integer、String中的应用" class="headerlink" title="剖析享元模式在Java Integer、String中的应用"></a>剖析享元模式在Java Integer、String中的应用</h3><h4 id="享元模式在-Java-Integer-中的应用"><a href="#享元模式在-Java-Integer-中的应用" class="headerlink" title="享元模式在 Java Integer 中的应用"></a>享元模式在 Java Integer 中的应用</h4><p>自动装箱，就是自动将基本数据类型转换为包装器类型。所谓的自动拆箱，也就是自动将包装器类型转化为基本数据类型</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Integer i &#x3D; 56; &#x2F;&#x2F;自动装箱</span><br><span class="line">int j &#x3D; i; &#x2F;&#x2F;自动拆箱</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Integer i &#x3D; 56；底层执行了：Integer i &#x3D; Integer.valueOf(56);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">int j &#x3D; i; 底层执行了：int j &#x3D; i.intValue();</span><br></pre></td></tr></table></figure>
+
+
+
+<p>为什么下面代码的运行结果为 一个 true, 一个false？</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Integer i1 &#x3D; 56;</span><br><span class="line">Integer i2 &#x3D; 56;</span><br><span class="line">Integer i3 &#x3D; 129;</span><br><span class="line">Integer i4 &#x3D; 129;</span><br><span class="line">System.out.println(i1 &#x3D;&#x3D; i2);</span><br><span class="line">System.out.println(i3 &#x3D;&#x3D; i4);</span><br></pre></td></tr></table></figure>
+
+<p>这正是因为 Integer 用到了享元模式来复用对象，才导致了这样的运行结果。当我们通过自动装箱，也就是调用 valueOf() 来创建 Integer 对象的时候，如果要创建的 Integer 对象的值在 -128 到 127 之间，会从 IntegerCache 类中直接返回，否则才调用 new 方法创建，Integer 类的 valueOf() 函数的具体代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">public static Integer valueOf(int i) &#123;</span><br><span class="line">    if (i &gt;&#x3D; IntegerCache.low &amp;&amp; i &lt;&#x3D; IntegerCache.high)</span><br><span class="line">        return IntegerCache.cache[i + (-IntegerCache.low)];</span><br><span class="line">    return new Integer(i);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>IntegerCache 则是生产享元对象的工厂类 （只说名字不叫XXXFactory），代码如下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;**</span><br><span class="line"> * Cache to support the object identity semantics of autoboxing for values between</span><br><span class="line"> * -128 and 127 (inclusive) as required by JLS.</span><br><span class="line"> *</span><br><span class="line"> * The cache is initialized on first usage.  The size of the cache</span><br><span class="line"> * may be controlled by the &#123;@code -XX:AutoBoxCacheMax&#x3D;&lt;size&gt;&#125; option.</span><br><span class="line"> * During VM initialization, java.lang.Integer.IntegerCache.high property</span><br><span class="line"> * may be set and saved in the private system properties in the</span><br><span class="line"> * sun.misc.VM class.</span><br><span class="line"> *&#x2F;</span><br><span class="line">private static class IntegerCache &#123;</span><br><span class="line">    static final int low &#x3D; -128;</span><br><span class="line">    static final int high;</span><br><span class="line">    static final Integer cache[];</span><br><span class="line"></span><br><span class="line">    static &#123;</span><br><span class="line">        &#x2F;&#x2F; high value may be configured by property</span><br><span class="line">        int h &#x3D; 127;</span><br><span class="line">        String integerCacheHighPropValue &#x3D;</span><br><span class="line">            sun.misc.VM.getSavedProperty(&quot;java.lang.Integer.IntegerCache.high&quot;);</span><br><span class="line">        if (integerCacheHighPropValue !&#x3D; null) &#123;</span><br><span class="line">            try &#123;</span><br><span class="line">                int i &#x3D; parseInt(integerCacheHighPropValue);</span><br><span class="line">                i &#x3D; Math.max(i, 127);</span><br><span class="line">                &#x2F;&#x2F; Maximum array size is Integer.MAX_VALUE</span><br><span class="line">                h &#x3D; Math.min(i, Integer.MAX_VALUE - (-low) -1);</span><br><span class="line">            &#125; catch( NumberFormatException nfe) &#123;</span><br><span class="line">                &#x2F;&#x2F; If the property cannot be parsed into an int, ignore it.</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        high &#x3D; h;</span><br><span class="line"></span><br><span class="line">        cache &#x3D; new Integer[(high - low) + 1];</span><br><span class="line">        int j &#x3D; low;</span><br><span class="line">        for(int k &#x3D; 0; k &lt; cache.length; k++)</span><br><span class="line">            cache[k] &#x3D; new Integer(j++);</span><br><span class="line"></span><br><span class="line">        &#x2F;&#x2F; range [-128, 127] must be interned (JLS7 5.1.7)</span><br><span class="line">        assert IntegerCache.high &gt;&#x3D; 127;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    private IntegerCache() &#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在 IntegerCache 的代码实现中，当这个类被加载的时候，缓存的享元对象会被集中一次性创建好。毕竟整型值太多了，我们不可能在 IntegerCache 类中预先创建好所有的整型值，这样既占用太多内存，也使得加载 IntegerCache 类的时间过长。所以，我们只能选择缓存对于大部分应用来说最常用的整型值，也就是一个字节的大小（-128 到 127 之间的数据）。不过 JDK 也提供了方法来让我们可以自定义缓存的最大值(没有提供设置最小值的方法)。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;方法一：</span><br><span class="line">-Djava.lang.Integer.IntegerCache.high&#x3D;255</span><br><span class="line">&#x2F;&#x2F;方法二：</span><br><span class="line">-XX:AutoBoxCacheMax&#x3D;255</span><br></pre></td></tr></table></figure>
+
+<p>除了 Integer 类型之外，其他包装器类型，比如 Long、Short、Byte 等，也都利用了享元模式来缓存 -128 到 127 之间的数据。比如 Long 类型对应的 LongCache 享元工厂类及 valueOf()</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">private static class LongCache &#123;</span><br><span class="line">    private LongCache()&#123;&#125;</span><br><span class="line"></span><br><span class="line">    static final Long cache[] &#x3D; new Long[-(-128) + 127 + 1];</span><br><span class="line"></span><br><span class="line">    static &#123;</span><br><span class="line">        for(int i &#x3D; 0; i &lt; cache.length; i++)</span><br><span class="line">            cache[i] &#x3D; new Long(i - 128);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public static Long valueOf(long l) &#123;</span><br><span class="line">    final int offset &#x3D; 128;</span><br><span class="line">    if (l &gt;&#x3D; -128 &amp;&amp; l &lt;&#x3D; 127) &#123; &#x2F;&#x2F; will cache</span><br><span class="line">        return LongCache.cache[(int)l + offset];</span><br><span class="line">    &#125;</span><br><span class="line">    return new Long(l);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<p>下面三种创建对象的方式，推荐使用哪种？</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Integer a &#x3D; new Integer(123);</span><br><span class="line">Integer a &#x3D; 123;</span><br><span class="line">Integer a &#x3D; Integer.valueOf(123);</span><br></pre></td></tr></table></figure>
+
+<p>答案是推荐使用后面两种，第一种创建方式并不会使用到 IntegerCache，而后面两种创建方法可以利用 IntegerCache 缓存，返回共享的对象，以达到节省内存的目的。举一个极端一点的例子，假设程序需要创建 1 万个 -128 到 127 之间的 Integer 对象。使用第一种创建方式，我们需要分配 1 万个 Integer 对象的内存空间；使用后两种创建方式，我们最多只需要分配 256 个 Integer 对象的内存空间。</p>
+<h4 id="享元模式在-Java-String-中的应用"><a href="#享元模式在-Java-String-中的应用" class="headerlink" title="享元模式在 Java String 中的应用"></a>享元模式在 Java String 中的应用</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">String s1 &#x3D; &quot;小争哥&quot;;</span><br><span class="line">String s2 &#x3D; &quot;小争哥&quot;;</span><br><span class="line">String s3 &#x3D; new String(&quot;小争哥&quot;);</span><br><span class="line"></span><br><span class="line">System.out.println(s1 &#x3D;&#x3D; s2);  &#x2F;&#x2F;运行结果为：true</span><br><span class="line">System.out.println(s1 &#x3D;&#x3D; s3);  &#x2F;&#x2F;运行结果为：false</span><br></pre></td></tr></table></figure>
+
+<p>跟 Integer 类的设计思路相似，String 类利用享元模式来复用相同的字符串常量（也就是代码中的“小争哥”）。JVM 会专门开辟一块存储区来存储字符串常量，这块存储区叫作“字符串常量池”。上面代码对应的内存存储结构如下所示：</p>
+<p><img src="evernotecid://B93CACCF-EBD1-4485-9709-207B83E62B19/appyinxiangcom/22404617/ENResource/p2473" alt="2dfc18575c22efccca191c566b24a22d.jpeg"></p>
+<h4 id="String-类的享元模式的设计，跟-Integer-类的享元模式的设计有什么不同？"><a href="#String-类的享元模式的设计，跟-Integer-类的享元模式的设计有什么不同？" class="headerlink" title="String 类的享元模式的设计，跟 Integer 类的享元模式的设计有什么不同？"></a>String 类的享元模式的设计，跟 Integer 类的享元模式的设计有什么不同？</h4><ul>
+<li><p>Integer 类中要共享的对象，是在类加载的时候，就集中一次性创建好的。</p>
+</li>
+<li><p>对于字符串来说，没法事先知道要共享哪些字符串常量，所以没办法事先创建好，只能在某个字符串常量第一次被用到的时候，存储到常量池中，当之后再用到的时候，直接引用常量池中已经存在的即可，就不需要再重新创建了。</p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Design-Pattern-Structural-Pattern/" rel="tag"># Design Pattern Structural-Pattern</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/10/15/design-pattern-behavioral-pattern/" rel="prev" title="设计模式之美-笔记Part7：设计模式与范式-行为型">
+      <i class="fa fa-chevron-left"></i> 设计模式之美-笔记Part7：设计模式与范式-行为型
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/10/09/design-pattern-creational-pattern/" rel="next" title="设计模式之美-笔记Part5：设计模式与范式-创建型">
+      设计模式之美-笔记Part5：设计模式与范式-创建型 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#概述"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#代理模式：代理在RPC、缓存、监控等场景中的应用"><span class="nav-number">2.</span> <span class="nav-text">代理模式：代理在RPC、缓存、监控等场景中的应用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#代理模式的原理与实现"><span class="nav-number">2.1.</span> <span class="nav-text">代理模式的原理与实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#代理模式的具体实现"><span class="nav-number">2.2.</span> <span class="nav-text">代理模式的具体实现</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-让代理类和原始类实现同样的接口"><span class="nav-number">2.2.1.</span> <span class="nav-text">1.让代理类和原始类实现同样的接口</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-让代理类继承原始类的方法来实现代理模式"><span class="nav-number">2.2.2.</span> <span class="nav-text">2.让代理类继承原始类的方法来实现代理模式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#两种实现方式的对比"><span class="nav-number">2.2.3.</span> <span class="nav-text">两种实现方式的对比</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#动态代理的原理与实现"><span class="nav-number">2.3.</span> <span class="nav-text">动态代理的原理与实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#代理模式的应用场景"><span class="nav-number">2.4.</span> <span class="nav-text">代理模式的应用场景</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-业务系统的非功能性需求开发"><span class="nav-number">2.4.1.</span> <span class="nav-text">1. 业务系统的非功能性需求开发</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-代理模式在-RPC中的应用"><span class="nav-number">2.4.2.</span> <span class="nav-text">2. 代理模式在 RPC中的应用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-代理模式在缓存中的应用"><span class="nav-number">2.4.3.</span> <span class="nav-text">3. 代理模式在缓存中的应用</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#桥接模式：如何实现支持不同类型和渠道的消息推送系统？"><span class="nav-number">3.</span> <span class="nav-text">桥接模式：如何实现支持不同类型和渠道的消息推送系统？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#桥接模式的原理解析"><span class="nav-number">3.1.</span> <span class="nav-text">桥接模式的原理解析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JDBC利用桥接模式优雅实现数据库切换"><span class="nav-number">3.2.</span> <span class="nav-text">JDBC利用桥接模式优雅实现数据库切换</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如何实现支持不同类型和渠道的消息推送系统？"><span class="nav-number">3.3.</span> <span class="nav-text">如何实现支持不同类型和渠道的消息推送系统？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#小结"><span class="nav-number">3.4.</span> <span class="nav-text">小结</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#精彩评论"><span class="nav-number">3.5.</span> <span class="nav-text">精彩评论</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#装饰器模式：通过剖析Java-IO类库源码学习装饰器模式"><span class="nav-number">4.</span> <span class="nav-text">装饰器模式：通过剖析Java IO类库源码学习装饰器模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#装饰器模式的理解"><span class="nav-number">4.1.</span> <span class="nav-text">装饰器模式的理解</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#装饰器的模版代码"><span class="nav-number">4.2.</span> <span class="nav-text">装饰器的模版代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Java-IO类库源码对装饰器模式的应用"><span class="nav-number">4.3.</span> <span class="nav-text">Java IO类库源码对装饰器模式的应用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#装饰器模式与代理模式的区别"><span class="nav-number">4.4.</span> <span class="nav-text">装饰器模式与代理模式的区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#添加缓存场景应该使用代理模式还说装饰者模式？"><span class="nav-number">4.5.</span> <span class="nav-text">添加缓存场景应该使用代理模式还说装饰者模式？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#小结-1"><span class="nav-number">4.6.</span> <span class="nav-text">小结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#适配器模式：代理、适配器、桥接、装饰，这四个模式有何区别？"><span class="nav-number">5.</span> <span class="nav-text">适配器模式：代理、适配器、桥接、装饰，这四个模式有何区别？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#适配器模式的原理与实现"><span class="nav-number">5.1.</span> <span class="nav-text">适配器模式的原理与实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#适配器模式应用场景总结"><span class="nav-number">5.2.</span> <span class="nav-text">适配器模式应用场景总结</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-封装有缺陷的接口设计"><span class="nav-number">5.2.1.</span> <span class="nav-text">1. 封装有缺陷的接口设计</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-统一多个类的接口设计"><span class="nav-number">5.2.2.</span> <span class="nav-text">2. 统一多个类的接口设计</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-替换依赖的外部系统"><span class="nav-number">5.2.3.</span> <span class="nav-text">3. 替换依赖的外部系统</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-兼容老版本接口"><span class="nav-number">5.2.4.</span> <span class="nav-text">4. 兼容老版本接口</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-适配不同格式的数据"><span class="nav-number">5.2.5.</span> <span class="nav-text">5. 适配不同格式的数据</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#剖析适配器模式在-Java-日志中的应用（Slf4j）"><span class="nav-number">5.3.</span> <span class="nav-text">剖析适配器模式在 Java 日志中的应用（Slf4j）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#代理、桥接、装饰器、适配器-4-种设计模式的区别"><span class="nav-number">5.4.</span> <span class="nav-text">代理、桥接、装饰器、适配器 4 种设计模式的区别</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#门面模式：如何设计合理的接口粒度以兼顾接口的易用性和通用性？"><span class="nav-number">6.</span> <span class="nav-text">门面模式：如何设计合理的接口粒度以兼顾接口的易用性和通用性？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#门面模式的原理与实现"><span class="nav-number">6.1.</span> <span class="nav-text">门面模式的原理与实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#门面模式的应用场景举例"><span class="nav-number">6.2.</span> <span class="nav-text">门面模式的应用场景举例</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-解决易用性问题"><span class="nav-number">6.2.1.</span> <span class="nav-text">1. 解决易用性问题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-解决性能问题"><span class="nav-number">6.2.2.</span> <span class="nav-text">2.解决性能问题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-解决分布式事务问题"><span class="nav-number">6.2.3.</span> <span class="nav-text">3. 解决分布式事务问题</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如何组织门面接口和非门面接口？"><span class="nav-number">6.3.</span> <span class="nav-text">如何组织门面接口和非门面接口？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#适配器模式和门面模式的区别"><span class="nav-number">6.4.</span> <span class="nav-text">适配器模式和门面模式的区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#小结-2"><span class="nav-number">6.5.</span> <span class="nav-text">小结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#组合模式：如何设计实现支持递归遍历的文件系统目录树结构？"><span class="nav-number">7.</span> <span class="nav-text">组合模式：如何设计实现支持递归遍历的文件系统目录树结构？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#组合模式的理解："><span class="nav-number">7.1.</span> <span class="nav-text">组合模式的理解：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用场景："><span class="nav-number">7.2.</span> <span class="nav-text">使用场景：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#实现方式："><span class="nav-number">7.3.</span> <span class="nav-text">实现方式：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如何设计实现支持递归遍历的文件系统目录树结构？"><span class="nav-number">7.4.</span> <span class="nav-text">如何设计实现支持递归遍历的文件系统目录树结构？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#享元模式"><span class="nav-number">8.</span> <span class="nav-text">享元模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#享元模式原理与实现"><span class="nav-number">8.1.</span> <span class="nav-text">享元模式原理与实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#享元模式的实现"><span class="nav-number">8.2.</span> <span class="nav-text">享元模式的实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如何利用享元模式优化文本编辑器的内存占用？"><span class="nav-number">8.3.</span> <span class="nav-text">如何利用享元模式优化文本编辑器的内存占用？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#享元模式-VS-单例、缓存、对象池-的区别"><span class="nav-number">8.4.</span> <span class="nav-text">享元模式 VS 单例、缓存、对象池 的区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#剖析享元模式在Java-Integer、String中的应用"><span class="nav-number">8.5.</span> <span class="nav-text">剖析享元模式在Java Integer、String中的应用</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#享元模式在-Java-Integer-中的应用"><span class="nav-number">8.5.1.</span> <span class="nav-text">享元模式在 Java Integer 中的应用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#享元模式在-Java-String-中的应用"><span class="nav-number">8.5.2.</span> <span class="nav-text">享元模式在 Java String 中的应用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#String-类的享元模式的设计，跟-Integer-类的享元模式的设计有什么不同？"><span class="nav-number">8.5.3.</span> <span class="nav-text">String 类的享元模式的设计，跟 Integer 类的享元模式的设计有什么不同？</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="crazyfzw"
+      src="/uploads/avatar.jpg">
+  <p class="site-author-name" itemprop="name">crazyfzw</p>
+  <div class="site-description" itemprop="description">做个有趣的技术人</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">43</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">140</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/crazyfzw" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;crazyfzw" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://book.douban.com/people/crazyfzw/" title="Booklist → https:&#x2F;&#x2F;book.douban.com&#x2F;people&#x2F;crazyfzw&#x2F;" rel="noopener" target="_blank"><i class="fab fa-skype fa-fw"></i>Booklist</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:crazyfzw@gmail.com" title="E-Mail → mailto:crazyfzw@gmail.com" rel="noopener" target="_blank"><i class="fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://plus.google.com/104894167431407693109" title="Google → https:&#x2F;&#x2F;plus.google.com&#x2F;104894167431407693109" rel="noopener" target="_blank"><i class="fab fa-google fa-fw"></i>Google</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.facebook.com/profile.php?id=100011315733045" title="Facebook → https:&#x2F;&#x2F;www.facebook.com&#x2F;profile.php?id&#x3D;100011315733045" rel="noopener" target="_blank"><i class="fab fa-facebook fa-fw"></i>Facebook</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/u/3829383159" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;3829383159" rel="noopener" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://ifeve.com/" title="http:&#x2F;&#x2F;ifeve.com&#x2F;" rel="noopener" target="_blank">并发编程网</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="http://www.importnew.com/" title="http:&#x2F;&#x2F;www.importnew.com&#x2F;" rel="noopener" target="_blank">ImportNew</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="http://jm.taobao.org/categories/" title="http:&#x2F;&#x2F;jm.taobao.org&#x2F;categories&#x2F;" rel="noopener" target="_blank">阿里中间件团队博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.ibm.com/developerworks/cn/java/" title="https:&#x2F;&#x2F;www.ibm.com&#x2F;developerworks&#x2F;cn&#x2F;java&#x2F;" rel="noopener" target="_blank">IBM developerworks</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tech.meituan.com/" title="https:&#x2F;&#x2F;tech.meituan.com&#x2F;" rel="noopener" target="_blank">美团点评技术团队</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="http://calvin1978.blogcn.com/" title="http:&#x2F;&#x2F;calvin1978.blogcn.com&#x2F;" rel="noopener" target="_blank">江南白衣的博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="http://blog.720ui.com/" title="http:&#x2F;&#x2F;blog.720ui.com" rel="noopener" target="_blank">梁桂钊的博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.jianshu.com/u/581f548ef0ec" title="https:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;581f548ef0ec" rel="noopener" target="_blank">李艳鹏的博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="http://jinnianshilongnian.iteye.com/" title="http:&#x2F;&#x2F;jinnianshilongnian.iteye.com&#x2F;" rel="noopener" target="_blank">张开涛的博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/zuoxiaolong" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;zuoxiaolong" rel="noopener" target="_blank">左潇龙的博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/xrq730/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;xrq730&#x2F;" rel="noopener" target="_blank">五月的仓颉</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://yikun.github.io/" title="https:&#x2F;&#x2F;yikun.github.io&#x2F;" rel="noopener" target="_blank">Yikun的博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="http://www.ruanyifeng.com/" title="http:&#x2F;&#x2F;www.ruanyifeng.com" rel="noopener" target="_blank">阮一峰的个人网站</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">crazyfzw</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">458k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">6:56</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : false,
+      appId      : 'jyxPxkBMeEmDfMMTuuyBdGdu-gzGzoHsz',
+      appKey     : '7SEECyfT4R10oTtj4zDMOdBt',
+      placeholder: "ヾﾉ≧∀≦)o 来呀！吐槽一番吧！",
+      avatar     : 'monsterid',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : '' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

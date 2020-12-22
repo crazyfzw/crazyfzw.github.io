@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"crazyfzw.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"valine","storage":true,"lazyload":true,"nav":null,"activeClass":"valine"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="理论一：什么情况下要重构？到底重构什么？又该如何重构？1. 重构的目的：为什么重构（why）？对于项目来言，重构可以保持代码质量持续处于一个可控状态，不至于腐化到无可救药的地步。 对于个人而言，重构非常锻炼一个人的代码能力，并且是一件非常有成就感的事情。它是我们学习的经典设计思想、原则、模式、编程规范等理论知识的练兵场。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="设计模式之美-笔记Part4：规范与重构">
+<meta property="og:url" content="https://crazyfzw.github.io/2020/10/07/design-pattern-refactoring/index.html">
+<meta property="og:site_name" content="Crazyfzw&#39;s blog">
+<meta property="og:description" content="理论一：什么情况下要重构？到底重构什么？又该如何重构？1. 重构的目的：为什么重构（why）？对于项目来言，重构可以保持代码质量持续处于一个可控状态，不至于腐化到无可救药的地步。 对于个人而言，重构非常锻炼一个人的代码能力，并且是一件非常有成就感的事情。它是我们学习的经典设计思想、原则、模式、编程规范等理论知识的练兵场。">
+<meta property="og:image" content="evernotecid://B93CACCF-EBD1-4485-9709-207B83E62B19/appyinxiangcom/22404617/ENResource/p2459">
+<meta property="og:image" content="evernotecid://B93CACCF-EBD1-4485-9709-207B83E62B19/appyinxiangcom/22404617/ENResource/p2460">
+<meta property="article:published_time" content="2020-10-07T04:37:56.000Z">
+<meta property="article:modified_time" content="2020-12-22T05:21:33.221Z">
+<meta property="article:author" content="crazyfzw">
+<meta property="article:tag" content="Design Pattern Refactoring-Principle">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="evernotecid://B93CACCF-EBD1-4485-9709-207B83E62B19/appyinxiangcom/22404617/ENResource/p2459">
+
+<link rel="canonical" href="https://crazyfzw.github.io/2020/10/07/design-pattern-refactoring/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-Hans'
+  };
+</script>
+
+  <title>设计模式之美-笔记Part4：规范与重构 | Crazyfzw's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Crazyfzw's blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Crazyfzw's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Return to base, step by step.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="https://crazyfzw.github.io/2020/10/07/design-pattern-refactoring/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/uploads/avatar.jpg">
+      <meta itemprop="name" content="crazyfzw">
+      <meta itemprop="description" content="做个有趣的技术人">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Crazyfzw's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          设计模式之美-笔记Part4：规范与重构
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-10-07 12:37:56" itemprop="dateCreated datePublished" datetime="2020-10-07T12:37:56+08:00">2020-10-07</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-12-22 13:21:33" itemprop="dateModified" datetime="2020-12-22T13:21:33+08:00">2020-12-22</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Design-Pattern/" itemprop="url" rel="index"><span itemprop="name">Design Pattern</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2020/10/07/design-pattern-refactoring/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/10/07/design-pattern-refactoring/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>36k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>33 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="理论一：什么情况下要重构？到底重构什么？又该如何重构？"><a href="#理论一：什么情况下要重构？到底重构什么？又该如何重构？" class="headerlink" title="理论一：什么情况下要重构？到底重构什么？又该如何重构？"></a>理论一：什么情况下要重构？到底重构什么？又该如何重构？</h2><h3 id="1-重构的目的："><a href="#1-重构的目的：" class="headerlink" title="1. 重构的目的："></a>1. 重构的目的：</h3><p>为什么重构（why）？<br>对于项目来言，重构可以保持代码质量持续处于一个可控状态，不至于腐化到无可救药的地步。</p>
+<p>对于个人而言，重构非常锻炼一个人的代码能力，并且是一件非常有成就感的事情。它是我们学习的经典设计思想、原则、模式、编程规范等理论知识的练兵场。</p>
+<a id="more"></a>
+
+<h3 id="2-重构的对象："><a href="#2-重构的对象：" class="headerlink" title="2. 重构的对象："></a>2. 重构的对象：</h3><p>重构什么（what）？按照重构的规模，我们可以将重构大致分为大规模高层次的重构和小规模低层次的重构。</p>
+<p>大规模高层次重构包括对代码分层、模块化、解耦、梳理类之间的交互关系、抽象复用组件等等。这部分工作利用的更多的是比较抽象、比较顶层的设计思想、原则、模式。</p>
+<p>小规模低层次的重构包括规范命名、注释、修正函数参数过多、消除超大类、提取重复代码等等编程细节问题，主要是针对类、函数级别的重构。小规模低层次的重构更多的是利用编码规范这一理论知识。</p>
+<h3 id="3-重构的时机："><a href="#3-重构的时机：" class="headerlink" title="3. 重构的时机："></a>3. 重构的时机：</h3><p>什么时候重构（when）？我反复强调，我们一定要建立持续重构意识，把重构作为开发必不可少的部分，融入到日常开发中，而不是等到代码出现很大问题的时候，再大刀阔斧地重构。</p>
+<p>平时没有事情的时候，你可以看看项目中有哪些写得不够好的、可以优化的代码，主动去重构一下。或者，在修改、添加某个功能代码的时候，你也可以顺手把不符合编码规范、不好的设计重构一下。总之，就像把单元测试、Code Review 作为开发的一部分，我们如果能把持续重构也作为开发的一部分，成为一种开发习惯，对项目、对自己都会很有好处。</p>
+<h3 id="4-重构的方法："><a href="#4-重构的方法：" class="headerlink" title="4. 重构的方法："></a>4. 重构的方法：</h3><p>如何重构（how）？大规模高层次的重构难度比较大，需要组织、有计划地进行，分阶段地小步快跑，时刻让代码处于一个可运行的状态。每个阶段完成一小部分代码的重构，然后提交、测试、运行，发现没有问题之后，再继续进行下一阶段的重构，保证代码仓库中的代码一直处于可运行、逻辑正确的状态。每个阶段，我们都要控制好重构影响到的代码范围，考虑好如何兼容老的代码逻辑，必要的时候还需要写一些兼容过渡代码。只有这样，我们才能让每一阶段的重构都不至于耗时太长（最好一天就能完成），不至于与新的功能开发相冲突。</p>
+<p>而小规模低层次的重构，因为影响范围小，改动耗时短，所以，只要你愿意并且有时间，随时随地都可以去做。平时没有事情的时候，你可以看看项目中有哪些写得不够好的、可以优化的代码，主动去重构一下。或者，在修改、添加某个功能代码的时候，你也可以顺手把不符合编码规范、不好的设计重构一下。除了人工去发现低层次的质量问题，我们还可以借助很多成熟的静态代码分析工具（比如 CheckStyle、FindBugs、PMD），来自动发现代码中的问题，然后针对性地进行重构优化。</p>
+<p>idea 可以安装 Alibaba Java Coding Guidelines 来帮助解决一些规范的问题，重构解决一些低级别的错误<br><a href="https://www.cnblogs.com/DDgougou/p/9282554.html" target="_blank" rel="noopener">https://www.cnblogs.com/DDgougou/p/9282554.html</a></p>
+<h3 id="评论区精彩评论"><a href="#评论区精彩评论" class="headerlink" title="评论区精彩评论"></a>评论区精彩评论</h3><h4 id="一个重构的案例（步骤）"><a href="#一个重构的案例（步骤）" class="headerlink" title="一个重构的案例（步骤）"></a>一个重构的案例（步骤）</h4><p>前段时间刚重构了一个功能模块。该模块可以说是祖传代码。里面堆砌着各种判断条件，就是所谓的箭头型代码。我接手这个功能重构的<br>1.把代码读一遍和跑一遍，理解里面的需求。尽量画一个流程图。<br>2.建立防护网。将需求拆分之后，针对每个拆分的业务点写单元测试。<br>4.开始重构，解耦逻辑，设计方法的时候尽量让职业单一，类与类之间尽量符合迪米特原则，有依赖关系的类尽量只依赖类的特定方法。我觉得比较基础也是比较重要一点。不要有重复代码。命名要规范，类的各个职业要清晰。重构过程中，其实也要时不时的识别代码的坏味道。尽然是重构，那么肯定要比不重构之前肯定要更好。<br>5.重构完成之后，通过防护网的测试。</p>
+<h4 id="重构后的功能一定要可测试"><a href="#重构后的功能一定要可测试" class="headerlink" title="重构后的功能一定要可测试"></a>重构后的功能一定要可测试</h4><p>代码中的坏味道，好比人的头疼脑热。“小病”不管的话，迟早会发展成大病，需要动大手术，甚至病入膏肓。<br>实际中的一些体会：<br>一、在完成一个新需求时，在时间允许的情况下，会经常改进代码，使代码更优雅。<br>二、“重构不改变外部的可见行为“，引入自动化测试非常重要，国内有些团队可能做的不好。因为改动代码可能引入bug，如果没有自动化测试，测起来就会非常费劲，改动的结果不确定。如果测试不方便，谁会愿意修改之前work的代码呢？<br>三、持续集成、自动化测试、持续重构都是很好的工程实践。即使工作的项目中暂时没有使用，也应该有所了解。</p>
+<h4 id="写单元测试很重要，谁写谁知道"><a href="#写单元测试很重要，谁写谁知道" class="headerlink" title="写单元测试很重要，谁写谁知道"></a>写单元测试很重要，谁写谁知道</h4><p>最可落地执行、最有效的保证重构不出错的手段应该就是单元测试（Unit Testing）了。当重构完成之后，如果新的代码仍然能通过单元测试，那就说明代码原有逻辑的正确性未被破坏，原有的外部可见行为未变。</p>
+<h2 id="理论二：为了保证重构不出错，有哪些非常能落地的技术手段？"><a href="#理论二：为了保证重构不出错，有哪些非常能落地的技术手段？" class="headerlink" title="理论二：为了保证重构不出错，有哪些非常能落地的技术手段？"></a>理论二：为了保证重构不出错，有哪些非常能落地的技术手段？</h2><p>什么是单元测试？为什么要写单元测试？如何编写单元测试？如何在团队中推行单元测试？</p>
+<p>那如何保证重构不出错呢？你需要熟练掌握各种设计原则、思想、模式，还需要对所重构的业务和代码有足够的了解。除了这些个人能力因素之外，最可落地执行、最有效的保证重构不出错的手段应该就是单元测试（Unit Testing）了。当重构完成之后，如果新的代码仍然能通过单元测试，那就说明代码原有逻辑的正确性未被破坏，原有的外部可见行为未变，符合上一节课中我们对重构的定义。</p>
+<h3 id="什么是单元测试？"><a href="#什么是单元测试？" class="headerlink" title="什么是单元测试？"></a>什么是单元测试？</h3><p>单元测试由研发工程师自己来编写，用来测试自己写的代码的正确性。单元测试顾名思义是测试一个“单元”，有别于集成测试，这个“单元”一般是类或函数，而不是模块或者系统。</p>
+<p>我们常常将它跟集成测试放到一块来对比。单元测试相对于集成测试（Integration Testing）来说，测试的粒度更小一些。集成测试的测试对象是整个系统或者某个功能模块，比如测试用户注册、登录功能是否正常，是一种端到端（end to end）的测试。而单元测试的测试对象是类或者函数，用来测试一个类和函数是否都按照预期的逻辑执行。这是代码层级的测试。</p>
+<h3 id="为什么要写单元测试？"><a href="#为什么要写单元测试？" class="headerlink" title="为什么要写单元测试？"></a>为什么要写单元测试？</h3><p>写单元测试的过程本身就是代码 Code Review 和重构的过程，能有效地发现代码中的 bug 和代码设计上的问题。除此之外，单元测试还是对集成测试的有力补充，还能帮助我们快速熟悉代码，是 TDD 可落地执行的改进方案。</p>
+<h4 id="1-单元测试能有效地帮你发现代码中的-bug"><a href="#1-单元测试能有效地帮你发现代码中的-bug" class="headerlink" title="1.单元测试能有效地帮你发现代码中的 bug"></a>1.单元测试能有效地帮你发现代码中的 bug</h4><p>坚持为自己提交的每一份代码，都编写完善的单元测试。可以减少很多 fix 低级 bug 的时间，能够有时间去做其他更有意义的事情，可以因此在工作上赢得了很多人的认可。可以这么说，坚持写单元测试是保证代码质量的一个“杀手锏”，也是帮助拉开与其他人差距的一个“小秘密”。</p>
+<h4 id="2-写单元测试能帮你发现代码设计上的问题"><a href="#2-写单元测试能帮你发现代码设计上的问题" class="headerlink" title="2.写单元测试能帮你发现代码设计上的问题"></a>2.写单元测试能帮你发现代码设计上的问题</h4><p>代码的可测试性是评判代码质量的一个重要标准。对于一段代码，如果很难为其编写单元测试，或者单元测试写起来很吃力，需要依靠单元测试框架里很高级的特性才能完成，那往往就意味着代码设计得不够合理，比如，没有使用依赖注入、大量使用静态函数、全局变量、代码高度耦合等。</p>
+<h4 id="3-单元测试是对集成测试的有力补充"><a href="#3-单元测试是对集成测试的有力补充" class="headerlink" title="3.单元测试是对集成测试的有力补充"></a>3.单元测试是对集成测试的有力补充</h4><p>尽管单元测试无法完全替代集成测试，但如果我们能保证每个类、每个函数都能按照我们的预期来执行，底层 bug 少了，那组装起来的整个系统，出问题的概率也就相应减少了。</p>
+<h4 id="4-写单元测试的过程本身就是代码重构的过程？"><a href="#4-写单元测试的过程本身就是代码重构的过程？" class="headerlink" title="4.写单元测试的过程本身就是代码重构的过程？"></a>4.写单元测试的过程本身就是代码重构的过程？</h4><p>设计和实现代码的时候，我们很难把所有的问题都想清楚。而编写单元测试就相当于对代码的一次自我 Code Review，在这个过程中，我们可以发现一些设计上的问题（比如代码设计的不可测试）以及代码编写方面的问题（比如一些边界条件处理不当）等，然后针对性的进行重构。</p>
+<h4 id="5-阅读单元测试能帮助你快速熟悉代码"><a href="#5-阅读单元测试能帮助你快速熟悉代码" class="headerlink" title="5.阅读单元测试能帮助你快速熟悉代码"></a>5.阅读单元测试能帮助你快速熟悉代码</h4><p>在没有文档和注释的情况下，单元测试就起了替代性作用。单元测试用例实际上就是用户用例，反映了代码的功能和如何使用。借助单元测试，我们不需要深入的阅读代码，便能知道代码实现了什么功能，有哪些特殊情况需要考虑，有哪些边界条件需要处理。</p>
+<h4 id="6-单元测试是-TDD-可落地执行的改进方案"><a href="#6-单元测试是-TDD-可落地执行的改进方案" class="headerlink" title="6.单元测试是 TDD 可落地执行的改进方案"></a>6.单元测试是 TDD 可落地执行的改进方案</h4><p>单元测试正好是对 TDD 的一种改进方案，先写代码，紧接着写单元测试，最后根据单元测试反馈出来问题，再回过头去重构代码。这个开发流程更加容易被接受，更加容易落地执行，而且又兼顾了 TDD 的优点。</p>
+<h3 id="如何编写单元测试"><a href="#如何编写单元测试" class="headerlink" title="如何编写单元测试"></a>如何编写单元测试</h3><p>写单元测试就是针对代码设计各种测试用例，以覆盖各种输入、异常、边界情况，并将其翻译成代码。我们可以利用一些测试框架来简化单元测试的编写。Java 中比较出名的单元测试框架有 Junit、TestNG、Spring Test 等。这些框架提供了通用的执行流程（比如执行测试用例的 TestCaseRunner）和工具类库（比如各种 Assert 判断函数）等。借助它们，我们在编写测试代码的时候，只需要关注测试用例本身的编写即可。</p>
+<p>除此之外，对于单元测试，我们需要建立以下正确的认知：</p>
+<ul>
+<li>编写单元测试尽管繁琐，但并不是太耗时；</li>
+<li>我们可以稍微放低对单元测试代码质量的要求；</li>
+<li>覆盖率作为衡量单元测试质量的唯一标准是不合理的；</li>
+<li>单元测试不要依赖被测代码的具体实现逻辑；</li>
+<li>单元测试框架无法测试，多半是因为代码的可测试性不好。</li>
+</ul>
+<h3 id="一个单元测试的例子"><a href="#一个单元测试的例子" class="headerlink" title="一个单元测试的例子"></a>一个单元测试的例子</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">public class Text &#123;</span><br><span class="line">  private String content;</span><br><span class="line"></span><br><span class="line">  public Text(String content) &#123;</span><br><span class="line">    this.content &#x3D; content;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  &#x2F;**</span><br><span class="line">   * 将字符串转化成数字，忽略字符串中的首尾空格；</span><br><span class="line">   * 如果字符串中包含除首尾空格之外的非数字字符，则返回null。</span><br><span class="line">   *&#x2F;</span><br><span class="line">  public Integer toNumber() &#123;</span><br><span class="line">    if (content &#x3D;&#x3D; null || content.isEmpty()) &#123;</span><br><span class="line">      return null;</span><br><span class="line">    &#125;</span><br><span class="line">    &#x2F;&#x2F;...省略代码实现...</span><br><span class="line">    return null;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果我们要测试 一下Text 类中的 toNumber() 函数的正确性，应该如何编写单元测试呢？</p>
+<p>写单元测试本身不需要什么高深技术。它更多的是考验程序员思维的缜密程度，看能否设计出覆盖各种正常及异常情况的测试用例，来保证代码在任何预期或非预期的情况下都能正确运行。</p>
+<h4 id="罗列出各种正常，异常，以及边界的测试用例"><a href="#罗列出各种正常，异常，以及边界的测试用例" class="headerlink" title="罗列出各种正常，异常，以及边界的测试用例"></a>罗列出各种正常，异常，以及边界的测试用例</h4><ul>
+<li>如果字符串只包含数字：“123”，toNumber() 函数输出对应的整数：123。</li>
+<li>如果字符串是空或者 null，toNumber() 函数返回：null。</li>
+<li>如果字符串包含首尾空格：“ 123”，“123 ”，“ 123 ”，toNumber() 返回对应的整数：123。</li>
+<li>如果字符串包含多个首尾空格：“ 123 ”，toNumber() 返回对应的整数：123；</li>
+<li>如果字符串包含非数字字符：“123a4”，“123 4”，toNumber() 返回 null；</li>
+</ul>
+<h4 id="将测试用例翻译成代码"><a href="#将测试用例翻译成代码" class="headerlink" title="将测试用例翻译成代码"></a>将测试用例翻译成代码</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">public class Assert &#123;</span><br><span class="line">  public static void assertEquals(Integer expectedValue, Integer actualValue) &#123;</span><br><span class="line">    if (actualValue !&#x3D; expectedValue) &#123;</span><br><span class="line">      String message &#x3D; String.format(</span><br><span class="line">              &quot;Test failed, expected: %d, actual: %d.&quot;, expectedValue, actualValue);</span><br><span class="line">      System.out.println(message);</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">      System.out.println(&quot;Test succeeded.&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  public static boolean assertNull(Integer actualValue) &#123;</span><br><span class="line">    boolean isNull &#x3D; actualValue &#x3D;&#x3D; null;</span><br><span class="line">    if (isNull) &#123;</span><br><span class="line">      System.out.println(&quot;Test succeeded.&quot;);</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">      System.out.println(&quot;Test failed, the value is not null:&quot; + actualValue);</span><br><span class="line">    &#125;</span><br><span class="line">    return isNull;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">import org.junit.Assert;</span><br><span class="line">import org.junit.Test;</span><br><span class="line"></span><br><span class="line">public class TextTest &#123;</span><br><span class="line">  @Test</span><br><span class="line">  public void testToNumber() &#123;</span><br><span class="line">    Text text &#x3D; new Text(&quot;123&quot;);</span><br><span class="line">    Assert.assertEquals(new Integer(123), text.toNumber());</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  @Test</span><br><span class="line">  public void testToNumber_nullorEmpty() &#123;</span><br><span class="line">    Text text1 &#x3D; new Text(null);</span><br><span class="line">    Assert.assertNull(text1.toNumber());</span><br><span class="line"></span><br><span class="line">    Text text2 &#x3D; new Text(&quot;&quot;);</span><br><span class="line">    Assert.assertNull(text2.toNumber());</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  @Test</span><br><span class="line">  public void testToNumber_containsLeadingAndTrailingSpaces() &#123;</span><br><span class="line">    Text text1 &#x3D; new Text(&quot; 123&quot;);</span><br><span class="line">    Assert.assertEquals(new Integer(123), text1.toNumber());</span><br><span class="line"></span><br><span class="line">    Text text2 &#x3D; new Text(&quot;123 &quot;);</span><br><span class="line">    Assert.assertEquals(new Integer(123), text2.toNumber());</span><br><span class="line"></span><br><span class="line">    Text text3 &#x3D; new Text(&quot; 123 &quot;);</span><br><span class="line">    Assert.assertEquals(new Integer(123), text3.toNumber());</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  @Test</span><br><span class="line">  public void testToNumber_containsMultiLeadingAndTrailingSpaces() &#123;</span><br><span class="line">    Text text1 &#x3D; new Text(&quot;  123&quot;);</span><br><span class="line">    Assert.assertEquals(new Integer(123), text1.toNumber());</span><br><span class="line"></span><br><span class="line">    Text text2 &#x3D; new Text(&quot;123  &quot;);</span><br><span class="line">    Assert.assertEquals(new Integer(123), text2.toNumber());</span><br><span class="line"></span><br><span class="line">    Text text3 &#x3D; new Text(&quot;  123  &quot;);</span><br><span class="line">    Assert.assertEquals(new Integer(123), text3.toNumber());</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  @Test</span><br><span class="line">  public void testToNumber_containsInvalidCharaters() &#123;</span><br><span class="line">    Text text1 &#x3D; new Text(&quot;123a4&quot;);</span><br><span class="line">    Assert.assertNull(text1.toNumber());</span><br><span class="line"></span><br><span class="line">    Text text2 &#x3D; new Text(&quot;123 4&quot;);</span><br><span class="line">    Assert.assertNull(text2.toNumber());</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="单元测试为何难落地执行？"><a href="#单元测试为何难落地执行？" class="headerlink" title="单元测试为何难落地执行？"></a>单元测试为何难落地执行？</h3><ul>
+<li>一方面，写单元测试本身比较繁琐，技术挑战不大，很多程序员不愿意去写；</li>
+<li>另一方面，国内研发比较偏向“快、糙、猛”，容易因为开发进度紧，导致单元测试的执行虎头蛇尾。最后，关键问题还是团队没有建立对单元测试正确的认识，觉得可有可无，单靠督促很难执行得很好。</li>
+</ul>
+<h3 id="重度依赖数据库的业务代码如何做单元测试"><a href="#重度依赖数据库的业务代码如何做单元测试" class="headerlink" title="重度依赖数据库的业务代码如何做单元测试"></a>重度依赖数据库的业务代码如何做单元测试</h3><ul>
+<li>涉及到数据库的确实比较难写单元测试，而且如果重度依赖数据库，业务逻辑又不复杂，单元测试确实没有太大意义。这个时候，集成测试可能更有意义些。</li>
+<li>涉及到数据库的项目，特别是重度依赖数据库的，确实比较难写单元测试。一种方式使用DBUNIT这样的测试框架来解耦合真正的数据库，另一种方式专门维护一个供单元测试用的数据库。</li>
+</ul>
+<h3 id="精彩评论"><a href="#精彩评论" class="headerlink" title="精彩评论"></a>精彩评论</h3><p>1.以前在开发中，没有写单元测试的意识。开发完功能后，直接去测试一个完整的流程。即前端发请求，服务端处理，看数据库数据。如果功能正确就过。这是从一个功能宏观去考虑测试。而单元测试是更细粒度的测试，它在保证各个“单元”都测试通过的情况下整个功能模块就测试通过了。这样的方式对于我们自己来说对代码可控粒度更细。更能比较清楚的理解某个“单元”在整个功能模块调用链路上的位置，承担什么职责，以及有什么行为。而不是一开始就站在模块宏观角度来思考。通过一个个单元测试的编写，将整个功能模块串联起来，最终达到整个功能模块的全局认知。 这也体现了任务分解的思想。通过单元测试，可以从另外一方面实现对已编写的代码的CodeReview，重新梳理流程。也为以后有重构需求打下基础。目前参与的项目中有单元测试，但是不够完备。可能由于某些原因（开发人员意识问题，团队对单元测试的执行落地程度不够等）。在写单元测试的过程中，遇到单元测试依赖数据库查询问题，因为存在多套环境，如开发环境，仿真环境，线上环境。对于依赖数据查询的单元测试，只能自己造假数据来解决。不知道还有什么好的解决办法。</p>
+<p>作者回复：涉及到数据库的确实比较难写单元测试，而且如果重度依赖数据库，业务逻辑又不复杂，单元测试确实没有太大意义。这个时候，集成测试可能更有意义些。</p>
+<p>2.如果到了具体的业务代码，该怎么写单元测试呢，单元测试正确标准是什么呢，以sql查询到的结果吗？</p>
+<p>作者回复：涉及到数据库的项目，特别是重度依赖数据库的，确实比较难写单元测试。一种方式使用DBUNIT这样的测试框架来解耦合真正的数据库，另一种方式专门维护一个供单元测试用的数据库。</p>
+<p>3.单元测试很重要，但是为什么大多人都会放弃？我个人觉得最主要的原因并不是代码量大，难以编写等，而是跑单元测试的次数少。很多单元测试都是为了写而写，写完一次可能都不去运行或者只偶尔运行一两次。如果是每次改完代码，都跑一遍单元测试，单元测试的效果会越来越显现。如果只是为了运行一两次或者干脆为了写而写，很容易就会放弃继续写单元测试。</p>
+<p>作者回复：可以集成到代码管理仓库git中，强制跑单元测试成功之后才能提交</p>
+<h2 id="理论三：什么是代码的可测试性？如何写出可测试性好的代码？"><a href="#理论三：什么是代码的可测试性？如何写出可测试性好的代码？" class="headerlink" title="理论三：什么是代码的可测试性？如何写出可测试性好的代码？"></a>理论三：什么是代码的可测试性？如何写出可测试性好的代码？</h2><p>写单元测试并不难，也不需要太多技巧，相反，写出可测试的代码反倒是件非常有挑战的事情。</p>
+<h3 id="1-什么是代码的可测试性？"><a href="#1-什么是代码的可测试性？" class="headerlink" title="1. 什么是代码的可测试性？"></a>1. 什么是代码的可测试性？</h3><p>粗略地讲，所谓代码的可测试性，就是针对代码编写单元测试的难易程度。对于一段代码，如果很难为其编写单元测试，或者单元测试写起来很费劲，需要依靠单元测试框架中很高级的特性，那往往就意味着代码设计得不够合理，代码的可测试性不好。</p>
+<h3 id="2-编写可测试性代码的最有效手段"><a href="#2-编写可测试性代码的最有效手段" class="headerlink" title="2. 编写可测试性代码的最有效手段"></a>2. 编写可测试性代码的最有效手段</h3><p>依赖注入是编写可测试性代码的最有效手段。通过依赖注入，我们在编写单元测试的时候，可以通过 mock 的方法解依赖外部服务，这也是我们在编写单元测试的过程中最有技术挑战的地方</p>
+<h3 id="3-常见的-Anti-Patterns"><a href="#3-常见的-Anti-Patterns" class="headerlink" title="3. 常见的 Anti-Patterns"></a>3. 常见的 Anti-Patterns</h3><p>常见的测试不友好的代码有下面这 5 种：</p>
+<ul>
+<li>代码中包含未决行为逻辑</li>
+<li>滥用可变全局变量</li>
+<li>滥用静态方法使用复杂的继承关系</li>
+<li>高度耦合的代码</li>
+</ul>
+<h3 id="4-mock-用一个“假”的服务替换真正的服务"><a href="#4-mock-用一个“假”的服务替换真正的服务" class="headerlink" title="4.mock 用一个“假”的服务替换真正的服务"></a>4.mock 用一个“假”的服务替换真正的服务</h3><p>单元测试主要是测试程序员自己编写的代码逻辑的正确性，并非是端到端的集成测试，它不需要测试所依赖的外部系统（分布式锁、Wallet RPC 服务）的逻辑正确性。所以，如果代码中依赖了外部系统或者不可控组件，比如，需要依赖数据库、网络通信、文件系统等，那我们就需要将被测代码与外部系统解依赖，而这种解依赖的方法就叫作“mock”。所谓的 mock 就是用一个“假”的服务替换真正的服务。mock 的服务完全在我们的控制之下，模拟输出我们想要的数据。</p>
+<p>那如何来 mock 服务呢？mock 的方式主要有两种，手动 mock 和利用框架 mock。</p>
+<p>例子：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">public class Transaction &#123;</span><br><span class="line">  private String id;</span><br><span class="line">  private Long buyerId;</span><br><span class="line">  private Long sellerId;</span><br><span class="line">  private Long productId;</span><br><span class="line">  private String orderId;</span><br><span class="line">  private Long createTimestamp;</span><br><span class="line">  private Double amount;</span><br><span class="line">  private STATUS status;</span><br><span class="line">  private String walletTransactionId;</span><br><span class="line">  </span><br><span class="line">  &#x2F;&#x2F; ...get() methods...</span><br><span class="line">  </span><br><span class="line">  public Transaction(String preAssignedId, Long buyerId, Long sellerId, Long productId, String orderId) &#123;</span><br><span class="line">    if (preAssignedId !&#x3D; null &amp;&amp; !preAssignedId.isEmpty()) &#123;</span><br><span class="line">      this.id &#x3D; preAssignedId;</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">      this.id &#x3D; IdGenerator.generateTransactionId();</span><br><span class="line">    &#125;</span><br><span class="line">    if (!this.id.startWith(&quot;t_&quot;)) &#123;</span><br><span class="line">      this.id &#x3D; &quot;t_&quot; + preAssignedId;</span><br><span class="line">    &#125;</span><br><span class="line">    this.buyerId &#x3D; buyerId;</span><br><span class="line">    this.sellerId &#x3D; sellerId;</span><br><span class="line">    this.productId &#x3D; productId;</span><br><span class="line">    this.orderId &#x3D; orderId;</span><br><span class="line">    this.status &#x3D; STATUS.TO_BE_EXECUTD;</span><br><span class="line">    this.createTimestamp &#x3D; System.currentTimestamp();</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  public boolean execute() throws InvalidTransactionException &#123;</span><br><span class="line">    if ((buyerId &#x3D;&#x3D; null || (sellerId &#x3D;&#x3D; null || amount &lt; 0.0) &#123;</span><br><span class="line">      throw new InvalidTransactionException(...);</span><br><span class="line">    &#125;</span><br><span class="line">    if (status &#x3D;&#x3D; STATUS.EXECUTED) return true;</span><br><span class="line">    boolean isLocked &#x3D; false;</span><br><span class="line">    try &#123;</span><br><span class="line">      isLocked &#x3D; RedisDistributedLock.getSingletonIntance().lockTransction(id);</span><br><span class="line">      if (!isLocked) &#123;</span><br><span class="line">        return false; &#x2F;&#x2F; 锁定未成功，返回false，job兜底执行</span><br><span class="line">      &#125;</span><br><span class="line">      if (status &#x3D;&#x3D; STATUS.EXECUTED) return true; &#x2F;&#x2F; double check</span><br><span class="line">      long executionInvokedTimestamp &#x3D; System.currentTimestamp();</span><br><span class="line">      if (executionInvokedTimestamp - createdTimestap &gt; 14days) &#123;</span><br><span class="line">        this.status &#x3D; STATUS.EXPIRED;</span><br><span class="line">        return false;</span><br><span class="line">      &#125;</span><br><span class="line">      WalletRpcService walletRpcService &#x3D; new WalletRpcService();</span><br><span class="line">      String walletTransactionId &#x3D; walletRpcService.moveMoney(id, buyerId, sellerId, amount);</span><br><span class="line">      if (walletTransactionId !&#x3D; null) &#123;</span><br><span class="line">        this.walletTransactionId &#x3D; walletTransactionId;</span><br><span class="line">        this.status &#x3D; STATUS.EXECUTED;</span><br><span class="line">        return true;</span><br><span class="line">      &#125; else &#123;</span><br><span class="line">        this.status &#x3D; STATUS.FAILED;</span><br><span class="line">        return false;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125; finally &#123;</span><br><span class="line">      if (isLocked) &#123;</span><br><span class="line">       RedisDistributedLock.getSingletonIntance().unlockTransction(id);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Transaction 类中的 execute() 函数负责执行转账操作，将钱从买家的钱包转到卖家的钱包中。真正的转账操作是通过调用 WalletRpcService RPC 服务来完成的。除此之外，代码中还涉及一个分布式锁 DistributedLock 单例类，用来避免 Transaction 并发执行，导致用户的钱被重复转出。</p>
+<p>1.当代码包含依赖第三方系统的RPC调用时怎么写 单元测试<br>我们通过继承 WalletRpcService 类，并且重写其中的 moveMoney() 函数的方式来实现 mock。具体的代码实现如下所示。通过 mock 的方式，我们可以让 moveMoney() 返回任意我们想要的数据，完全在我们的控制范围内，并且不需要真正进行网络通信。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">public class MockWalletRpcServiceOne extends WalletRpcService &#123;</span><br><span class="line">  public String moveMoney(Long id, Long fromUserId, Long toUserId, Double amount) &#123;</span><br><span class="line">    return &quot;123bac&quot;;</span><br><span class="line">  &#125; </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class MockWalletRpcServiceTwo extends WalletRpcService &#123;</span><br><span class="line">  public String moveMoney(Long id, Long fromUserId, Long toUserId, Double amount) &#123;</span><br><span class="line">    return null;</span><br><span class="line">  &#125; </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">public class Transaction &#123;</span><br><span class="line">  &#x2F;&#x2F;...</span><br><span class="line">  &#x2F;&#x2F; 添加一个成员变量及其set方法</span><br><span class="line">  private WalletRpcService walletRpcService;</span><br><span class="line">  </span><br><span class="line">  public void setWalletRpcService(WalletRpcService walletRpcService) &#123;</span><br><span class="line">    this.walletRpcService &#x3D; walletRpcService;</span><br><span class="line">  &#125;</span><br><span class="line">  &#x2F;&#x2F; ...</span><br><span class="line">  public boolean execute() &#123;</span><br><span class="line">    &#x2F;&#x2F; ...</span><br><span class="line">    &#x2F;&#x2F; 删除下面这一行代码</span><br><span class="line">    &#x2F;&#x2F; WalletRpcService walletRpcService &#x3D; new WalletRpcService();</span><br><span class="line">    &#x2F;&#x2F; ...</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">public void testExecute() &#123;</span><br><span class="line">  Long buyerId &#x3D; 123L;</span><br><span class="line">  Long sellerId &#x3D; 234L;</span><br><span class="line">  Long productId &#x3D; 345L;</span><br><span class="line">  Long orderId &#x3D; 456L;</span><br><span class="line">  Transction transaction &#x3D; new Transaction(null, buyerId, sellerId, productId, orderId);</span><br><span class="line">  &#x2F;&#x2F; 使用mock对象来替代真正的RPC服务</span><br><span class="line">  transaction.setWalletRpcService(new MockWalletRpcServiceOne()):</span><br><span class="line">  boolean executedResult &#x3D; transaction.execute();</span><br><span class="line">  assertTrue(executedResult);</span><br><span class="line">  assertEquals(STATUS.EXECUTED, transaction.getStatus());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>当代码中包含一些不是我们维护的组件的调用时如何写单元测试</li>
+</ol>
+<p>如果 RedisDistributedLock 是我们自己维护的，可以自由修改、重构，那我们可以将其改为非单例的模式，或者定义一个接口，比如 IDistributedLock，让 RedisDistributedLock 实现这个接口。这样我们就可以像前面 WalletRpcService 的替换方式那样，替换 RedisDistributedLock 为 MockRedisDistributedLock 了。但如果 RedisDistributedLock 不是我们维护的，我们无权去修改这部分代码，这个时候该怎么办呢？</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line">public class TransactionLock &#123;</span><br><span class="line">  public boolean lock(String id) &#123;</span><br><span class="line">    return RedisDistributedLock.getSingletonIntance().lockTransction(id);</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  public void unlock() &#123;</span><br><span class="line">    RedisDistributedLock.getSingletonIntance().unlockTransction(id);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class Transaction &#123;</span><br><span class="line">  &#x2F;&#x2F;...</span><br><span class="line">  private TransactionLock lock;</span><br><span class="line">  </span><br><span class="line">  public void setTransactionLock(TransactionLock lock) &#123;</span><br><span class="line">    this.lock &#x3D; lock;</span><br><span class="line">  &#125;</span><br><span class="line"> </span><br><span class="line">  public boolean execute() &#123;</span><br><span class="line">    &#x2F;&#x2F;...</span><br><span class="line">    try &#123;</span><br><span class="line">      isLocked &#x3D; lock.lock();</span><br><span class="line">      &#x2F;&#x2F;...</span><br><span class="line">    &#125; finally &#123;</span><br><span class="line">      if (isLocked) &#123;</span><br><span class="line">        lock.unlock();</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    &#x2F;&#x2F;...</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">public void testExecute() &#123;</span><br><span class="line">  Long buyerId &#x3D; 123L;</span><br><span class="line">  Long sellerId &#x3D; 234L;</span><br><span class="line">  Long productId &#x3D; 345L;</span><br><span class="line">  Long orderId &#x3D; 456L;</span><br><span class="line">  </span><br><span class="line">  TransactionLock mockLock &#x3D; new TransactionLock() &#123;</span><br><span class="line">    public boolean lock(String id) &#123;</span><br><span class="line">      return true;</span><br><span class="line">    &#125;</span><br><span class="line">  </span><br><span class="line">    public void unlock() &#123;&#125;</span><br><span class="line">  &#125;;</span><br><span class="line">  </span><br><span class="line">  Transction transaction &#x3D; new Transaction(null, buyerId, sellerId, productId, orderId);</span><br><span class="line">  transaction.setWalletRpcService(new MockWalletRpcServiceOne());</span><br><span class="line">  transaction.setTransactionLock(mockLock);</span><br><span class="line">  boolean executedResult &#x3D; transaction.execute();</span><br><span class="line">  assertTrue(executedResult);</span><br><span class="line">  assertEquals(STATUS.EXECUTED, transaction.getStatus());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h3><p>1.依赖注入是提高代码可测试性的最有效的手段。</p>
+<p>2.可测试性差的代码，本身代码设计得也不够好，很多地方都没有遵守我们之前讲到的设计原则和思想，比如“基于接口而非实现编程”思想、依赖反转原则等。重构之后的代码，不仅可测试性更好，而且从代码设计的角度来说，也遵从了经典的设计原则和思想。这也印证了我们之前说过的，代码的可测试性可以从侧面上反应代码设计是否合理。除此之</p>
+<p>3、未决行为：例时间、随机数。将未决行为重新封装，测试时mock，使用匿名类。</p>
+<h2 id="理论四：如何通过封装、抽象、模块化、中间层等解耦代码？"><a href="#理论四：如何通过封装、抽象、模块化、中间层等解耦代码？" class="headerlink" title="理论四：如何通过封装、抽象、模块化、中间层等解耦代码？"></a>理论四：如何通过封装、抽象、模块化、中间层等解耦代码？</h2><p>大型重构是对系统、模块、代码结构、类之间关系等顶层代码设计进行的重构。对于大型重构来说，今天我们重点讲解最有效的一个手段，那就是“解耦”。解耦的目的是实现代码高内聚、松耦合。</p>
+<h3 id="“解耦”为何如此重要？"><a href="#“解耦”为何如此重要？" class="headerlink" title="“解耦”为何如此重要？"></a>“解耦”为何如此重要？</h3><p>过于复杂的代码往往在可读性、可维护性上都不友好。解耦保证代码松耦合、高内聚，是控制代码复杂度的有效手段。代码高内聚、松耦合，也就是意味着，代码结构清晰、分层模块化合理、依赖关系简单、模块或类之间的耦合小，那代码整体的质量就不会差。</p>
+<h3 id="如何判定代码是否需要“解耦”？"><a href="#如何判定代码是否需要“解耦”？" class="headerlink" title="如何判定代码是否需要“解耦”？"></a>如何判定代码是否需要“解耦”？</h3><p>间接的衡量标准有很多，比如，看修改代码是否牵一发而动全身。直接的衡量标准是把模块与模块、类与类之间的依赖关系画出来，根据依赖关系图的复杂性来判断是否需要解耦重构。</p>
+<h3 id="如何给代码“解耦”？"><a href="#如何给代码“解耦”？" class="headerlink" title="如何给代码“解耦”？"></a>如何给代码“解耦”？</h3><p>给代码解耦的方法有：封装与抽象、中间层、模块化，以及一些其他的设计思想与原则，比如：单一职责原则、基于接口而非实现编程、依赖注入、多用组合少用继承、迪米特法则等。当然，还有一些设计模式，比如观察者模式。</p>
+<h3 id="设计原则回顾"><a href="#设计原则回顾" class="headerlink" title="设计原则回顾"></a>设计原则回顾</h3><h4 id="单一职责原则"><a href="#单一职责原则" class="headerlink" title="单一职责原则"></a>单一职责原则</h4><p>高内聚会让代码更加松耦合，而实现高内聚的重要指导原则就是单一职责原则。模块或者类的职责设计得单一，而不是大而全，那依赖它的类和它依赖的类就会比较少，代码耦合也就相应的降低了。</p>
+<h4 id="基于接口而非实现编程"><a href="#基于接口而非实现编程" class="headerlink" title="基于接口而非实现编程"></a>基于接口而非实现编程</h4><p>基于接口而非实现编程能通过接口这样一个中间层，隔离变化和具体的实现。这样做的好处是，在有依赖关系的两个模块或类之间，一个模块或者类的改动，不会影响到另一个模块或类。实际上，这就相当于将一种强依赖关系（强耦合）解耦为了弱依赖关系（弱耦合）。</p>
+<h4 id="依赖注入"><a href="#依赖注入" class="headerlink" title="依赖注入"></a>依赖注入</h4><p>跟基于接口而非实现编程思想类似，依赖注入也是将代码之间的强耦合变为弱耦合。尽管依赖注入无法将本应该有依赖关系的两个类，解耦为没有依赖关系，但可以让耦合关系没那么紧密，容易做到插拔替换。</p>
+<h4 id="多用组合少用继承"><a href="#多用组合少用继承" class="headerlink" title="多用组合少用继承"></a>多用组合少用继承</h4><p>继承是一种强依赖关系，父类与子类高度耦合，且这种耦合关系非常脆弱，牵一发而动全身，父类的每一次改动都会影响所有的子类。相反，组合关系是一种弱依赖关系，这种关系更加灵活，所以，对于继承结构比较复杂的代码，利用组合来替换继承，也是一种解耦的有效手段。</p>
+<h4 id="迪米特法则"><a href="#迪米特法则" class="headerlink" title="迪米特法则"></a>迪米特法则</h4><p>迪米特法则讲的是，不该有直接依赖关系的类之间，不要有依赖；有依赖关系的类之间，尽量只依赖必要的接口。</p>
+<h2 id="理论五：让你最快速地改善代码质量的20条编程规范"><a href="#理论五：让你最快速地改善代码质量的20条编程规范" class="headerlink" title="理论五：让你最快速地改善代码质量的20条编程规范"></a>理论五：让你最快速地改善代码质量的20条编程规范</h2><h3 id="1-关于命名"><a href="#1-关于命名" class="headerlink" title="1. 关于命名"></a>1. 关于命名</h3><ul>
+<li>命名的关键是能准确达意。对于不同作用域的命名，我们可以适当地选择不同的长度。作用域小的变量（比如临时变量），可以适当地选择短一些的命名方式。除此之外，命名中也可以使用一些耳熟能详的缩写。</li>
+<li>我们可以借助类的信息来简化属性、函数的命名，利用函数的信息来简化函数参数的命名。</li>
+<li>命名要可读、可搜索。不要使用生僻的、不好读的英文单词来命名。除此之外，命名要符合项目的统一规范，不要用些反直觉的命名。</li>
+<li>接口有两种命名方式：一种是在接口中带前缀“I”；另一种是在接口的实现类中带后缀“Impl”。对于抽象类的命名，也有两种方式，一种是带上前缀“Abstract”，一种是不带前缀。这两种命名方式都可以，关键是要在项目中统一。</li>
+</ul>
+<h3 id="2-关于注释"><a href="#2-关于注释" class="headerlink" title="2. 关于注释"></a>2. 关于注释</h3><ul>
+<li>关于注释注释的目的就是让代码更容易看懂。只要符合这个要求的内容，你就可以将它写到注释里。总结一下，注释的内容主要包含这样三个方面：做什么、为什么、怎么做。对于一些复杂的类和接口，我们可能还需要写明“如何用”。</li>
+<li>注释本身有一定的维护成本，所以并非越多越好。类和函数一定要写注释，而且要写得尽可能全面、详细，而函数内部的注释要相对少一些，一般都是靠好的命名、提炼函数、解释性变量、总结性注释来提高代码可读性。</li>
+</ul>
+<h3 id="3-关于代码风格"><a href="#3-关于代码风格" class="headerlink" title="3.关于代码风格"></a>3.关于代码风格</h3><h4 id="函数、类多大才合适？"><a href="#函数、类多大才合适？" class="headerlink" title="函数、类多大才合适？"></a>函数、类多大才合适？</h4><p>函数的代码行数不要超过一屏幕的大小，比如 50 行。类的大小限制比较难确定。</p>
+<h4 id="一行代码多长最合适？"><a href="#一行代码多长最合适？" class="headerlink" title="一行代码多长最合适？"></a>一行代码多长最合适？</h4><p> 最好不要超过 IDE 显示的宽度。当然，限制也不能太小，太小会导致很多稍微长点的语句被折成两行，也会影响到代码的整洁，不利于阅读。</p>
+<h4 id="善用空行分割单元块"><a href="#善用空行分割单元块" class="headerlink" title="善用空行分割单元块"></a>善用空行分割单元块</h4><p>对于比较长的函数，为了让逻辑更加清晰，可以使用空行来分割各个代码块。在类内部，成员变量与函数之间、静态成员变量与普通成员变量之间、函数之间，甚至成员变量之间，都可以通过添加空行的方式，让不同模块的代码之间的界限更加明确。</p>
+<h4 id="四格缩进还是两格缩进？"><a href="#四格缩进还是两格缩进？" class="headerlink" title="四格缩进还是两格缩进？"></a>四格缩进还是两格缩进？</h4><p>我个人比较推荐使用两格缩进，这样可以节省空间，特别是在代码嵌套层次比较深的情况下。除此之外，值得强调的是，不管是用两格缩进还是四格缩进，一定不要用 tab 键缩进。</p>
+<h4 id="大括号是否要另起一行？"><a href="#大括号是否要另起一行？" class="headerlink" title="大括号是否要另起一行？"></a>大括号是否要另起一行？</h4><p>我个人还是比较推荐将大括号放到跟上一条语句同一行的风格，这样可以节省代码行数。但是，将大括号另起一行，也有它的优势，那就是，左右括号可以垂直对齐，哪些代码属于哪一个代码块，更加一目了然。6. 类中成员的排列顺序在 Google Java 编程规范中，依赖类按照字母序从小到大排列。类中先写成员变量后写函数。成员变量之间或函数之间，先写静态成员变量或函数，后写普通变量或函数，并且按照作用域大小依次排列。</p>
+<h4 id="类中成员的排列顺序"><a href="#类中成员的排列顺序" class="headerlink" title="类中成员的排列顺序"></a>类中成员的排列顺序</h4><p>在 Google Java 编程规范中，依赖类按照字母序从小到大排列。类中先写成员变量后写函数。成员变量之间或函数之间，先写静态成员变量或函数，后写普通变量或函数，并且按照作用域大小依次排列。</p>
+<h3 id="4-关于变成技巧"><a href="#4-关于变成技巧" class="headerlink" title="4.关于变成技巧"></a>4.关于变成技巧</h3><ul>
+<li>将复杂的逻辑提炼拆分成函数和类。</li>
+<li>通过拆分成多个函数或将参数封装为对象的方式，来处理参数过多的情况。</li>
+<li>函数中不要使用参数来做代码执行逻辑的控制。</li>
+<li>函数设计要职责单一。移</li>
+<li>除过深的嵌套层次，方法包括：去掉多余的 if 或 else 语句，使用 continue、break、return 关键字提前退出嵌套，调整执行顺序来减少嵌套，将部分嵌套逻辑抽象成函数。</li>
+<li>用字面常量取代魔法数。</li>
+<li>用解释性变量来解释复杂表达式，以此提高代码可读性。</li>
+</ul>
+<p>代码示例<br>1.用解释性变量来解释复杂表达式，以此提高代码可读性</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">if (date.after(SUMMER_START) &amp;&amp; date.before(SUMMER_END)) &#123;</span><br><span class="line">  &#x2F;&#x2F; ...</span><br><span class="line">&#125; else &#123;</span><br><span class="line">  &#x2F;&#x2F; ...</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; 引入解释性变量后逻辑更加清晰</span><br><span class="line">boolean isSummer &#x3D; date.after(SUMMER_START)&amp;&amp;date.before(SUMMER_END);</span><br><span class="line">if (isSummer) &#123;</span><br><span class="line">  &#x2F;&#x2F; ...</span><br><span class="line">&#125; else &#123;</span><br><span class="line">  &#x2F;&#x2F; ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>2.常量替代魔法数字</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">public double CalculateCircularArea(double radius) &#123;</span><br><span class="line">  return (3.1415) * radius * radius;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; 常量替代魔法数字</span><br><span class="line">public static final Double PI &#x3D; 3.1415;</span><br><span class="line">public double CalculateCircularArea(double radius) &#123;</span><br><span class="line">  return PI * radius * radius;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>3.调整执行顺序来减少嵌套</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; 重构前的代码</span><br><span class="line">public List&lt;String&gt; matchStrings(List&lt;String&gt; strList,String substr) &#123;</span><br><span class="line">  List&lt;String&gt; matchedStrings &#x3D; new ArrayList&lt;&gt;();</span><br><span class="line">  if (strList !&#x3D; null &amp;&amp; substr !&#x3D; null) &#123;</span><br><span class="line">    for (String str : strList) &#123;</span><br><span class="line">      if (str !&#x3D; null) &#123;</span><br><span class="line">        if (str.contains(substr)) &#123;</span><br><span class="line">          matchedStrings.add(str);</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  return matchedStrings;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; 重构后的代码：先执行判空逻辑，再执行正常逻辑</span><br><span class="line">public List&lt;String&gt; matchStrings(List&lt;String&gt; strList,String substr) &#123;</span><br><span class="line">  if (strList &#x3D;&#x3D; null || substr &#x3D;&#x3D; null) &#123; &#x2F;&#x2F;先判空</span><br><span class="line">    return Collections.emptyList();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  List&lt;String&gt; matchedStrings &#x3D; new ArrayList&lt;&gt;();</span><br><span class="line">  for (String str : strList) &#123;</span><br><span class="line">    if (str !&#x3D; null) &#123;</span><br><span class="line">      if (str.contains(substr)) &#123;</span><br><span class="line">        matchedStrings.add(str);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  return matchedStrings;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-统一编码规范"><a href="#5-统一编码规范" class="headerlink" title="5.统一编码规范"></a>5.统一编码规范</h3><p>除了这三节讲到的比较细节的知识点之外，最后，还有一条非常重要的，那就是，项目、团队，甚至公司，一定要制定统一的编码规范，并且通过 Code Review 督促执行，这对提高代码质量有立竿见影的效果。</p>
+<h3 id="代码分析工具推荐"><a href="#代码分析工具推荐" class="headerlink" title="代码分析工具推荐"></a>代码分析工具推荐</h3><p>代码中的很多低级质量问题不需要人工去审查，java开发有很多现成的工具可以使用，比如：checkstyle，findbugs, pmd, jacaco, sonar等。</p>
+<p>Checkstyle,findbugs,pmd是静态代码分析工具，通过分析源代码或者字节码，找出代码的缺陷，比如参数不匹配，有歧义的嵌套语句，错误的递归，非法计算，可能出现的空指针引用等等。三者都可以集成到gradle等构建工具中。</p>
+<p>Jacoco是一种单元测试覆盖率统计工具，也可以集成到gradle等构建工具中，可以生成漂亮的测试覆盖率统计报表，同时Eclipse提供了插件可以EclEmma可以直观的在IDE中查看单元测试的覆盖情况。</p>
+<p>Sonar Sonar 是一个用于代码质量管理的平台。可以在一个统一的平台上显示管理静态分析，单元测试覆盖率等质量报告。</p>
+<h2 id="实战一（上）：通过一段ID生成器代码，学习如何发现代码质量问题"><a href="#实战一（上）：通过一段ID生成器代码，学习如何发现代码质量问题" class="headerlink" title="实战一（上）：通过一段ID生成器代码，学习如何发现代码质量问题"></a>实战一（上）：通过一段ID生成器代码，学习如何发现代码质量问题</h2><h3 id="如何发现代码质量问题-常规checkList"><a href="#如何发现代码质量问题-常规checkList" class="headerlink" title="如何发现代码质量问题-常规checkList"></a>如何发现代码质量问题-常规checkList</h3><ul>
+<li>目录设置是否合理、模块划分是否清晰、代码结构是否满足“高内聚、松耦合”？</li>
+<li>是否遵循经典的设计原则和设计思想（SOLID、DRY、KISS、YAGNI、LOD 等）？</li>
+<li>设计模式是否应用得当？是否有过度设计？</li>
+<li>代码是否容易扩展？如果要添加新功能，是否容易实现？</li>
+<li>代码是否可以复用？是否可以复用已有的项目代码或类库？是否有重复造轮子？</li>
+<li>代码是否容易测试？单元测试是否全面覆盖了各种正常和异常的情况？</li>
+<li>代码是否易读？是否符合编码规范（比如命名和注释是否恰当、代码风格是否一致等）？</li>
+</ul>
+<p><img src="evernotecid://B93CACCF-EBD1-4485-9709-207B83E62B19/appyinxiangcom/22404617/ENResource/p2459" alt="041e22cac6ce2ba3481e246c119adfc9.jpeg"></p>
+<h3 id="如何发现代码质量问题-业务需求checkList"><a href="#如何发现代码质量问题-业务需求checkList" class="headerlink" title="如何发现代码质量问题-业务需求checkList"></a>如何发现代码质量问题-业务需求checkList</h3><ul>
+<li>代码是否实现了预期的业务需求？</li>
+<li>逻辑是否正确？是否处理了各种异常情况？日</li>
+<li>志打印是否得当？是否方便 debug 排查问题？</li>
+<li>接口是否易用？是否支持幂等、事务等？</li>
+<li>代码是否存在并发问题？是否线程安全？</li>
+<li>性能是否有优化空间，比如，SQL、算法是否可以优化？</li>
+<li>是否有安全漏洞？比如输入输出校验是否全面？</li>
+<li><img src="evernotecid://B93CACCF-EBD1-4485-9709-207B83E62B19/appyinxiangcom/22404617/ENResource/p2460" alt="9894233257994a69102afa960692ce98.jpeg"></li>
+</ul>
+<h3 id="一段有很多问题的ID生成器代码"><a href="#一段有很多问题的ID生成器代码" class="headerlink" title="一段有很多问题的ID生成器代码"></a>一段有很多问题的ID生成器代码</h3><p>为了方便在请求出错时排查问题，我们在编写代码的时候会在关键路径上打印日志。某个请求出错之后，我们希望能搜索出这个请求对应的所有日志，以此来查找问题的原因。而实际情况是，在日志文件中，不同请求的日志会交织在一起。如果没有东西来标识哪些日志属于同一个请求，我们就无法关联同一个请求的所有日志。</p>
+<p>借鉴微服务调用链追踪的实现思路，我们可以给每个请求分配一个唯一 ID，并且保存在请求的上下文（Context）中，比如，处理请求的工作线程的局部变量中。在 Java 语言中，我们可以将 ID 存储在 Servlet 线程的 ThreadLocal 中，或者利用 Slf4j 日志框架的 MDC（Mapped Diagnostic Contexts）来实现（实际上底层原理也是基于线程的 ThreadLocal）。每次打印日志的时候，我们从请求上下文中取出请求 ID，跟日志一块输出。这样，同一个请求的所有日志都包含同样的请求 ID 信息，我们就可以通过请求 ID 来搜索同一个请求的所有日志了。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">public class IdGenerator &#123;</span><br><span class="line">  private static final Logger logger &#x3D; LoggerFactory.getLogger(IdGenerator.class);</span><br><span class="line"></span><br><span class="line">  public static String generate() &#123;</span><br><span class="line">    String id &#x3D; &quot;&quot;;</span><br><span class="line">    try &#123;</span><br><span class="line">      String hostName &#x3D; InetAddress.getLocalHost().getHostName();</span><br><span class="line">      String[] tokens &#x3D; hostName.split(&quot;\\.&quot;);</span><br><span class="line">      if (tokens.length &gt; 0) &#123;</span><br><span class="line">        hostName &#x3D; tokens[tokens.length - 1];</span><br><span class="line">      &#125;</span><br><span class="line">      char[] randomChars &#x3D; new char[8];</span><br><span class="line">      int count &#x3D; 0;</span><br><span class="line">      Random random &#x3D; new Random();</span><br><span class="line">      while (count &lt; 8) &#123;</span><br><span class="line">        int randomAscii &#x3D; random.nextInt(122);</span><br><span class="line">        if (randomAscii &gt;&#x3D; 48 &amp;&amp; randomAscii &lt;&#x3D; 57) &#123;</span><br><span class="line">          randomChars[count] &#x3D; (char)(&#39;0&#39; + (randomAscii - 48));</span><br><span class="line">          count++;</span><br><span class="line">        &#125; else if (randomAscii &gt;&#x3D; 65 &amp;&amp; randomAscii &lt;&#x3D; 90) &#123;</span><br><span class="line">          randomChars[count] &#x3D; (char)(&#39;A&#39; + (randomAscii - 65));</span><br><span class="line">          count++;</span><br><span class="line">        &#125; else if (randomAscii &gt;&#x3D; 97 &amp;&amp; randomAscii &lt;&#x3D; 122) &#123;</span><br><span class="line">          randomChars[count] &#x3D; (char)(&#39;a&#39; + (randomAscii - 97));</span><br><span class="line">          count++;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      id &#x3D; String.format(&quot;%s-%d-%s&quot;, hostName,</span><br><span class="line">              System.currentTimeMillis(), new String(randomChars));</span><br><span class="line">    &#125; catch (UnknownHostException e) &#123;</span><br><span class="line">      logger.warn(&quot;Failed to get the host name.&quot;, e);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    return id;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="实战一（下）：手把手带你将ID生成器代码从“能用”重构为“好用”"><a href="#实战一（下）：手把手带你将ID生成器代码从“能用”重构为“好用”" class="headerlink" title="实战一（下）：手把手带你将ID生成器代码从“能用”重构为“好用”"></a>实战一（下）：手把手带你将ID生成器代码从“能用”重构为“好用”</h2><p>重构代码的过程也应该遵循这样的思路。每次改动一点点，改好之后，再进行下一轮的优化，保证每次对代码的改动不会过大，能在很短的时间内完成。</p>
+<ul>
+<li>第一轮重构：提高代码的可读性</li>
+<li>第二轮重构：提高代码的可测试性</li>
+<li>第三轮重构：编写完善的单元测试</li>
+<li>第四轮重构：所有重构完成之后添加注释</li>
+</ul>
+<h3 id="第一轮重构：提高代码的可读性"><a href="#第一轮重构：提高代码的可读性" class="headerlink" title="第一轮重构：提高代码的可读性"></a>第一轮重构：提高代码的可读性</h3><p>首先，我们要解决最明显、最急需改进的代码可读性问题。具体有下面几点：</p>
+<ul>
+<li>hostName 变量不应该被重复使用，尤其当这两次使用时的含义还不同的时候；</li>
+<li>将获取 hostName 的代码抽离出来，定义为 getLastfieldOfHostName() 函数；</li>
+<li>删除代码中的魔法数，比如，57、90、97、122；</li>
+<li>将随机数生成的代码抽离出来，定义为 generateRandomAlphameric() 函数；</li>
+<li>generate() 函数中的三个 if 逻辑重复了，且实现过于复杂，我们要对其进行简化；对 IdGenerator 类重命名，并且抽象出对应的接口。</li>
+</ul>
+<p>第一轮重构后的代码如下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line">public interface IdGenerator &#123;</span><br><span class="line">  String generate();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public interface LogTraceIdGenerator extends IdGenerator &#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class RandomIdGenerator implements LogTraceIdGenerator &#123;</span><br><span class="line">  private static final Logger logger &#x3D; LoggerFactory.getLogger(RandomIdGenerator.class);</span><br><span class="line"></span><br><span class="line">  @Override</span><br><span class="line">  public String generate() &#123;</span><br><span class="line">    String substrOfHostName &#x3D; getLastfieldOfHostName();</span><br><span class="line">    long currentTimeMillis &#x3D; System.currentTimeMillis();</span><br><span class="line">    String randomString &#x3D; generateRandomAlphameric(8);</span><br><span class="line">    String id &#x3D; String.format(&quot;%s-%d-%s&quot;,</span><br><span class="line">            substrOfHostName, currentTimeMillis, randomString);</span><br><span class="line">    return id;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  private String getLastfieldOfHostName() &#123;</span><br><span class="line">    String substrOfHostName &#x3D; null;</span><br><span class="line">    try &#123;</span><br><span class="line">      String hostName &#x3D; InetAddress.getLocalHost().getHostName();</span><br><span class="line">      String[] tokens &#x3D; hostName.split(&quot;\\.&quot;);</span><br><span class="line">      substrOfHostName &#x3D; tokens[tokens.length - 1];</span><br><span class="line">      return substrOfHostName;</span><br><span class="line">    &#125; catch (UnknownHostException e) &#123;</span><br><span class="line">      logger.warn(&quot;Failed to get the host name.&quot;, e);</span><br><span class="line">    &#125;</span><br><span class="line">    return substrOfHostName;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  private String generateRandomAlphameric(int length) &#123;</span><br><span class="line">    char[] randomChars &#x3D; new char[length];</span><br><span class="line">    int count &#x3D; 0;</span><br><span class="line">    Random random &#x3D; new Random();</span><br><span class="line">    while (count &lt; length) &#123;</span><br><span class="line">      int maxAscii &#x3D; &#39;z&#39;;</span><br><span class="line">      int randomAscii &#x3D; random.nextInt(maxAscii);</span><br><span class="line">      boolean isDigit&#x3D; randomAscii &gt;&#x3D; &#39;0&#39; &amp;&amp; randomAscii &lt;&#x3D; &#39;9&#39;;</span><br><span class="line">      boolean isUppercase&#x3D; randomAscii &gt;&#x3D; &#39;A&#39; &amp;&amp; randomAscii &lt;&#x3D; &#39;Z&#39;;</span><br><span class="line">      boolean isLowercase&#x3D; randomAscii &gt;&#x3D; &#39;a&#39; &amp;&amp; randomAscii &lt;&#x3D; &#39;z&#39;;</span><br><span class="line">      if (isDigit|| isUppercase || isLowercase) &#123;</span><br><span class="line">        randomChars[count] &#x3D; (char) (randomAscii);</span><br><span class="line">        ++count;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    return new String(randomChars);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;代码使用举例</span><br><span class="line">LogTraceIdGenerator logTraceIdGenerator &#x3D; new RandomIdGenerator();</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="第二轮重构：提高代码的可测试性"><a href="#第二轮重构：提高代码的可测试性" class="headerlink" title="第二轮重构：提高代码的可测试性"></a>第二轮重构：提高代码的可测试性</h3><p>关于代码可测试性的问题，主要包含下面两个方面：</p>
+<ul>
+<li>generate() 函数定义为静态函数，会影响使用该函数的代码的可测试性；</li>
+<li>generate() 函数的代码实现依赖运行环境（本机名）、时间函数、随机函数，所以 generate() 函数本身的可测试性也不好。</li>
+</ul>
+<p>对于第一点，我们已经在第一轮重构中解决了。我们将 RandomIdGenerator 类中的 generate() 静态函数重新定义成了普通函数。调用者可以通过依赖注入的方式，在外部创建好 RandomIdGenerator 对象后注入到自己的代码中，从而解决静态函数调用影响代码可测试性的问题。</p>
+<p>对于第二点，我们需要在第一轮重构的基础之上再进行重构。</p>
+<ul>
+<li>从 getLastfieldOfHostName() 函数中，将逻辑比较复杂的那部分代码剥离出来，定义为 getLastSubstrSplittedByDot() 函数。因为 getLastfieldOfHostName() 函数依赖本地主机名，所以，剥离出主要代码之后这个函数变得非常简单，可以不用测试。我们重点测试 getLastSubstrSplittedByDot() 函数即可。</li>
+<li>将 generateRandomAlphameric() 和 getLastSubstrSplittedByDot() 这两个函数的访问权限设置为 protected。这样做的目的是，可以直接在单元测试中通过对象来调用两个函数进行测试。</li>
+<li>给 generateRandomAlphameric() 和 getLastSubstrSplittedByDot() 两个函数添加 Google Guava 的 annotation @VisibleForTesting。这个 annotation 没有任何实际的作用，只起到标识的作用，告诉其他人说，这两个函数本该是 private 访问权限的，之所以提升访问权限到 protected，只是为了测试，只能用于单元测试中。</li>
+</ul>
+<p>第二轮重构后代码如下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">public class RandomIdGenerator implements LogTraceIdGenerator &#123;</span><br><span class="line">  private static final Logger logger &#x3D; LoggerFactory.getLogger(RandomIdGenerator.class);</span><br><span class="line"></span><br><span class="line">  @Override</span><br><span class="line">  public String generate() &#123;</span><br><span class="line">    String substrOfHostName &#x3D; getLastfieldOfHostName();</span><br><span class="line">    long currentTimeMillis &#x3D; System.currentTimeMillis();</span><br><span class="line">    String randomString &#x3D; generateRandomAlphameric(8);</span><br><span class="line">    String id &#x3D; String.format(&quot;%s-%d-%s&quot;,</span><br><span class="line">            substrOfHostName, currentTimeMillis, randomString);</span><br><span class="line">    return id;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  private String getLastfieldOfHostName() &#123;</span><br><span class="line">    String substrOfHostName &#x3D; null;</span><br><span class="line">    try &#123;</span><br><span class="line">      String hostName &#x3D; InetAddress.getLocalHost().getHostName();</span><br><span class="line">      substrOfHostName &#x3D; getLastSubstrSplittedByDot(hostName);</span><br><span class="line">    &#125; catch (UnknownHostException e) &#123;</span><br><span class="line">      logger.warn(&quot;Failed to get the host name.&quot;, e);</span><br><span class="line">    &#125;</span><br><span class="line">    return substrOfHostName;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  @VisibleForTesting</span><br><span class="line">  protected String getLastSubstrSplittedByDot(String hostName) &#123;</span><br><span class="line">    String[] tokens &#x3D; hostName.split(&quot;\\.&quot;);</span><br><span class="line">    String substrOfHostName &#x3D; tokens[tokens.length - 1];</span><br><span class="line">    return substrOfHostName;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  @VisibleForTesting</span><br><span class="line">  protected String generateRandomAlphameric(int length) &#123;</span><br><span class="line">    char[] randomChars &#x3D; new char[length];</span><br><span class="line">    int count &#x3D; 0;</span><br><span class="line">    Random random &#x3D; new Random();</span><br><span class="line">    while (count &lt; length) &#123;</span><br><span class="line">      int maxAscii &#x3D; &#39;z&#39;;</span><br><span class="line">      int randomAscii &#x3D; random.nextInt(maxAscii);</span><br><span class="line">      boolean isDigit&#x3D; randomAscii &gt;&#x3D; &#39;0&#39; &amp;&amp; randomAscii &lt;&#x3D; &#39;9&#39;;</span><br><span class="line">      boolean isUppercase&#x3D; randomAscii &gt;&#x3D; &#39;A&#39; &amp;&amp; randomAscii &lt;&#x3D; &#39;Z&#39;;</span><br><span class="line">      boolean isLowercase&#x3D; randomAscii &gt;&#x3D; &#39;a&#39; &amp;&amp; randomAscii &lt;&#x3D; &#39;z&#39;;</span><br><span class="line">      if (isDigit|| isUppercase || isLowercase) &#123;</span><br><span class="line">        randomChars[count] &#x3D; (char) (randomAscii);</span><br><span class="line">        ++count;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    return new String(randomChars);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="第三轮重构：编写完善的单元测试"><a href="#第三轮重构：编写完善的单元测试" class="headerlink" title="第三轮重构：编写完善的单元测试"></a>第三轮重构：编写完善的单元测试</h3><p>经过上面的重构之后，代码存在的比较明显的问题，基本上都已经解决了。我们现在为代码补全单元测试。RandomIdGenerator 类中有 4 个函数。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">public String generate();</span><br><span class="line">private String getLastfieldOfHostName();</span><br><span class="line">@VisibleForTesting</span><br><span class="line">protected String getLastSubstrSplittedByDot(String hostName);</span><br><span class="line">@VisibleForTesting</span><br><span class="line">protected String generateRandomAlphameric(int length);</span><br></pre></td></tr></table></figure>
+
+<p>在上一步重构中，为了提高代码的可测试性，我们已经将这两个部分代码跟不可控的组件（本机名、随机函数、时间函数）进行了隔离。所以，我们只需要设计完备的单元测试用例即可。具体的代码实现如下所示</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">public class RandomIdGeneratorTest &#123;</span><br><span class="line">  @Test</span><br><span class="line">  public void testGetLastSubstrSplittedByDot() &#123;</span><br><span class="line">    RandomIdGenerator idGenerator &#x3D; new RandomIdGenerator();</span><br><span class="line">    String actualSubstr &#x3D; idGenerator.getLastSubstrSplittedByDot(&quot;field1.field2.field3&quot;);</span><br><span class="line">    Assert.assertEquals(&quot;field3&quot;, actualSubstr);</span><br><span class="line"></span><br><span class="line">    actualSubstr &#x3D; idGenerator.getLastSubstrSplittedByDot(&quot;field1&quot;);</span><br><span class="line">    Assert.assertEquals(&quot;field1&quot;, actualSubstr);</span><br><span class="line"></span><br><span class="line">    actualSubstr &#x3D; idGenerator.getLastSubstrSplittedByDot(&quot;field1#field2$field3&quot;);</span><br><span class="line">    Assert.assertEquals(&quot;field1#field2#field3&quot;, actualSubstr);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  &#x2F;&#x2F; 此单元测试会失败，因为我们在代码中没有处理hostName为null或空字符串的情况</span><br><span class="line">  &#x2F;&#x2F; 这部分优化留在第36、37节课中讲解</span><br><span class="line">  @Test</span><br><span class="line">  public void testGetLastSubstrSplittedByDot_nullOrEmpty() &#123;</span><br><span class="line">    RandomIdGenerator idGenerator &#x3D; new RandomIdGenerator();</span><br><span class="line">    String actualSubstr &#x3D; idGenerator.getLastSubstrSplittedByDot(null);</span><br><span class="line">    Assert.assertNull(actualSubstr);</span><br><span class="line"></span><br><span class="line">    actualSubstr &#x3D; idGenerator.getLastSubstrSplittedByDot(&quot;&quot;);</span><br><span class="line">    Assert.assertEquals(&quot;&quot;, actualSubstr);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  @Test</span><br><span class="line">  public void testGenerateRandomAlphameric() &#123;</span><br><span class="line">    RandomIdGenerator idGenerator &#x3D; new RandomIdGenerator();</span><br><span class="line">    String actualRandomString &#x3D; idGenerator.generateRandomAlphameric(6);</span><br><span class="line">    Assert.assertNotNull(actualRandomString);</span><br><span class="line">    Assert.assertEquals(6, actualRandomString.length());</span><br><span class="line">    for (char c : actualRandomString.toCharArray()) &#123;</span><br><span class="line">      Assert.assertTrue((&#39;0&#39; &lt; c &amp;&amp; c &lt; &#39;9&#39;) || (&#39;a&#39; &lt; c &amp;&amp; c &lt; &#39;z&#39;) || (&#39;A&#39; &lt; c &amp;&amp; c &lt; &#39;Z&#39;));</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  &#x2F;&#x2F; 此单元测试会失败，因为我们在代码中没有处理length&lt;&#x3D;0的情况</span><br><span class="line">  &#x2F;&#x2F; 这部分优化留在第36、37节课中讲解</span><br><span class="line">  @Test</span><br><span class="line">  public void testGenerateRandomAlphameric_lengthEqualsOrLessThanZero() &#123;</span><br><span class="line">    RandomIdGenerator idGenerator &#x3D; new RandomIdGenerator();</span><br><span class="line">    String actualRandomString &#x3D; idGenerator.generateRandomAlphameric(0);</span><br><span class="line">    Assert.assertEquals(&quot;&quot;, actualRandomString);</span><br><span class="line"></span><br><span class="line">    actualRandomString &#x3D; idGenerator.generateRandomAlphameric(-1);</span><br><span class="line">    Assert.assertNull(actualRandomString);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="添加注释"><a href="#添加注释" class="headerlink" title="添加注释"></a>添加注释</h3><p>注释不能太多，也不能太少，主要添加在类和函数上</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;**</span><br><span class="line"> * Id Generator that is used to generate random IDs.</span><br><span class="line"> *</span><br><span class="line"> * &lt;p&gt;</span><br><span class="line"> * The IDs generated by this class are not absolutely unique,</span><br><span class="line"> * but the probability of duplication is very low.</span><br><span class="line"> *&#x2F;</span><br><span class="line">public class RandomIdGenerator implements LogTraceIdGenerator &#123;</span><br><span class="line">  private static final Logger logger &#x3D; LoggerFactory.getLogger(RandomIdGenerator.class);</span><br><span class="line"></span><br><span class="line">  &#x2F;**</span><br><span class="line">   * Generate the random ID. The IDs may be duplicated only in extreme situation.</span><br><span class="line">   *</span><br><span class="line">   * @return an random ID</span><br><span class="line">   *&#x2F;</span><br><span class="line">  @Override</span><br><span class="line">  public String generate() &#123;</span><br><span class="line">    &#x2F;&#x2F;...</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  &#x2F;**</span><br><span class="line">   * Get the local hostname and</span><br><span class="line">   * extract the last field of the name string splitted by delimiter &#39;.&#39;.</span><br><span class="line">   *</span><br><span class="line">   * @return the last field of hostname. Returns null if hostname is not obtained.</span><br><span class="line">   *&#x2F;</span><br><span class="line">  private String getLastfieldOfHostName() &#123;</span><br><span class="line">    &#x2F;&#x2F;...</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  &#x2F;**</span><br><span class="line">   * Get the last field of &#123;@hostName&#125; splitted by delemiter &#39;.&#39;.</span><br><span class="line">   *</span><br><span class="line">   * @param hostName should not be null</span><br><span class="line">   * @return the last field of &#123;@hostName&#125;. Returns empty string if &#123;@hostName&#125; is empty string.</span><br><span class="line">   *&#x2F;</span><br><span class="line">  @VisibleForTesting</span><br><span class="line">  protected String getLastSubstrSplittedByDot(String hostName) &#123;</span><br><span class="line">    &#x2F;&#x2F;...</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  &#x2F;**</span><br><span class="line">   * Generate random string which</span><br><span class="line">   * only contains digits, uppercase letters and lowercase letters.</span><br><span class="line">   *</span><br><span class="line">   * @param length should not be less than 0</span><br><span class="line">   * @return the random string. Returns empty string if &#123;@length&#125; is 0</span><br><span class="line">   *&#x2F;</span><br><span class="line">  @VisibleForTesting</span><br><span class="line">  protected String generateRandomAlphameric(int length) &#123;</span><br><span class="line">    &#x2F;&#x2F;...</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="小结-1"><a href="#小结-1" class="headerlink" title="小结"></a>小结</h3><ul>
+<li>即便是非常简单的需求，不同水平的人写出来的代码，差别可能会很大。我们要对代码质量有所追求，不能只是凑活能用就好。花点心思写一段高质量的代码，比写 100 段凑活能用的代码，对你的代码能力提高更有帮助。</li>
+<li>知其然知其所以然，了解优秀代码设计的演变过程，比学习优秀设计本身更有价值。知道为什么这么做，比单纯地知道怎么做更重要，这样可以避免你过度使用设计模式、思想和原则。</li>
+<li>设计思想、原则、模式本身并没有太多“高大上”的东西，都是一些简单的道理，而且知识点也并不多，关键还是锻炼具体代码具体分析的能力，把知识点恰当地用在项目中。</li>
+<li>高手之间的竞争都是在细节。大的架构设计、分层、分模块思路实际上都差不多。没有项目是靠一些不为人知的设计来取胜的，即便有，很快也能被学习过去。所以，关键还是看代码细节处理得够不够好。这些细节的差别累积起来，会让代码质量有质的差别。所以，要想提高代码质量，还是要在细节处下功夫。</li>
+</ul>
+<h2 id="实战二（上）：程序出错该返回啥？NULL、异常、错误码、空对象？"><a href="#实战二（上）：程序出错该返回啥？NULL、异常、错误码、空对象？" class="headerlink" title="实战二（上）：程序出错该返回啥？NULL、异常、错误码、空对象？"></a>实战二（上）：程序出错该返回啥？NULL、异常、错误码、空对象？</h2><h3 id="1-返回错误码"><a href="#1-返回错误码" class="headerlink" title="1. 返回错误码"></a>1. 返回错误码</h3><p>C 语言没有异常这样的语法机制，返回错误码便是最常用的出错处理方式。而 Java、Python 等比较新的编程语言中，大部分情况下，我们都用异常来处理函数出错的情况，极少会用到错误码。</p>
+<h3 id="2-返回-NULL-值"><a href="#2-返回-NULL-值" class="headerlink" title="2. 返回 NULL 值"></a>2. 返回 NULL 值</h3><p>在多数编程语言中，我们用 NULL 来表示“不存在”这种语义。对于查找函数来说，数据不存在并非一种异常情况，是一种正常行为，所以返回表示不存在语义的 NULL 值比返回异常更加合理。</p>
+<h3 id="3-返回空对象"><a href="#3-返回空对象" class="headerlink" title="3. 返回空对象"></a>3. 返回空对象</h3><p>返回 NULL 值有各种弊端，对此有一个比较经典的应对策略，那就是应用空对象设计模式。当函数返回的数据是字符串类型或者集合类型的时候，我们可以用空字符串或空集合替代 NULL 值，来表示不存在的情况。这样，我们在使用函数的时候，就可以不用做 NULL 值判断。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; 使用空集合替代NULL</span><br><span class="line">public class UserService &#123;</span><br><span class="line">  private UserRepo userRepo; &#x2F;&#x2F; 依赖注入</span><br><span class="line">  </span><br><span class="line">  public List&lt;User&gt; getUsers(String telephonePrefix) &#123;</span><br><span class="line">   &#x2F;&#x2F; 没有查找到数据</span><br><span class="line">    return Collections.emptyList();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">&#x2F;&#x2F; getUsers使用示例</span><br><span class="line">List&lt;User&gt; users &#x3D; userService.getUsers(&quot;189&quot;);</span><br><span class="line">for (User user : users) &#123; &#x2F;&#x2F;这里不需要做NULL值判断</span><br><span class="line">  &#x2F;&#x2F; ...</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; 使用空字符串替代NULL</span><br><span class="line">public String retrieveUppercaseLetters(String text) &#123;</span><br><span class="line">  &#x2F;&#x2F; 如果text中没有大写字母，返回空字符串，而非NULL值</span><br><span class="line">  return &quot;&quot;;</span><br><span class="line">&#125;</span><br><span class="line">&#x2F;&#x2F; retrieveUppercaseLetters()使用举例</span><br><span class="line">String uppercaseLetters &#x3D; retrieveUppercaseLetters(&quot;wangzheng&quot;);</span><br><span class="line">int length &#x3D; uppercaseLetters.length();&#x2F;&#x2F; 不需要做NULL值判断 </span><br><span class="line">System.out.println(&quot;Contains &quot; + length + &quot; upper case letters.&quot;);</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-抛出异常对象"><a href="#4-抛出异常对象" class="headerlink" title="4. 抛出异常对象"></a>4. 抛出异常对象</h3><p>尽管前面讲了很多函数出错的返回数据类型，但是，最常用的函数出错处理方式是抛出异常。异常有两种类型：受检异常和非受检异常。对于应该用受检异常还是非受检异常，网上的争论有很多，但也并没有一个非常强有力的理由，说明一个就一定比另一个更好。所以，我们只需要根据团队的开发习惯，在同一个项目中，制定统一的异常处理规范即可。</p>
+<h3 id="5-针对函数抛出异常的三种处理方式"><a href="#5-针对函数抛出异常的三种处理方式" class="headerlink" title="5.针对函数抛出异常的三种处理方式"></a>5.针对函数抛出异常的三种处理方式</h3><p>对于函数抛出的异常，我们有三种处理方法：直接吞掉、直接往上抛出、包裹成新的异常抛出。</p>
+<h4 id="直接吞掉"><a href="#直接吞掉" class="headerlink" title="直接吞掉"></a>直接吞掉</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">public void func1() throws Exception1 &#123;</span><br><span class="line">  &#x2F;&#x2F; ...</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public void func2() &#123;</span><br><span class="line">  &#x2F;&#x2F;...</span><br><span class="line">  try &#123;</span><br><span class="line">    func1();</span><br><span class="line">  &#125; catch(Exception1 e) &#123;</span><br><span class="line">    log.warn(&quot;...&quot;, e); &#x2F;&#x2F;吐掉：try-catch打印日志</span><br><span class="line">  &#125;</span><br><span class="line">  &#x2F;&#x2F;...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="直接往上抛出-（原封不动地-re-throw）"><a href="#直接往上抛出-（原封不动地-re-throw）" class="headerlink" title="直接往上抛出 （原封不动地 re-throw）"></a>直接往上抛出 （原封不动地 re-throw）</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">public void func1() throws Exception1 &#123;</span><br><span class="line">  &#x2F;&#x2F; ...</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">public void func2() throws Exception1 &#123;&#x2F;&#x2F;原封不动的re-throw Exception1</span><br><span class="line">  &#x2F;&#x2F;...</span><br><span class="line">  func1();</span><br><span class="line">  &#x2F;&#x2F;...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="包裹成新的异常抛出-re-throw"><a href="#包裹成新的异常抛出-re-throw" class="headerlink" title="包裹成新的异常抛出 re-throw"></a>包裹成新的异常抛出 re-throw</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">public void func1() throws Exception1 &#123;</span><br><span class="line">  &#x2F;&#x2F; ...</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">public void func2() throws Exception2 &#123;</span><br><span class="line">  &#x2F;&#x2F;...</span><br><span class="line">  try &#123;</span><br><span class="line">    func1();</span><br><span class="line">  &#125; catch(Exception1 e) &#123;</span><br><span class="line">   throw new Exception2(&quot;...&quot;, e); &#x2F;&#x2F; wrap成新的Exception2然后re-throw</span><br><span class="line">  &#125;</span><br><span class="line">  &#x2F;&#x2F;...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="实战二（下）：重构ID生成器项目中各函数的异常处理代码"><a href="#实战二（下）：重构ID生成器项目中各函数的异常处理代码" class="headerlink" title="实战二（下）：重构ID生成器项目中各函数的异常处理代码"></a>实战二（下）：重构ID生成器项目中各函数的异常处理代码</h2><h3 id="异常处理代码重构"><a href="#异常处理代码重构" class="headerlink" title="异常处理代码重构"></a>异常处理代码重构</h3><p>重构之前的代码</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">public class RandomIdGenerator implements IdGenerator &#123;</span><br><span class="line">  private static final Logger logger &#x3D; LoggerFactory.getLogger(RandomIdGenerator.class);</span><br><span class="line"></span><br><span class="line">  @Override</span><br><span class="line">  public String generate() &#123;</span><br><span class="line">    String substrOfHostName &#x3D; getLastFiledOfHostName();</span><br><span class="line">    long currentTimeMillis &#x3D; System.currentTimeMillis();</span><br><span class="line">    String randomString &#x3D; generateRandomAlphameric(8);</span><br><span class="line">    String id &#x3D; String.format(&quot;%s-%d-%s&quot;,</span><br><span class="line">            substrOfHostName, currentTimeMillis, randomString);</span><br><span class="line">    return id;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  private String getLastFiledOfHostName() &#123;</span><br><span class="line">    String substrOfHostName &#x3D; null;</span><br><span class="line">    try &#123;</span><br><span class="line">      String hostName &#x3D; InetAddress.getLocalHost().getHostName();</span><br><span class="line">      substrOfHostName &#x3D; getLastSubstrSplittedByDot(hostName);</span><br><span class="line">    &#125; catch (UnknownHostException e) &#123;</span><br><span class="line">      logger.warn(&quot;Failed to get the host name.&quot;, e);</span><br><span class="line">    &#125;</span><br><span class="line">    return substrOfHostName;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  @VisibleForTesting</span><br><span class="line">  protected String getLastSubstrSplittedByDot(String hostName) &#123;</span><br><span class="line">    String[] tokens &#x3D; hostName.split(&quot;\\.&quot;);</span><br><span class="line">    String substrOfHostName &#x3D; tokens[tokens.length - 1];</span><br><span class="line">    return substrOfHostName;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  @VisibleForTesting</span><br><span class="line">  protected String generateRandomAlphameric(int length) &#123;</span><br><span class="line">    char[] randomChars &#x3D; new char[length];</span><br><span class="line">    int count &#x3D; 0;</span><br><span class="line">    Random random &#x3D; new Random();</span><br><span class="line">    while (count &lt; length) &#123;</span><br><span class="line">      int maxAscii &#x3D; &#39;z&#39;;</span><br><span class="line">      int randomAscii &#x3D; random.nextInt(maxAscii);</span><br><span class="line">      boolean isDigit&#x3D; randomAscii &gt;&#x3D; &#39;0&#39; &amp;&amp; randomAscii &lt;&#x3D; &#39;9&#39;;</span><br><span class="line">      boolean isUppercase&#x3D; randomAscii &gt;&#x3D; &#39;A&#39; &amp;&amp; randomAscii &lt;&#x3D; &#39;Z&#39;;</span><br><span class="line">      boolean isLowercase&#x3D; randomAscii &gt;&#x3D; &#39;a&#39; &amp;&amp; randomAscii &lt;&#x3D; &#39;z&#39;;</span><br><span class="line">      if (isDigit|| isUppercase || isLowercase) &#123;</span><br><span class="line">        randomChars[count] &#x3D; (char) (randomAscii);</span><br><span class="line">        ++count;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    return new String(randomChars);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>重构后的代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line">public class RandomIdGenerator implements IdGenerator &#123;</span><br><span class="line">  private static final Logger logger &#x3D; LoggerFactory.getLogger(RandomIdGenerator.class);</span><br><span class="line"></span><br><span class="line">  @Override</span><br><span class="line">  public String generate() throws IdGenerationFailureException &#123;</span><br><span class="line">    String substrOfHostName &#x3D; null;</span><br><span class="line">    try &#123;</span><br><span class="line">      substrOfHostName &#x3D; getLastFieldOfHostName();</span><br><span class="line">    &#125; catch (UnknownHostException e) &#123;</span><br><span class="line">      throw new IdGenerationFailureException(&quot;...&quot;, e);</span><br><span class="line">    &#125;</span><br><span class="line">    long currentTimeMillis &#x3D; System.currentTimeMillis();</span><br><span class="line">    String randomString &#x3D; generateRandomAlphameric(8);</span><br><span class="line">    String id &#x3D; String.format(&quot;%s-%d-%s&quot;,</span><br><span class="line">            substrOfHostName, currentTimeMillis, randomString);</span><br><span class="line">    return id;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  private String getLastFieldOfHostName() throws UnknownHostException&#123;</span><br><span class="line">    String substrOfHostName &#x3D; null;</span><br><span class="line">    String hostName &#x3D; InetAddress.getLocalHost().getHostName();</span><br><span class="line">    if (hostName &#x3D;&#x3D; null || hostName.isEmpty()) &#123;</span><br><span class="line">      throw new UnknownHostException(&quot;...&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">    substrOfHostName &#x3D; getLastSubstrSplittedByDot(hostName);</span><br><span class="line">    return substrOfHostName;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  @VisibleForTesting</span><br><span class="line">  protected String getLastSubstrSplittedByDot(String hostName) &#123;</span><br><span class="line">    if (hostName &#x3D;&#x3D; null || hostName.isEmpty()) &#123;</span><br><span class="line">      throw new IllegalArgumentException(&quot;...&quot;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    String[] tokens &#x3D; hostName.split(&quot;\\.&quot;);</span><br><span class="line">    String substrOfHostName &#x3D; tokens[tokens.length - 1];</span><br><span class="line">    return substrOfHostName;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  @VisibleForTesting</span><br><span class="line">  protected String generateRandomAlphameric(int length) &#123;</span><br><span class="line">    if (length &lt;&#x3D; 0) &#123;</span><br><span class="line">      throw new IllegalArgumentException(&quot;...&quot;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    char[] randomChars &#x3D; new char[length];</span><br><span class="line">    int count &#x3D; 0;</span><br><span class="line">    Random random &#x3D; new Random();</span><br><span class="line">    while (count &lt; length) &#123;</span><br><span class="line">      int maxAscii &#x3D; &#39;z&#39;;</span><br><span class="line">      int randomAscii &#x3D; random.nextInt(maxAscii);</span><br><span class="line">      boolean isDigit&#x3D; randomAscii &gt;&#x3D; &#39;0&#39; &amp;&amp; randomAscii &lt;&#x3D; &#39;9&#39;;</span><br><span class="line">      boolean isUppercase&#x3D; randomAscii &gt;&#x3D; &#39;A&#39; &amp;&amp; randomAscii &lt;&#x3D; &#39;Z&#39;;</span><br><span class="line">      boolean isLowercase&#x3D; randomAscii &gt;&#x3D; &#39;a&#39; &amp;&amp; randomAscii &lt;&#x3D; &#39;z&#39;;</span><br><span class="line">      if (isDigit|| isUppercase || isLowercase) &#123;</span><br><span class="line">        randomChars[count] &#x3D; (char) (randomAscii);</span><br><span class="line">        ++count;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    return new String(randomChars);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>1.在 generate() 函数中，我们需要捕获 UnknownHostException 异常，并重新包裹成新的异常 IdGenerationFailureException 往上抛出。之所以这么做，有下面三个原因。</p>
+<ul>
+<li>调用者在使用 generate() 函数的时候，只需要知道它生成的是随机唯一 ID，并不关心 ID 是如何生成的。也就说是，这是依赖抽象而非实现编程。</li>
+<li>如果 generate() 函数直接抛出 UnknownHostException 异常，实际上是暴露了实现细节。从代码封装的角度来讲，我们不希望将 UnknownHostException 这个比较底层的异常，暴露给更上层的代码，也就是调用 generate() 函数的代码。而且，调用者拿到这个异常的时候，并不能理解这个异常到底代表了什么，也不知道该如何处理。</li>
+<li>UnknownHostException 异常跟 generate() 函数，在业务概念上没有相关性。</li>
+</ul>
+<p>2.如果函数是 public 的，你无法掌控会被谁调用以及如何调用（有可能某个同事一时疏忽，传递进了 NULL 值，这种情况也是存在的），为了尽可能提高代码的健壮性，我们最好是在 public 函数中做 NULL 值或空字符串的判断。</p>
+<h3 id="小结-2"><a href="#小结-2" class="headerlink" title="小结"></a>小结</h3><p>1.程序的 bug 往往都出现在一些边界条件和异常情况下，所以说，异常处理得好坏直接影响了代码的健壮性。</p>
+<p>2.再简单的代码，看上去再完美的代码，只要我们下功夫去推敲，总有可以优化的空间，就看你愿不愿把事情做到极致。</p>
+<p>3.内功不够深厚，理论知识不够扎实，那你就很难参透开源项目的代码到底优秀在哪里。</p>
+<p>4.能用的代码和优质代码之间最大的区别就在于细节，这就是60分和100分的差别。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Design-Pattern-Refactoring-Principle/" rel="tag"># Design Pattern Refactoring-Principle</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/10/08/design-pattern05/" rel="prev" title="总结回顾面向对象、设计原则、编程规范、重构技巧等知识点（Part1~Part4）">
+      <i class="fa fa-chevron-left"></i> 总结回顾面向对象、设计原则、编程规范、重构技巧等知识点（Part1~Part4）
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/10/05/design-pattern-design-principle/" rel="next" title="设计模式之美-笔记Part3：设计原则">
+      设计模式之美-笔记Part3：设计原则 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#理论一：什么情况下要重构？到底重构什么？又该如何重构？"><span class="nav-number">1.</span> <span class="nav-text">理论一：什么情况下要重构？到底重构什么？又该如何重构？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-重构的目的："><span class="nav-number">1.1.</span> <span class="nav-text">1. 重构的目的：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-重构的对象："><span class="nav-number">1.2.</span> <span class="nav-text">2. 重构的对象：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-重构的时机："><span class="nav-number">1.3.</span> <span class="nav-text">3. 重构的时机：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-重构的方法："><span class="nav-number">1.4.</span> <span class="nav-text">4. 重构的方法：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#评论区精彩评论"><span class="nav-number">1.5.</span> <span class="nav-text">评论区精彩评论</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#一个重构的案例（步骤）"><span class="nav-number">1.5.1.</span> <span class="nav-text">一个重构的案例（步骤）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#重构后的功能一定要可测试"><span class="nav-number">1.5.2.</span> <span class="nav-text">重构后的功能一定要可测试</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#写单元测试很重要，谁写谁知道"><span class="nav-number">1.5.3.</span> <span class="nav-text">写单元测试很重要，谁写谁知道</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#理论二：为了保证重构不出错，有哪些非常能落地的技术手段？"><span class="nav-number">2.</span> <span class="nav-text">理论二：为了保证重构不出错，有哪些非常能落地的技术手段？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#什么是单元测试？"><span class="nav-number">2.1.</span> <span class="nav-text">什么是单元测试？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#为什么要写单元测试？"><span class="nav-number">2.2.</span> <span class="nav-text">为什么要写单元测试？</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-单元测试能有效地帮你发现代码中的-bug"><span class="nav-number">2.2.1.</span> <span class="nav-text">1.单元测试能有效地帮你发现代码中的 bug</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-写单元测试能帮你发现代码设计上的问题"><span class="nav-number">2.2.2.</span> <span class="nav-text">2.写单元测试能帮你发现代码设计上的问题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-单元测试是对集成测试的有力补充"><span class="nav-number">2.2.3.</span> <span class="nav-text">3.单元测试是对集成测试的有力补充</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-写单元测试的过程本身就是代码重构的过程？"><span class="nav-number">2.2.4.</span> <span class="nav-text">4.写单元测试的过程本身就是代码重构的过程？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-阅读单元测试能帮助你快速熟悉代码"><span class="nav-number">2.2.5.</span> <span class="nav-text">5.阅读单元测试能帮助你快速熟悉代码</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#6-单元测试是-TDD-可落地执行的改进方案"><span class="nav-number">2.2.6.</span> <span class="nav-text">6.单元测试是 TDD 可落地执行的改进方案</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如何编写单元测试"><span class="nav-number">2.3.</span> <span class="nav-text">如何编写单元测试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#一个单元测试的例子"><span class="nav-number">2.4.</span> <span class="nav-text">一个单元测试的例子</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#罗列出各种正常，异常，以及边界的测试用例"><span class="nav-number">2.4.1.</span> <span class="nav-text">罗列出各种正常，异常，以及边界的测试用例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#将测试用例翻译成代码"><span class="nav-number">2.4.2.</span> <span class="nav-text">将测试用例翻译成代码</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#单元测试为何难落地执行？"><span class="nav-number">2.5.</span> <span class="nav-text">单元测试为何难落地执行？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#重度依赖数据库的业务代码如何做单元测试"><span class="nav-number">2.6.</span> <span class="nav-text">重度依赖数据库的业务代码如何做单元测试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#精彩评论"><span class="nav-number">2.7.</span> <span class="nav-text">精彩评论</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#理论三：什么是代码的可测试性？如何写出可测试性好的代码？"><span class="nav-number">3.</span> <span class="nav-text">理论三：什么是代码的可测试性？如何写出可测试性好的代码？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-什么是代码的可测试性？"><span class="nav-number">3.1.</span> <span class="nav-text">1. 什么是代码的可测试性？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-编写可测试性代码的最有效手段"><span class="nav-number">3.2.</span> <span class="nav-text">2. 编写可测试性代码的最有效手段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-常见的-Anti-Patterns"><span class="nav-number">3.3.</span> <span class="nav-text">3. 常见的 Anti-Patterns</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-mock-用一个“假”的服务替换真正的服务"><span class="nav-number">3.4.</span> <span class="nav-text">4.mock 用一个“假”的服务替换真正的服务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#小结"><span class="nav-number">3.5.</span> <span class="nav-text">小结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#理论四：如何通过封装、抽象、模块化、中间层等解耦代码？"><span class="nav-number">4.</span> <span class="nav-text">理论四：如何通过封装、抽象、模块化、中间层等解耦代码？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#“解耦”为何如此重要？"><span class="nav-number">4.1.</span> <span class="nav-text">“解耦”为何如此重要？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如何判定代码是否需要“解耦”？"><span class="nav-number">4.2.</span> <span class="nav-text">如何判定代码是否需要“解耦”？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如何给代码“解耦”？"><span class="nav-number">4.3.</span> <span class="nav-text">如何给代码“解耦”？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#设计原则回顾"><span class="nav-number">4.4.</span> <span class="nav-text">设计原则回顾</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#单一职责原则"><span class="nav-number">4.4.1.</span> <span class="nav-text">单一职责原则</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#基于接口而非实现编程"><span class="nav-number">4.4.2.</span> <span class="nav-text">基于接口而非实现编程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#依赖注入"><span class="nav-number">4.4.3.</span> <span class="nav-text">依赖注入</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#多用组合少用继承"><span class="nav-number">4.4.4.</span> <span class="nav-text">多用组合少用继承</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#迪米特法则"><span class="nav-number">4.4.5.</span> <span class="nav-text">迪米特法则</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#理论五：让你最快速地改善代码质量的20条编程规范"><span class="nav-number">5.</span> <span class="nav-text">理论五：让你最快速地改善代码质量的20条编程规范</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-关于命名"><span class="nav-number">5.1.</span> <span class="nav-text">1. 关于命名</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-关于注释"><span class="nav-number">5.2.</span> <span class="nav-text">2. 关于注释</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-关于代码风格"><span class="nav-number">5.3.</span> <span class="nav-text">3.关于代码风格</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#函数、类多大才合适？"><span class="nav-number">5.3.1.</span> <span class="nav-text">函数、类多大才合适？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#一行代码多长最合适？"><span class="nav-number">5.3.2.</span> <span class="nav-text">一行代码多长最合适？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#善用空行分割单元块"><span class="nav-number">5.3.3.</span> <span class="nav-text">善用空行分割单元块</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#四格缩进还是两格缩进？"><span class="nav-number">5.3.4.</span> <span class="nav-text">四格缩进还是两格缩进？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#大括号是否要另起一行？"><span class="nav-number">5.3.5.</span> <span class="nav-text">大括号是否要另起一行？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#类中成员的排列顺序"><span class="nav-number">5.3.6.</span> <span class="nav-text">类中成员的排列顺序</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-关于变成技巧"><span class="nav-number">5.4.</span> <span class="nav-text">4.关于变成技巧</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-统一编码规范"><span class="nav-number">5.5.</span> <span class="nav-text">5.统一编码规范</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#代码分析工具推荐"><span class="nav-number">5.6.</span> <span class="nav-text">代码分析工具推荐</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#实战一（上）：通过一段ID生成器代码，学习如何发现代码质量问题"><span class="nav-number">6.</span> <span class="nav-text">实战一（上）：通过一段ID生成器代码，学习如何发现代码质量问题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#如何发现代码质量问题-常规checkList"><span class="nav-number">6.1.</span> <span class="nav-text">如何发现代码质量问题-常规checkList</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如何发现代码质量问题-业务需求checkList"><span class="nav-number">6.2.</span> <span class="nav-text">如何发现代码质量问题-业务需求checkList</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#一段有很多问题的ID生成器代码"><span class="nav-number">6.3.</span> <span class="nav-text">一段有很多问题的ID生成器代码</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#实战一（下）：手把手带你将ID生成器代码从“能用”重构为“好用”"><span class="nav-number">7.</span> <span class="nav-text">实战一（下）：手把手带你将ID生成器代码从“能用”重构为“好用”</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#第一轮重构：提高代码的可读性"><span class="nav-number">7.1.</span> <span class="nav-text">第一轮重构：提高代码的可读性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#第二轮重构：提高代码的可测试性"><span class="nav-number">7.2.</span> <span class="nav-text">第二轮重构：提高代码的可测试性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#第三轮重构：编写完善的单元测试"><span class="nav-number">7.3.</span> <span class="nav-text">第三轮重构：编写完善的单元测试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#添加注释"><span class="nav-number">7.4.</span> <span class="nav-text">添加注释</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#小结-1"><span class="nav-number">7.5.</span> <span class="nav-text">小结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#实战二（上）：程序出错该返回啥？NULL、异常、错误码、空对象？"><span class="nav-number">8.</span> <span class="nav-text">实战二（上）：程序出错该返回啥？NULL、异常、错误码、空对象？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-返回错误码"><span class="nav-number">8.1.</span> <span class="nav-text">1. 返回错误码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-返回-NULL-值"><span class="nav-number">8.2.</span> <span class="nav-text">2. 返回 NULL 值</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-返回空对象"><span class="nav-number">8.3.</span> <span class="nav-text">3. 返回空对象</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-抛出异常对象"><span class="nav-number">8.4.</span> <span class="nav-text">4. 抛出异常对象</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-针对函数抛出异常的三种处理方式"><span class="nav-number">8.5.</span> <span class="nav-text">5.针对函数抛出异常的三种处理方式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#直接吞掉"><span class="nav-number">8.5.1.</span> <span class="nav-text">直接吞掉</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#直接往上抛出-（原封不动地-re-throw）"><span class="nav-number">8.5.2.</span> <span class="nav-text">直接往上抛出 （原封不动地 re-throw）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#包裹成新的异常抛出-re-throw"><span class="nav-number">8.5.3.</span> <span class="nav-text">包裹成新的异常抛出 re-throw</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#实战二（下）：重构ID生成器项目中各函数的异常处理代码"><span class="nav-number">9.</span> <span class="nav-text">实战二（下）：重构ID生成器项目中各函数的异常处理代码</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#异常处理代码重构"><span class="nav-number">9.1.</span> <span class="nav-text">异常处理代码重构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#小结-2"><span class="nav-number">9.2.</span> <span class="nav-text">小结</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="crazyfzw"
+      src="/uploads/avatar.jpg">
+  <p class="site-author-name" itemprop="name">crazyfzw</p>
+  <div class="site-description" itemprop="description">做个有趣的技术人</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">43</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">140</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/crazyfzw" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;crazyfzw" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://book.douban.com/people/crazyfzw/" title="Booklist → https:&#x2F;&#x2F;book.douban.com&#x2F;people&#x2F;crazyfzw&#x2F;" rel="noopener" target="_blank"><i class="fab fa-skype fa-fw"></i>Booklist</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:crazyfzw@gmail.com" title="E-Mail → mailto:crazyfzw@gmail.com" rel="noopener" target="_blank"><i class="fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://plus.google.com/104894167431407693109" title="Google → https:&#x2F;&#x2F;plus.google.com&#x2F;104894167431407693109" rel="noopener" target="_blank"><i class="fab fa-google fa-fw"></i>Google</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.facebook.com/profile.php?id=100011315733045" title="Facebook → https:&#x2F;&#x2F;www.facebook.com&#x2F;profile.php?id&#x3D;100011315733045" rel="noopener" target="_blank"><i class="fab fa-facebook fa-fw"></i>Facebook</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/u/3829383159" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;3829383159" rel="noopener" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://ifeve.com/" title="http:&#x2F;&#x2F;ifeve.com&#x2F;" rel="noopener" target="_blank">并发编程网</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="http://www.importnew.com/" title="http:&#x2F;&#x2F;www.importnew.com&#x2F;" rel="noopener" target="_blank">ImportNew</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="http://jm.taobao.org/categories/" title="http:&#x2F;&#x2F;jm.taobao.org&#x2F;categories&#x2F;" rel="noopener" target="_blank">阿里中间件团队博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.ibm.com/developerworks/cn/java/" title="https:&#x2F;&#x2F;www.ibm.com&#x2F;developerworks&#x2F;cn&#x2F;java&#x2F;" rel="noopener" target="_blank">IBM developerworks</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tech.meituan.com/" title="https:&#x2F;&#x2F;tech.meituan.com&#x2F;" rel="noopener" target="_blank">美团点评技术团队</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="http://calvin1978.blogcn.com/" title="http:&#x2F;&#x2F;calvin1978.blogcn.com&#x2F;" rel="noopener" target="_blank">江南白衣的博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="http://blog.720ui.com/" title="http:&#x2F;&#x2F;blog.720ui.com" rel="noopener" target="_blank">梁桂钊的博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.jianshu.com/u/581f548ef0ec" title="https:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;581f548ef0ec" rel="noopener" target="_blank">李艳鹏的博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="http://jinnianshilongnian.iteye.com/" title="http:&#x2F;&#x2F;jinnianshilongnian.iteye.com&#x2F;" rel="noopener" target="_blank">张开涛的博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/zuoxiaolong" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;zuoxiaolong" rel="noopener" target="_blank">左潇龙的博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/xrq730/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;xrq730&#x2F;" rel="noopener" target="_blank">五月的仓颉</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://yikun.github.io/" title="https:&#x2F;&#x2F;yikun.github.io&#x2F;" rel="noopener" target="_blank">Yikun的博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="http://www.ruanyifeng.com/" title="http:&#x2F;&#x2F;www.ruanyifeng.com" rel="noopener" target="_blank">阮一峰的个人网站</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">crazyfzw</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">458k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">6:56</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : false,
+      appId      : 'jyxPxkBMeEmDfMMTuuyBdGdu-gzGzoHsz',
+      appKey     : '7SEECyfT4R10oTtj4zDMOdBt',
+      placeholder: "ヾﾉ≧∀≦)o 来呀！吐槽一番吧！",
+      avatar     : 'monsterid',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : '' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

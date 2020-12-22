@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"crazyfzw.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"valine","storage":true,"lazyload":true,"nav":null,"activeClass":"valine"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="设计原则概述SOLID原则：由 5 个设计原则组成的，它们分别是：单一职责原则、开闭原则、里式替换原则、接口隔离原则和依赖反转原则，依次对应 SOLID 中的 S、O、L、I、D 这 5 个英文字母，SRP单一职责原则 Single Responsibility Principle； KISS保持简单 Keep It Simple and Stupid； YAGNI不需要原则 You Ain’t">
+<meta property="og:type" content="article">
+<meta property="og:title" content="设计模式之美-笔记Part3：设计原则">
+<meta property="og:url" content="https://crazyfzw.github.io/2020/10/05/design-pattern-design-principle/index.html">
+<meta property="og:site_name" content="Crazyfzw&#39;s blog">
+<meta property="og:description" content="设计原则概述SOLID原则：由 5 个设计原则组成的，它们分别是：单一职责原则、开闭原则、里式替换原则、接口隔离原则和依赖反转原则，依次对应 SOLID 中的 S、O、L、I、D 这 5 个英文字母，SRP单一职责原则 Single Responsibility Principle； KISS保持简单 Keep It Simple and Stupid； YAGNI不需要原则 You Ain’t">
+<meta property="og:image" content="evernotecid://B93CACCF-EBD1-4485-9709-207B83E62B19/appyinxiangcom/22404617/ENResource/p2453">
+<meta property="og:image" content="evernotecid://B93CACCF-EBD1-4485-9709-207B83E62B19/appyinxiangcom/22404617/ENResource/p2454">
+<meta property="og:image" content="evernotecid://B93CACCF-EBD1-4485-9709-207B83E62B19/appyinxiangcom/22404617/ENResource/p2455">
+<meta property="og:image" content="evernotecid://B93CACCF-EBD1-4485-9709-207B83E62B19/appyinxiangcom/22404617/ENResource/p2456">
+<meta property="article:published_time" content="2020-10-05T04:37:56.000Z">
+<meta property="article:modified_time" content="2020-12-22T05:21:28.679Z">
+<meta property="article:author" content="crazyfzw">
+<meta property="article:tag" content="Design Pattern Design-Principle">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="evernotecid://B93CACCF-EBD1-4485-9709-207B83E62B19/appyinxiangcom/22404617/ENResource/p2453">
+
+<link rel="canonical" href="https://crazyfzw.github.io/2020/10/05/design-pattern-design-principle/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-Hans'
+  };
+</script>
+
+  <title>设计模式之美-笔记Part3：设计原则 | Crazyfzw's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Crazyfzw's blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Crazyfzw's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Return to base, step by step.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="https://crazyfzw.github.io/2020/10/05/design-pattern-design-principle/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/uploads/avatar.jpg">
+      <meta itemprop="name" content="crazyfzw">
+      <meta itemprop="description" content="做个有趣的技术人">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Crazyfzw's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          设计模式之美-笔记Part3：设计原则
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-10-05 12:37:56" itemprop="dateCreated datePublished" datetime="2020-10-05T12:37:56+08:00">2020-10-05</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-12-22 13:21:28" itemprop="dateModified" datetime="2020-12-22T13:21:28+08:00">2020-12-22</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Design-Pattern/" itemprop="url" rel="index"><span itemprop="name">Design Pattern</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2020/10/05/design-pattern-design-principle/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/10/05/design-pattern-design-principle/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>41k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>37 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="设计原则概述"><a href="#设计原则概述" class="headerlink" title="设计原则概述"></a>设计原则概述</h2><p>SOLID原则：由 5 个设计原则组成的，它们分别是：单一职责原则、开闭原则、里式替换原则、接口隔离原则和依赖反转原则，依次对应 SOLID 中的 S、O、L、I、D 这 5 个英文字母，SRP单一职责原则 Single Responsibility Principle； KISS保持简单 Keep It Simple and Stupid； YAGNI不需要原则 You Ain’t Gonna Need It ； DRY 不要重复原则 Don’t Repeat Yourself ； LOD 迪米特法则 Law of Demeter。</p>
+<a id="more"></a>
+
+<p>设计原则和思想比设计模式更加普适和重要。可以这样说，设计原则和思想是更高层次的理论和指导原则，设计模式只是这些理论和指导原则下，根据经验和场景，总结出来的编程范式。掌握了代码的设计原则和思想，我们才能更清楚的了解，为什么要用某种设计模式，才能更恰到好处地应用设计模式。</p>
+<h2 id="理论一：对于单一职责原则，如何判定某个类的职责是否够“单一”？"><a href="#理论一：对于单一职责原则，如何判定某个类的职责是否够“单一”？" class="headerlink" title="理论一：对于单一职责原则，如何判定某个类的职责是否够“单一”？"></a>理论一：对于单一职责原则，如何判定某个类的职责是否够“单一”？</h2><p>单一职责原则的英文是 Single Responsibility Principle，缩写为 SRP。这个原则的英文描述是这样的：A class or module should have a single responsibility。如果我们把它翻译成中文，那就是：一个类或者模块只负责完成一个职责（或者功能）。</p>
+<h3 id="1-如何理解单一职责原则（SRP）？"><a href="#1-如何理解单一职责原则（SRP）？" class="headerlink" title="1. 如何理解单一职责原则（SRP）？"></a>1. 如何理解单一职责原则（SRP）？</h3><p>一个类只负责完成一个职责或者功能。不要设计大而全的类，要设计粒度小、功能单一的类。单一职责原则是为了实现代码高内聚、低耦合，提高代码的复用性、可读性、可维护性。</p>
+<h3 id="2-如何判断类的职责是否足够单一？"><a href="#2-如何判断类的职责是否足够单一？" class="headerlink" title="2. 如何判断类的职责是否足够单一？"></a>2. 如何判断类的职责是否足够单一？</h3><p>不同的应用场景、不同阶段的需求背景、不同的业务层面，对同一个类的职责是否单一，可能会有不同的判定结果。实际上，一些侧面的判断指标更具有指导意义和可执行性，比如，出现下面这些情况就有可能说明这类的设计不满足单一职责原则：类中的代码行数、函数或者属性过多；类依赖的其他类过多，或者依赖类的其他类过多；私有方法过多；比较难给类起一个合适的名字；类中大量的方法都是集中操作类中的某几个属性。</p>
+<h3 id="3-类的职责是否设计得越单一越好？"><a href="#3-类的职责是否设计得越单一越好？" class="headerlink" title="3. 类的职责是否设计得越单一越好？"></a>3. 类的职责是否设计得越单一越好？</h3><p>单一职责原则通过避免设计大而全的类，避免将不相关的功能耦合在一起，来提高类的内聚性。同时，类职责单一，类依赖的和被依赖的其他类也会变少，减少了代码的耦合性，以此来实现代码的高内聚、低耦合。但是，如果拆分得过细，实际上会适得其反，反倒会降低内聚性，也会影响代码的可维护性。</p>
+<h2 id="理论二：开闭原则，如何做到“对扩展开放、修改关闭”？扩展和修改各指什么？"><a href="#理论二：开闭原则，如何做到“对扩展开放、修改关闭”？扩展和修改各指什么？" class="headerlink" title="理论二：开闭原则，如何做到“对扩展开放、修改关闭”？扩展和修改各指什么？"></a>理论二：开闭原则，如何做到“对扩展开放、修改关闭”？扩展和修改各指什么？</h2><p>开闭原则的英文全称是 Open Closed Principle，简写为 OCP。它的英文描述是：software entities (modules, classes, functions, etc.) should be open for extension , but closed for modification。我们把它翻译成中文就是：软件实体（模块、类、方法等）应该“对扩展开放、对修改关闭”。</p>
+<p>添加一个新的功能应该是，在已有代码基础上扩展代码（新增模块、类、方法等），而非修改已有代码（修改模块、类、方法等）。这条原则的设计初衷：只要它没有破坏原有的代码的正常运行，没有破坏原有的单元测试。</p>
+<h3 id="1-如何理解“对扩展开放、对修改关闭”？"><a href="#1-如何理解“对扩展开放、对修改关闭”？" class="headerlink" title="1.如何理解“对扩展开放、对修改关闭”？"></a>1.如何理解“对扩展开放、对修改关闭”？</h3><p>添加一个新的功能，应该是通过在已有代码基础上扩展代码（新增模块、类、方法、属性等），而非修改已有代码（修改模块、类、方法、属性等）的方式来完成。关于定义，我们有两点要注意。第一点是，开闭原则并不是说完全杜绝修改，而是以最小的修改代码的代价来完成新功能的开发。第二点是，同样的代码改动，在粗代码粒度下，可能被认定为“修改”；在细代码粒度下，可能又被认定为“扩展”。</p>
+<h3 id="2-如何做到“对扩展开放、修改关闭”？"><a href="#2-如何做到“对扩展开放、修改关闭”？" class="headerlink" title="2. 如何做到“对扩展开放、修改关闭”？"></a>2. 如何做到“对扩展开放、修改关闭”？</h3><p>我们要时刻具备扩展意识、抽象意识、封装意识。在写代码的时候，我们要多花点时间思考一下，这段代码未来可能有哪些需求变更，如何设计代码结构，事先留好扩展点，以便在未来需求变更的时候，在不改动代码整体结构、做到最小代码改动的情况下，将新的代码灵活地插入到扩展点上。</p>
+<p>很多设计原则、设计思想、设计模式，都是以提高代码的扩展性为最终目的的。特别是 23 种经典设计模式，大部分都是为了解决代码的扩展性问题而总结出来的，都是以开闭原则为指导原则的。最常用来提高代码扩展性的方法有：多态、依赖注入、基于接口而非实现编程，以及大部分的设计模式（比如，装饰、策略、模板、职责链、状态）。</p>
+<h4 id="通过多态实现"><a href="#通过多态实现" class="headerlink" title="通过多态实现"></a>通过多态实现</h4><p>例子：API 接口监控告警的代码</p>
+<p>改造前的代码</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">public class Alert &#123;</span><br><span class="line">  private AlertRule rule;</span><br><span class="line">  private Notification notification;</span><br><span class="line"></span><br><span class="line">  public Alert(AlertRule rule, Notification notification) &#123;</span><br><span class="line">    this.rule &#x3D; rule;</span><br><span class="line">    this.notification &#x3D; notification;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  public void check(String api, long requestCount, long errorCount, long durationOfSeconds) &#123;</span><br><span class="line">    long tps &#x3D; requestCount &#x2F; durationOfSeconds;</span><br><span class="line">    if (tps &gt; rule.getMatchedRule(api).getMaxTps()) &#123;</span><br><span class="line">      notification.notify(NotificationEmergencyLevel.URGENCY, &quot;...&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">    if (errorCount &gt; rule.getMatchedRule(api).getMaxErrorCount()) &#123;</span><br><span class="line">      notification.notify(NotificationEmergencyLevel.SEVERE, &quot;...&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">现在，如果我们需要添加一个功能，当每秒钟接口超时请求个数，超过某个预先设置的最大阈值时，我们也要触发告警发送通知。</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">public class Alert &#123;</span><br><span class="line">  &#x2F;&#x2F; ...省略AlertRule&#x2F;Notification属性和构造函数...</span><br><span class="line">  </span><br><span class="line">  &#x2F;&#x2F; 改动一：添加参数timeoutCount</span><br><span class="line">  public void check(String api, long requestCount, long errorCount, long timeoutCount, long durationOfSeconds) &#123;</span><br><span class="line">    long tps &#x3D; requestCount &#x2F; durationOfSeconds;</span><br><span class="line">    if (tps &gt; rule.getMatchedRule(api).getMaxTps()) &#123;</span><br><span class="line">      notification.notify(NotificationEmergencyLevel.URGENCY, &quot;...&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">    if (errorCount &gt; rule.getMatchedRule(api).getMaxErrorCount()) &#123;</span><br><span class="line">      notification.notify(NotificationEmergencyLevel.SEVERE, &quot;...&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">    &#x2F;&#x2F; 改动二：添加接口超时处理逻辑</span><br><span class="line">    long timeoutTps &#x3D; timeoutCount &#x2F; durationOfSeconds;</span><br><span class="line">    if (timeoutTps &gt; rule.getMatchedRule(api).getMaxTimeoutTps()) &#123;</span><br><span class="line">      notification.notify(NotificationEmergencyLevel.URGENCY, &quot;...&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">弊端：一方面，我们对接口进行了修改，这就意味着调用这个接口的代码都要做相应的修改。另一方面，修改了 check() 函数，相应的单元测试都需要修改</span><br></pre></td></tr></table></figure>
+
+<p>使用多态改造后的代码</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">public class Alert &#123;</span><br><span class="line">  private List&lt;AlertHandler&gt; alertHandlers &#x3D; new ArrayList&lt;&gt;();</span><br><span class="line">  </span><br><span class="line">  public void addAlertHandler(AlertHandler alertHandler) &#123;</span><br><span class="line">    this.alertHandlers.add(alertHandler);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  public void check(ApiStatInfo apiStatInfo) &#123;</span><br><span class="line">    for (AlertHandler handler : alertHandlers) &#123;</span><br><span class="line">      handler.check(apiStatInfo);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class ApiStatInfo &#123;&#x2F;&#x2F;省略constructor&#x2F;getter&#x2F;setter方法</span><br><span class="line">  private String api;</span><br><span class="line">  private long requestCount;</span><br><span class="line">  private long errorCount;</span><br><span class="line">  private long durationOfSeconds;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public abstract class AlertHandler &#123;</span><br><span class="line">  protected AlertRule rule;</span><br><span class="line">  protected Notification notification;</span><br><span class="line">  public AlertHandler(AlertRule rule, Notification notification) &#123;</span><br><span class="line">    this.rule &#x3D; rule;</span><br><span class="line">    this.notification &#x3D; notification;</span><br><span class="line">  &#125;</span><br><span class="line">  public abstract void check(ApiStatInfo apiStatInfo);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class TpsAlertHandler extends AlertHandler &#123;</span><br><span class="line">  public TpsAlertHandler(AlertRule rule, Notification notification) &#123;</span><br><span class="line">    super(rule, notification);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  @Override</span><br><span class="line">  public void check(ApiStatInfo apiStatInfo) &#123;</span><br><span class="line">    long tps &#x3D; apiStatInfo.getRequestCount()&#x2F; apiStatInfo.getDurationOfSeconds();</span><br><span class="line">    if (tps &gt; rule.getMatchedRule(apiStatInfo.getApi()).getMaxTps()) &#123;</span><br><span class="line">      notification.notify(NotificationEmergencyLevel.URGENCY, &quot;...&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class ErrorAlertHandler extends AlertHandler &#123;</span><br><span class="line">  public ErrorAlertHandler(AlertRule rule, Notification notification)&#123;</span><br><span class="line">    super(rule, notification);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  @Override</span><br><span class="line">  public void check(ApiStatInfo apiStatInfo) &#123;</span><br><span class="line">    if (apiStatInfo.getErrorCount() &gt; rule.getMatchedRule(apiStatInfo.getApi()).getMaxErrorCount()) &#123;</span><br><span class="line">      notification.notify(NotificationEmergencyLevel.SEVERE, &quot;...&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">上面的代码是对 Alert 的重构，我们再来看下，重构之后的 Alert 该如何使用呢？具体的使用代码我也写在这里了。其中，ApplicationContext 是一个单例类，负责 Alert 的创建、组装（alertRule 和 notification 的依赖注入）、初始化（添加 handlers）工作。</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">public class ApplicationContext &#123;</span><br><span class="line">  private AlertRule alertRule;</span><br><span class="line">  private Notification notification;</span><br><span class="line">  private Alert alert;</span><br><span class="line">  </span><br><span class="line">  public void initializeBeans() &#123;</span><br><span class="line">    alertRule &#x3D; new AlertRule(&#x2F;*.省略参数.*&#x2F;); &#x2F;&#x2F;省略一些初始化代码</span><br><span class="line">    notification &#x3D; new Notification(&#x2F;*.省略参数.*&#x2F;); &#x2F;&#x2F;省略一些初始化代码</span><br><span class="line">    alert &#x3D; new Alert();</span><br><span class="line">    alert.addAlertHandler(new TpsAlertHandler(alertRule, notification));</span><br><span class="line">    alert.addAlertHandler(new ErrorAlertHandler(alertRule, notification));</span><br><span class="line">  &#125;</span><br><span class="line">  public Alert getAlert() &#123; return alert; &#125;</span><br><span class="line"></span><br><span class="line">  &#x2F;&#x2F; 饿汉式单例</span><br><span class="line">  private static final ApplicationContext instance &#x3D; new ApplicationContext();</span><br><span class="line">  private ApplicationContext() &#123;</span><br><span class="line">    initializeBeans();</span><br><span class="line">  &#125;</span><br><span class="line">  public static ApplicationContext getInstance() &#123;</span><br><span class="line">    return instance;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class Demo &#123;</span><br><span class="line">  public static void main(String[] args) &#123;</span><br><span class="line">    ApiStatInfo apiStatInfo &#x3D; new ApiStatInfo();</span><br><span class="line">    &#x2F;&#x2F; ...省略设置apiStatInfo数据值的代码</span><br><span class="line">    ApplicationContext.getInstance().getAlert().check(apiStatInfo);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">如果这时需要添加其他规则警告，只需按如下进行改动</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">public class Alert &#123; &#x2F;&#x2F; 代码未改动... &#125;</span><br><span class="line">public class ApiStatInfo &#123;&#x2F;&#x2F;省略constructor&#x2F;getter&#x2F;setter方法</span><br><span class="line">  private String api;</span><br><span class="line">  private long requestCount;</span><br><span class="line">  private long errorCount;</span><br><span class="line">  private long durationOfSeconds;</span><br><span class="line">  private long timeoutCount; &#x2F;&#x2F; 改动一：添加新字段</span><br><span class="line">&#125;</span><br><span class="line">public abstract class AlertHandler &#123; &#x2F;&#x2F;代码未改动... &#125;</span><br><span class="line">public class TpsAlertHandler extends AlertHandler &#123;&#x2F;&#x2F;代码未改动...&#125;</span><br><span class="line">public class ErrorAlertHandler extends AlertHandler &#123;&#x2F;&#x2F;代码未改动...&#125;</span><br><span class="line">&#x2F;&#x2F; 改动二：添加新的handler</span><br><span class="line">public class TimeoutAlertHandler extends AlertHandler &#123;&#x2F;&#x2F;省略代码...&#125;</span><br><span class="line"></span><br><span class="line">public class ApplicationContext &#123;</span><br><span class="line">  private AlertRule alertRule;</span><br><span class="line">  private Notification notification;</span><br><span class="line">  private Alert alert;</span><br><span class="line">  </span><br><span class="line">  public void initializeBeans() &#123;</span><br><span class="line">    alertRule &#x3D; new AlertRule(&#x2F;*.省略参数.*&#x2F;); &#x2F;&#x2F;省略一些初始化代码</span><br><span class="line">    notification &#x3D; new Notification(&#x2F;*.省略参数.*&#x2F;); &#x2F;&#x2F;省略一些初始化代码</span><br><span class="line">    alert &#x3D; new Alert();</span><br><span class="line">    alert.addAlertHandler(new TpsAlertHandler(alertRule, notification));</span><br><span class="line">    alert.addAlertHandler(new ErrorAlertHandler(alertRule, notification));</span><br><span class="line">    &#x2F;&#x2F; 改动三：注册handler</span><br><span class="line">    alert.addAlertHandler(new TimeoutAlertHandler(alertRule, notification));</span><br><span class="line">  &#125;</span><br><span class="line">  &#x2F;&#x2F;...省略其他未改动代码...</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class Demo &#123;</span><br><span class="line">  public static void main(String[] args) &#123;</span><br><span class="line">    ApiStatInfo apiStatInfo &#x3D; new ApiStatInfo();</span><br><span class="line">    &#x2F;&#x2F; ...省略apiStatInfo的set字段代码</span><br><span class="line">    apiStatInfo.setTimeoutCount(289); &#x2F;&#x2F; 改动四：设置tiemoutCount值</span><br><span class="line">    ApplicationContext.getInstance().getAlert().check(apiStatInfo);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>重构之后的代码更加灵活和易扩展。如果我们要想添加新的告警逻辑，只需要基于扩展的方式创建新的 handler 类即可，不需要改动原来的 check() 函数的逻辑。而且，我们只需要为新的 handler 类添加单元测试，老的单元测试都不会失败，也不用修改。</p>
+<h4 id="通过接口实现"><a href="#通过接口实现" class="headerlink" title="通过接口实现"></a>通过接口实现</h4><p>例子通过 Kafka 来发送异步消息：</p>
+<p>对于这样一个功能的开发，我们要学会将其抽象成一组跟具体消息队列（Kafka）无关的异步消息接口。所有上层系统都依赖这组抽象的接口编程，并且通过依赖注入的方式来调用。当我们要替换新的消息队列的时候，比如将 Kafka 替换成 RocketMQ，可以很方便地拔掉老的消息队列实现，插入新的消息队列实现。具体代码如下所示：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">&#x2F;&#x2F; 这一部分体现了抽象意识</span><br><span class="line">public interface MessageQueue &#123; &#x2F;&#x2F;... &#125;</span><br><span class="line">public class KafkaMessageQueue implements MessageQueue &#123; &#x2F;&#x2F;... &#125;</span><br><span class="line">public class RocketMQMessageQueue implements MessageQueue &#123;&#x2F;&#x2F;...&#125;</span><br><span class="line"></span><br><span class="line">public interface MessageFromatter &#123; &#x2F;&#x2F;... &#125;</span><br><span class="line">public class JsonMessageFromatter implements MessageFromatter &#123;&#x2F;&#x2F;...&#125;</span><br><span class="line">public class ProtoBufMessageFromatter implements MessageFromatter &#123;&#x2F;&#x2F;...&#125;</span><br><span class="line"></span><br><span class="line">public class Demo &#123;</span><br><span class="line">  private MessageQueue msgQueue; &#x2F;&#x2F; 基于接口而非实现编程</span><br><span class="line">  public Demo(MessageQueue msgQueue) &#123; &#x2F;&#x2F; 依赖注入</span><br><span class="line">    this.msgQueue &#x3D; msgQueue;</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  &#x2F;&#x2F; msgFormatter：多态、依赖注入</span><br><span class="line">  public void sendNotification(Notification notification, MessageFormatter msgFormatter) &#123;</span><br><span class="line">    &#x2F;&#x2F;...    </span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="通过各种设计模式实现（比如，装饰、策略、模板、职责链、状态）"><a href="#通过各种设计模式实现（比如，装饰、策略、模板、职责链、状态）" class="headerlink" title="通过各种设计模式实现（比如，装饰、策略、模板、职责链、状态）"></a>通过各种设计模式实现（比如，装饰、策略、模板、职责链、状态）</h4><h3 id="3-如何在项目中合理应用开闭原则？"><a href="#3-如何在项目中合理应用开闭原则？" class="headerlink" title="3.如何在项目中合理应用开闭原则？"></a>3.如何在项目中合理应用开闭原则？</h3><p>1.最合理的做法是，对于一些比较确定的、短期内可能就会扩展，或者需求改动对代码结构影响比较大的情况，或者实现成本不高的扩展点，在编写代码的时候之后，我们就可以事先做些扩展性设计。但对于一些不确定未来是否要支持的需求，或者实现起来比较复杂的扩展点，我们可以等到有需求驱动的时候，再通过重构代码的方式来支持扩展的需求。这样可以避免过度设计。</p>
+<p>2.代码的扩展性会跟可读性相冲突，很多时候，我们都需要在扩展性和可读性之间做权衡。在某些场景下，代码的扩展性很重要，我们就可以适当地牺牲一些代码的可读性；在另一些场景下，代码的可读性更加重要，那我们就适当地牺牲一些代码的可扩展性。</p>
+<h2 id="理论三：里式替换（LSP）跟多态有何区别？哪些代码违背了LSP？"><a href="#理论三：里式替换（LSP）跟多态有何区别？哪些代码违背了LSP？" class="headerlink" title="理论三：里式替换（LSP）跟多态有何区别？哪些代码违背了LSP？"></a>理论三：里式替换（LSP）跟多态有何区别？哪些代码违背了LSP？</h2><p>Liskov Substitution Principle</p>
+<blockquote>
+<p>If S is a subtype of T, then objects of type T may be replaced with objects of type S, without breaking the program。<br>Functions that use pointers of references to base classes must be able to use objects of derived classes without knowing it。</p>
+</blockquote>
+<p>中文描述：子类对象（object of subtype/derived class）能够替换程序（program）中父类对象（object of base/parent class）出现的任何地方，并且保证原来程序的逻辑行为（behavior）不变及正确性不被破坏。</p>
+<h3 id="里式替换原则的理解"><a href="#里式替换原则的理解" class="headerlink" title="里式替换原则的理解"></a>里式替换原则的理解</h3><p>里式替换原则是用来指导，继承关系中子类该如何设计的一个原则。理解里式替换原则，最核心的就是理解“design by contract，按照协议来设计”这几个字。父类定义了函数的“约定”（或者叫协议），那子类可以改变函数的内部实现逻辑，但不能改变函数原有的“约定”。这里的约定包括：函数声明要实现的功能；对输入、输出、异常的约定；甚至包括注释中所罗列的任何特殊说明。</p>
+<h3 id="符合里式替换原则的代码示例"><a href="#符合里式替换原则的代码示例" class="headerlink" title="符合里式替换原则的代码示例"></a>符合里式替换原则的代码示例</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">public class Transporter &#123;</span><br><span class="line">  private HttpClient httpClient;</span><br><span class="line">  </span><br><span class="line">  public Transporter(HttpClient httpClient) &#123;</span><br><span class="line">    this.httpClient &#x3D; httpClient;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  public Response sendRequest(Request request) &#123;</span><br><span class="line">    &#x2F;&#x2F; ...use httpClient to send request</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class SecurityTransporter extends Transporter &#123;</span><br><span class="line">  private String appId;</span><br><span class="line">  private String appToken;</span><br><span class="line"></span><br><span class="line">  public SecurityTransporter(HttpClient httpClient, String appId, String appToken) &#123;</span><br><span class="line">    super(httpClient);</span><br><span class="line">    this.appId &#x3D; appId;</span><br><span class="line">    this.appToken &#x3D; appToken;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  @Override</span><br><span class="line">  public Response sendRequest(Request request) &#123;</span><br><span class="line">    if (StringUtils.isNotBlank(appId) &amp;&amp; StringUtils.isNotBlank(appToken)) &#123;</span><br><span class="line">      request.addPayload(&quot;app-id&quot;, appId);</span><br><span class="line">      request.addPayload(&quot;app-token&quot;, appToken);</span><br><span class="line">    &#125;</span><br><span class="line">    return super.sendRequest(request);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class Demo &#123;    </span><br><span class="line">  public void demoFunction(Transporter transporter) &#123;    </span><br><span class="line">    Reuqest request &#x3D; new Request();</span><br><span class="line">    &#x2F;&#x2F;...省略设置request中数据值的代码...</span><br><span class="line">    Response response &#x3D; transporter.sendRequest(request);</span><br><span class="line">    &#x2F;&#x2F;...省略其他逻辑...</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; 里式替换原则</span><br><span class="line">Demo demo &#x3D; new Demo();</span><br><span class="line">demo.demofunction(new SecurityTransporter(&#x2F;*省略参数*&#x2F;););</span><br></pre></td></tr></table></figure>
+
+<p>在上面的代码中，子类 SecurityTransporter 的设计完全符合里式替换原则，可以替换父类出现的任何位置，并且原来代码的逻辑行为不变且正确性也没有被破坏。</p>
+<h3 id="哪些代码违背了里式替换原则"><a href="#哪些代码违背了里式替换原则" class="headerlink" title="哪些代码违背了里式替换原则"></a>哪些代码违背了里式替换原则</h3><h4 id="1-子类违背父类声明要实现的功能"><a href="#1-子类违背父类声明要实现的功能" class="headerlink" title="1. 子类违背父类声明要实现的功能"></a>1. 子类违背父类声明要实现的功能</h4><p>父类中提供的 sortOrdersByAmount() 订单排序函数，是按照金额从小到大来给订单排序的，而子类重写这个 sortOrdersByAmount() 订单排序函数之后，是按照创建日期来给订单排序的。那子类的设计就违背里式替换原则。</p>
+<h4 id="2-子类违背父类对输入、输出、异常的约定"><a href="#2-子类违背父类对输入、输出、异常的约定" class="headerlink" title="2. 子类违背父类对输入、输出、异常的约定"></a>2. 子类违背父类对输入、输出、异常的约定</h4><p>在父类中，某个函数约定：运行出错的时候返回 null；获取数据为空的时候返回空集合（empty collection）。而子类重载函数之后，实现变了，运行出错返回异常（exception），获取不到数据返回 null。那子类的设计就违背里式替换原则。</p>
+<p>在父类中，某个函数约定，只会抛出 ArgumentNullException 异常，那子类的设计实现中只允许抛出 ArgumentNullException 异常，任何其他异常的抛出，都会导致子类违背里式替换原则。</p>
+<h4 id="3-子类违背父类注释中所罗列的任何特殊说明"><a href="#3-子类违背父类注释中所罗列的任何特殊说明" class="headerlink" title="3. 子类违背父类注释中所罗列的任何特殊说明"></a>3. 子类违背父类注释中所罗列的任何特殊说明</h4><p>父类中定义的 withdraw() 提现函数的注释是这么写的：“用户的提现金额不得超过账户余额……”，而子类重写 withdraw() 函数之后，针对 VIP 账号实现了透支提现的功能，也就是提现金额可以大于账户余额，那这个子类的设计也是不符合里式替换原则的。</p>
+<h3 id="判断子类的设计实现是否违背里式替换原则的小窍门"><a href="#判断子类的设计实现是否违背里式替换原则的小窍门" class="headerlink" title="判断子类的设计实现是否违背里式替换原则的小窍门"></a>判断子类的设计实现是否违背里式替换原则的小窍门</h3><p>拿父类的单元测试去验证子类的代码。如果某些单元测试运行失败，就有可能说明，子类的设计实现没有完全地遵守父类的约定，子类有可能违背了里式替换原则。</p>
+<p>在父类中，某个函数约定：运行出错的时候返回 null；获取数据为空的时候返回空集合（empty collection）。而子类重载函数之后，实现变了，运行出错返回异常（exception），获取不到数据返回 null。那子类的设计就违背里式替换原则。</p>
+<h3 id="里式替换与多态的区别"><a href="#里式替换与多态的区别" class="headerlink" title="里式替换与多态的区别"></a>里式替换与多态的区别</h3><p>虽然从定义描述和代码实现上来看，多态和里式替换有点类似，但它们关注的角度是不一样的。</p>
+<p>多态是面向对象编程的一大特性，也是面向对象编程语言的一种语法。它是一种代码实现的思路。</p>
+<p>而里式替换是一种设计原则，用来指导继承关系中子类该如何设计，子类的设计要保证在替换父类的时候，不改变原有程序的逻辑及不破坏原有程序的正确性。</p>
+<h2 id="理论四：接口隔离原则有哪三种应用？原则中的“接口”该如何理解？"><a href="#理论四：接口隔离原则有哪三种应用？原则中的“接口”该如何理解？" class="headerlink" title="理论四：接口隔离原则有哪三种应用？原则中的“接口”该如何理解？"></a>理论四：接口隔离原则有哪三种应用？原则中的“接口”该如何理解？</h2><h3 id="1-如何理解“接口隔离原则”"><a href="#1-如何理解“接口隔离原则”" class="headerlink" title="1.如何理解“接口隔离原则”"></a>1.如何理解“接口隔离原则”</h3><p>Interface Segregation Principle</p>
+<h4 id="把“接口”理解为一组-API-接口集合"><a href="#把“接口”理解为一组-API-接口集合" class="headerlink" title="把“接口”理解为一组 API 接口集合"></a>把“接口”理解为一组 API 接口集合</h4><p>如果把“接口”理解为一组接口集合，可以是某个微服务的接口，也可以是某个类库的接口等。如果部分接口只被部分调用者使用，我们就需要将这部分接口隔离出来，单独给这部分调用者使用，而不强迫其他调用者也依赖这部分不会被用到的接口。</p>
+<p>例子：服务用户系统提供了一组跟用户相关的 API 给其他系统使用，比如：注册、登录、获取用户信息等，我们的后台管理系统要实现删除用户的功能，希望用户系统提供一个删除用户的接口。这个时候我们该如何来做呢？参照接口隔离原则，调用者不应该强迫依赖它不需要的接口，将删除接口单独放到另外一个接口 RestrictedUserService 中，然后将 RestrictedUserService 只打包提供给后台管理系统来使用。具体的代码实现如下所示：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">public interface UserService &#123;</span><br><span class="line">  boolean register(String cellphone, String password);</span><br><span class="line">  boolean login(String cellphone, String password);</span><br><span class="line">  UserInfo getUserInfoById(long id);</span><br><span class="line">  UserInfo getUserInfoByCellphone(String cellphone);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public interface RestrictedUserService &#123;</span><br><span class="line">  boolean deleteUserByCellphone(String cellphone);</span><br><span class="line">  boolean deleteUserById(long id);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class UserServiceImpl implements UserService, RestrictedUserService &#123;</span><br><span class="line">  &#x2F;&#x2F; ...省略实现代码...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="把“接口”理解为单个-API-接口或函数"><a href="#把“接口”理解为单个-API-接口或函数" class="headerlink" title="把“接口”理解为单个 API 接口或函数"></a>把“接口”理解为单个 API 接口或函数</h4><p>如果把“接口”理解为单个 API 接口或函数，部分调用者只需要函数中的部分功能，那我们就需要把函数拆分成粒度更细的多个函数，让调用者只依赖它需要的那个细粒度函数。</p>
+<p>比如一下代码 count() 函数功能不够单一，包含了很多不同的统计功能</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">public class Statistics &#123;</span><br><span class="line">  private Long max;</span><br><span class="line">  private Long min;</span><br><span class="line">  private Long average;</span><br><span class="line">  private Long sum;</span><br><span class="line">  private Long percentile99;</span><br><span class="line">  private Long percentile999;</span><br><span class="line">  &#x2F;&#x2F;...省略constructor&#x2F;getter&#x2F;setter等方法...</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public Statistics count(Collection&lt;Long&gt; dataSet) &#123;</span><br><span class="line">  Statistics statistics &#x3D; new Statistics();</span><br><span class="line">  &#x2F;&#x2F;...省略计算逻辑...</span><br><span class="line">  return statistics;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>按照接口隔离原则，我们应该把 count() 函数拆成几个更小粒度的函数，每个函数负责一个独立的统计功能:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">public Long max(Collection&lt;Long&gt; dataSet) &#123; &#x2F;&#x2F;... &#125;</span><br><span class="line">public Long min(Collection&lt;Long&gt; dataSet) &#123; &#x2F;&#x2F;... &#125; </span><br><span class="line">public Long average(Colletion&lt;Long&gt; dataSet) &#123; &#x2F;&#x2F;... &#125;</span><br><span class="line">&#x2F;&#x2F; ...省略其他统计函数...</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="把“接口”理解为-OOP-中的接口概念"><a href="#把“接口”理解为-OOP-中的接口概念" class="headerlink" title="把“接口”理解为 OOP 中的接口概念"></a>把“接口”理解为 OOP 中的接口概念</h4><p>如果把“接口”理解为 OOP 中的接口，也可以理解为面向对象编程语言中的接口语法。那接口的设计要尽量单一，不要让接口的实现类和调用者，依赖不需要的接口函数。</p>
+<p>例子：我们的项目中用到了三个外部系统：Redis、MySQL、Kafka。每个系统都对应一系列配置信息，比如地址、端口、访问超时时间等。为了在内存中存储这些配置信息，供项目中的其他模块来使用，我们分别设计实现了三个 Configuration 类：RedisConfig、MysqlConfig、KafkaConfig。具体的代码实现如下所示。代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">public class RedisConfig &#123;</span><br><span class="line">    private ConfigSource configSource; &#x2F;&#x2F;配置中心（比如zookeeper）</span><br><span class="line">    private String address;</span><br><span class="line">    private int timeout;</span><br><span class="line">    private int maxTotal;</span><br><span class="line">    &#x2F;&#x2F;省略其他配置: maxWaitMillis,maxIdle,minIdle...</span><br><span class="line"></span><br><span class="line">    public RedisConfig(ConfigSource configSource) &#123;</span><br><span class="line">        this.configSource &#x3D; configSource;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public String getAddress() &#123;</span><br><span class="line">        return this.address;</span><br><span class="line">    &#125;</span><br><span class="line">    &#x2F;&#x2F;...省略其他get()、init()方法...</span><br><span class="line"></span><br><span class="line">    public void update() &#123;</span><br><span class="line">      &#x2F;&#x2F;从configSource加载配置到address&#x2F;timeout&#x2F;maxTotal...</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class KafkaConfig &#123; &#x2F;&#x2F;...省略... &#125;</span><br><span class="line">public class MysqlConfig &#123; &#x2F;&#x2F;...省略... &#125;</span><br></pre></td></tr></table></figure>
+
+<p>现在，有一个新的功能需求，希望支持 Redis 和 Kafka 配置信息的热更新。所谓“热更新（hot update）”就是，如果在配置中心中更改了配置信息，我们希望在不用重启系统的情况下，能将最新的配置信息加载到内存中（也就是 RedisConfig、KafkaConfig 类中）。但是，因为某些原因，我们并不希望对 MySQL 的配置信息进行热更新。</p>
+<p>实现代码如下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">public interface Updater &#123;</span><br><span class="line">  void update();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class RedisConfig implemets Updater &#123;</span><br><span class="line">  &#x2F;&#x2F;...省略其他属性和方法...</span><br><span class="line">  @Override</span><br><span class="line">  public void update() &#123; &#x2F;&#x2F;... &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class KafkaConfig implements Updater &#123;</span><br><span class="line">  &#x2F;&#x2F;...省略其他属性和方法...</span><br><span class="line">  @Override</span><br><span class="line">  public void update() &#123; &#x2F;&#x2F;... &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class MysqlConfig &#123; &#x2F;&#x2F;...省略其他属性和方法... &#125;</span><br><span class="line"></span><br><span class="line">public class ScheduledUpdater &#123;</span><br><span class="line">    private final ScheduledExecutorService executor &#x3D; Executors.newSingleThreadScheduledExecutor();;</span><br><span class="line">    private long initialDelayInSeconds;</span><br><span class="line">    private long periodInSeconds;</span><br><span class="line">    private Updater updater;</span><br><span class="line"></span><br><span class="line">    public ScheduleUpdater(Updater updater, long initialDelayInSeconds, long periodInSeconds) &#123;</span><br><span class="line">        this.updater &#x3D; updater;</span><br><span class="line">        this.initialDelayInSeconds &#x3D; initialDelayInSeconds;</span><br><span class="line">        this.periodInSeconds &#x3D; periodInSeconds;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public void run() &#123;</span><br><span class="line">        executor.scheduleAtFixedRate(new Runnable() &#123;</span><br><span class="line">            @Override</span><br><span class="line">            public void run() &#123;</span><br><span class="line">                updater.update();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;, this.initialDelayInSeconds, this.periodInSeconds, TimeUnit.SECONDS);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class Application &#123;</span><br><span class="line">  ConfigSource configSource &#x3D; new ZookeeperConfigSource(&#x2F;*省略参数*&#x2F;);</span><br><span class="line">  public static final RedisConfig redisConfig &#x3D; new RedisConfig(configSource);</span><br><span class="line">  public static final KafkaConfig kafkaConfig &#x3D; new KakfaConfig(configSource);</span><br><span class="line">  public static final MySqlConfig mysqlConfig &#x3D; new MysqlConfig(configSource);</span><br><span class="line"></span><br><span class="line">  public static void main(String[] args) &#123;</span><br><span class="line">    ScheduledUpdater redisConfigUpdater &#x3D; new ScheduledUpdater(redisConfig, 300, 300);</span><br><span class="line">    redisConfigUpdater.run();</span><br><span class="line">    </span><br><span class="line">    ScheduledUpdater kafkaConfigUpdater &#x3D; new ScheduledUpdater(kafkaConfig, 60, 60);</span><br><span class="line">    redisConfigUpdater.run();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<p>接着，有一个新的监控需求，期望输出项目的配置信息到一个固定的 HTTP 地址，比如：<a href="http://127.0.0.1:2389/config" target="_blank" rel="noopener">http://127.0.0.1:2389/config</a> 。我们只需要在浏览器中输入这个地址，就可以显示出系统的配置信息。不过，出于某些原因，我们只想暴露 MySQL 和 Redis 的配置信息，不想暴露 Kafka 的配置信息。</p>
+<p>在原来代码的基础上拓展后如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">public interface Updater &#123;</span><br><span class="line">  void update();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public interface Viewer &#123;</span><br><span class="line">  String outputInPlainText();</span><br><span class="line">  Map&lt;String, String&gt; output();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class RedisConfig implemets Updater, Viewer &#123;</span><br><span class="line">  &#x2F;&#x2F;...省略其他属性和方法...</span><br><span class="line">  @Override</span><br><span class="line">  public void update() &#123; &#x2F;&#x2F;... &#125;</span><br><span class="line">  @Override</span><br><span class="line">  public String outputInPlainText() &#123; &#x2F;&#x2F;... &#125;</span><br><span class="line">  @Override</span><br><span class="line">  public Map&lt;String, String&gt; output() &#123; &#x2F;&#x2F;...&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class KafkaConfig implements Updater &#123;</span><br><span class="line">  &#x2F;&#x2F;...省略其他属性和方法...</span><br><span class="line">  @Override</span><br><span class="line">  public void update() &#123; &#x2F;&#x2F;... &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class MysqlConfig implements Viewer &#123;</span><br><span class="line">  &#x2F;&#x2F;...省略其他属性和方法...</span><br><span class="line">  @Override</span><br><span class="line">  public String outputInPlainText() &#123; &#x2F;&#x2F;... &#125;</span><br><span class="line">  @Override</span><br><span class="line">  public Map&lt;String, String&gt; output() &#123; &#x2F;&#x2F;...&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class SimpleHttpServer &#123;</span><br><span class="line">  private String host;</span><br><span class="line">  private int port;</span><br><span class="line">  private Map&lt;String, List&lt;Viewer&gt;&gt; viewers &#x3D; new HashMap&lt;&gt;();</span><br><span class="line">  </span><br><span class="line">  public SimpleHttpServer(String host, int port) &#123;&#x2F;&#x2F;...&#125;</span><br><span class="line">  </span><br><span class="line">  public void addViewers(String urlDirectory, Viewer viewer) &#123;</span><br><span class="line">    if (!viewers.containsKey(urlDirectory)) &#123;</span><br><span class="line">      viewers.put(urlDirectory, new ArrayList&lt;Viewer&gt;());</span><br><span class="line">    &#125;</span><br><span class="line">    this.viewers.get(urlDirectory).add(viewer);</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  public void run() &#123; &#x2F;&#x2F;... &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class Application &#123;</span><br><span class="line">    ConfigSource configSource &#x3D; new ZookeeperConfigSource();</span><br><span class="line">    public static final RedisConfig redisConfig &#x3D; new RedisConfig(configSource);</span><br><span class="line">    public static final KafkaConfig kafkaConfig &#x3D; new KakfaConfig(configSource);</span><br><span class="line">    public static final MySqlConfig mysqlConfig &#x3D; new MySqlConfig(configSource);</span><br><span class="line">    </span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        ScheduledUpdater redisConfigUpdater &#x3D;</span><br><span class="line">            new ScheduledUpdater(redisConfig, 300, 300);</span><br><span class="line">        redisConfigUpdater.run();</span><br><span class="line">        </span><br><span class="line">        ScheduledUpdater kafkaConfigUpdater &#x3D;</span><br><span class="line">            new ScheduledUpdater(kafkaConfig, 60, 60);</span><br><span class="line">        redisConfigUpdater.run();</span><br><span class="line">        </span><br><span class="line">        SimpleHttpServer simpleHttpServer &#x3D; new SimpleHttpServer(“127.0.0.1”, 2389);</span><br><span class="line">        simpleHttpServer.addViewer(&quot;&#x2F;config&quot;, redisConfig);</span><br><span class="line">        simpleHttpServer.addViewer(&quot;&#x2F;config&quot;, mysqlConfig);</span><br><span class="line">        simpleHttpServer.run();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<p>我们设计了两个功能非常单一的接口：Updater 和 Viewer。ScheduledUpdater 只依赖 Updater 这个跟热更新相关的接口，不需要被强迫去依赖不需要的 Viewer 接口，满足接口隔离原则。同理，SimpleHttpServer 只依赖跟查看信息相关的 Viewer 接口，不依赖不需要的 Updater 接口，也满足接口隔离原则</p>
+<h3 id="2-接口隔离原则与单一职责原则的区别"><a href="#2-接口隔离原则与单一职责原则的区别" class="headerlink" title="2.接口隔离原则与单一职责原则的区别"></a>2.接口隔离原则与单一职责原则的区别</h3><p>单一职责原则针对的是模块、类、接口的设计。接口隔离原则相对于单一职责原则，一方面更侧重于接口的设计，另一方面它的思考角度也是不同的。接口隔离原则提供了一种判断接口的职责是否单一的标准：通过调用者如何使用接口来间接地判定。如果调用者只使用部分接口或接口的部分功能，那接口的设计就不够职责单一。</p>
+<h2 id="理论五：控制反转、依赖反转、依赖注入，这三者有何区别和联系？"><a href="#理论五：控制反转、依赖反转、依赖注入，这三者有何区别和联系？" class="headerlink" title="理论五：控制反转、依赖反转、依赖注入，这三者有何区别和联系？"></a>理论五：控制反转、依赖反转、依赖注入，这三者有何区别和联系？</h2><h3 id="控制反转（IOC）"><a href="#控制反转（IOC）" class="headerlink" title="控制反转（IOC）"></a>控制反转（IOC）</h3><p>实际上，控制反转是一个比较笼统的设计思想，并不是一种具体的实现方法，一般用来指导框架层面的设计。这里所说的“控制”指的是对程序执行流程的控制，而“反转”指的是在没有使用框架之前，程序员自己控制整个程序的执行。在使用框架之后，整个程序的执行流程通过框架来控制。流程的控制权从程序员“反转”给了框架。</p>
+<h3 id="依赖注入（DI）"><a href="#依赖注入（DI）" class="headerlink" title="依赖注入（DI）"></a>依赖注入（DI）</h3><p>依赖注入和控制反转恰恰相反，它是一种具体的编码技巧。我们不通过 new 的方式在类内部创建依赖类的对象，而是将依赖的类对象在外部创建好之后，通过构造函数、函数参数等方式传递（或注入）给类来使用。</p>
+<h3 id="依赖注入框架（DI-Framework）"><a href="#依赖注入框架（DI-Framework）" class="headerlink" title="依赖注入框架（DI Framework）"></a>依赖注入框架（DI Framework）</h3><p>我们通过依赖注入框架提供的扩展点，简单配置一下所有需要的类及其类与类之间依赖关系，就可以实现由框架来自动创建对象、管理对象的生命周期、依赖注入等原本需要程序员来做的事情。</p>
+<p>现成的依赖注入框架有很多，比如 Google Guice、Java Spring、Pico Container、Butterfly Container 等。不过，如果你熟悉 Java Spring 框架，你可能会说，Spring 框架自己声称是控制反转容器（Inversion Of Control Container）。</p>
+<h3 id="依赖反转原则（DIP）"><a href="#依赖反转原则（DIP）" class="headerlink" title="依赖反转原则（DIP）"></a>依赖反转原则（DIP）</h3><blockquote>
+<p>High-level modules shouldn’t depend on low-level modules. Both modules should depend on abstractions. In addition, abstractions shouldn’t depend on details. Details depend on abstractions.</p>
+</blockquote>
+<p>高层模块（high-level modules）不要依赖低层模块（low-level）。高层模块和低层模块应该通过抽象（abstractions）来互相依赖。除此之外，抽象（abstractions）不要依赖具体实现细节（details），具体实现细节（details）依赖抽象（abstractions）。</p>
+<p>例子：<br>Tomcat 是运行 Java Web 应用程序的容器。我们编写的 Web 应用程序代码只需要部署在 Tomcat 容器下，便可以被 Tomcat 容器调用执行。按照之前的划分原则，Tomcat 就是高层模块，我们编写的 Web 应用程序代码就是低层模块。Tomcat 和应用程序代码之间并没有直接的依赖关系，两者都依赖同一个“抽象”，也就是 Servlet 规范。Servlet 规范不依赖具体的 Tomcat 容器和应用程序的实现细节，而 Tomcat 容器和应用程序依赖 Servlet 规范。</p>
+<h2 id="理论六：为何-KISS、YAGNI原则看似简单，却经常被用错？"><a href="#理论六：为何-KISS、YAGNI原则看似简单，却经常被用错？" class="headerlink" title="理论六：为何 KISS、YAGNI原则看似简单，却经常被用错？"></a>理论六：为何 KISS、YAGNI原则看似简单，却经常被用错？</h2><p>KISS 原则的英文描述有好几个版本，比如下面这几个。</p>
+<blockquote>
+<p>Keep It Simple and Stupid.<br>Keep It Short and Simple.Keep<br>It Simple and Straightforward.</p>
+</blockquote>
+<p>KISS 原则就是保持代码可读和可维护的重要手段。代码足够简单，也就意味着很容易读懂，bug 比较难隐藏。即便出现 bug，修复起来也比较简单。</p>
+<h3 id="如何写出满足-KISS-原则的代码？"><a href="#如何写出满足-KISS-原则的代码？" class="headerlink" title="如何写出满足 KISS 原则的代码？"></a>如何写出满足 KISS 原则的代码？</h3><ul>
+<li><p>不要使用同事可能不懂的技术来实现代码。比如前面例子中的正则表达式，还有一些编程语言中过于高级的语法等。</p>
+</li>
+<li><p>不要重复造轮子，要善于使用已经有的工具类库。经验证明，自己去实现这些类库，出 bug 的概率会更高，维护的成本也比较高。</p>
+</li>
+<li><p>不要过度优化。不要过度使用一些奇技淫巧（比如，位运算代替算术运算、复杂的条件语句代替 if-else、使用一些过于底层的函数等）来优化代码，牺牲代码的可读性。</p>
+</li>
+</ul>
+<h3 id="YAGNI-原则"><a href="#YAGNI-原则" class="headerlink" title="YAGNI 原则"></a>YAGNI 原则</h3><blockquote>
+<p>You Ain’t Gonna Need It。</p>
+</blockquote>
+<p>直译就是：你不会需要它,实际上，这条原则的核心思想就是：不要做过度设计。</p>
+<p>比如，我们的系统暂时只用 Redis 存储配置信息，以后可能会用到 ZooKeeper。根据 YAGNI 原则，在未用到 ZooKeeper 之前，我们没必要提前编写这部分代码。当然，这并不是说我们就不需要考虑代码的扩展性。我们还是要预留好扩展点，等到需要的时候，再去实现 ZooKeeper 存储配置信息这部分代码。</p>
+<p>比如，我们不要在项目中提前引入不需要依赖的开发包。对于 Java 程序员来说，我们经常使用 Maven 或者 Gradle 来管理依赖的类库（library）。我发现，有些同事为了避免开发中 library 包缺失而频繁地修改 Maven 或者 Gradle 配置文件，提前往项目里引入大量常用的 library 包。实际上，这样的做法也是违背 YAGNI 原则的。</p>
+<h3 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h3><p>YAGNI 原则跟 KISS 原则并非一回事儿。KISS 原则讲的是“如何做”的问题（尽量保持简单），而 YAGNI 原则说的是“要不要做”的问题（当前不需要的就不要做）。</p>
+<h2 id="理论七：重复的代码就一定违背DRY吗？如何提高代码的复用性？"><a href="#理论七：重复的代码就一定违背DRY吗？如何提高代码的复用性？" class="headerlink" title="理论七：重复的代码就一定违背DRY吗？如何提高代码的复用性？"></a>理论七：重复的代码就一定违背DRY吗？如何提高代码的复用性？</h2><h3 id="DRY-原则（Don’t-Repeat-Yourself）"><a href="#DRY-原则（Don’t-Repeat-Yourself）" class="headerlink" title="DRY 原则（Don’t Repeat Yourself）"></a>DRY 原则（Don’t Repeat Yourself）</h3><p>原则我们今天讲了三种代码重复的情况：实现逻辑重复、功能语义重复、代码执行重复。实现逻辑重复，但功能语义不重复的代码，并不违反 DRY 原则。实现逻辑不重复，但功能语义重复的代码，也算是违反 DRY 原则。除此之外，代码执行重复也算是违反 DRY 原则。</p>
+<h3 id="怎么提高代码复用性？"><a href="#怎么提高代码复用性？" class="headerlink" title="怎么提高代码复用性？"></a>怎么提高代码复用性？</h3><ul>
+<li>减少代码耦合</li>
+<li>满足单一职责原则</li>
+<li>模块化</li>
+<li>业务与非业务逻辑分离</li>
+<li>通用代码下沉继承、多态、抽象、封装</li>
+<li>应用模板等设计模式</li>
+</ul>
+<h2 id="理论八：如何用迪米特法则（LOD）实现“高内聚、松耦合”？"><a href="#理论八：如何用迪米特法则（LOD）实现“高内聚、松耦合”？" class="headerlink" title="理论八：如何用迪米特法则（LOD）实现“高内聚、松耦合”？"></a>理论八：如何用迪米特法则（LOD）实现“高内聚、松耦合”？</h2><p>Law of Demeter</p>
+<blockquote>
+<p>Each unit should have only limited knowledge about other units: only units “closely” related to the current unit. Or: Each unit should only talk to its friends; Don’t talk to strangers.</p>
+</blockquote>
+<p>每个模块（unit）只应该了解那些与它关系密切的模块（units: only units “closely” related to the current unit）的有限知识（knowledge）。或者说，每个模块只和自己的朋友“说话”（talk），不和陌生人“说话”（talk）。</p>
+<p><strong>不该有直接依赖关系的类之间，不要有依赖；有依赖关系的类之间，尽量只依赖必要的接口（也就是定义中的“有限知识”）</strong></p>
+<h3 id="如何理解“高内聚、松耦合”？"><a href="#如何理解“高内聚、松耦合”？" class="headerlink" title="如何理解“高内聚、松耦合”？"></a>如何理解“高内聚、松耦合”？</h3><ol>
+<li>“高内聚、松耦合”是一个非常重要的设计思想，能够有效提高代码的可读性和可维护性，缩小功能改动导致的代码改动范围。“高内聚”用来指导类本身的设计，“松耦合”用来指导类与类之间依赖关系的设计。所谓高内聚，就是指相近的功能应该放到同一个类中，不相近的功能不要放到同一类中。相近的功能往往会被同时修改，放到同一个类中，修改会比较集中。所谓松耦合指的是，在代码中，类与类之间的依赖关系简单清晰。即使两个类有依赖关系，一个类的代码改动也不会或者很少导致依赖类的代码改动。</li>
+</ol>
+<h3 id="2-如何理解“迪米特法则”？"><a href="#2-如何理解“迪米特法则”？" class="headerlink" title="2. 如何理解“迪米特法则”？"></a>2. 如何理解“迪米特法则”？</h3><p>不该有直接依赖关系的类之间，不要有依赖；有依赖关系的类之间，尽量只依赖必要的接口。迪米特法则是希望减少类之间的耦合，让类越独立越好。每个类都应该少了解系统的其他部分。一旦发生变化，需要了解这一变化的类就会比较少。</p>
+<h3 id="3-“高内聚、松耦合”“单一职责原则”“接口隔离原则”“基于接口而非实现编程”“迪米特法则”，你能总结一下它们之间的区别和联系吗？"><a href="#3-“高内聚、松耦合”“单一职责原则”“接口隔离原则”“基于接口而非实现编程”“迪米特法则”，你能总结一下它们之间的区别和联系吗？" class="headerlink" title="3. “高内聚、松耦合”“单一职责原则”“接口隔离原则”“基于接口而非实现编程”“迪米特法则”，你能总结一下它们之间的区别和联系吗？"></a>3. “高内聚、松耦合”“单一职责原则”“接口隔离原则”“基于接口而非实现编程”“迪米特法则”，你能总结一下它们之间的区别和联系吗？</h3><p>目的都是实现高内聚低耦合，但是出发的角度不一样，单一职责是从自身提供的功能出发，迪米特法则是从关系出发，针对接口而非实现编程是使用者的角度，殊途同归。</p>
+<h2 id="实战一（上）：针对业务系统的开发，如何做需求分析和设计？"><a href="#实战一（上）：针对业务系统的开发，如何做需求分析和设计？" class="headerlink" title="实战一（上）：针对业务系统的开发，如何做需求分析和设计？"></a>实战一（上）：针对业务系统的开发，如何做需求分析和设计？</h2><p>以 分兑换系统的开发实战 为例：</p>
+<h3 id="需求分析"><a href="#需求分析" class="headerlink" title="需求分析"></a>需求分析</h3><h4 id="1-我们可以找几个类似的产品，比如淘宝，看看它们是如何设计积分系统的，然后借鉴到我们的产品中"><a href="#1-我们可以找几个类似的产品，比如淘宝，看看它们是如何设计积分系统的，然后借鉴到我们的产品中" class="headerlink" title="1. 我们可以找几个类似的产品，比如淘宝，看看它们是如何设计积分系统的，然后借鉴到我们的产品中"></a>1. 我们可以找几个类似的产品，比如淘宝，看看它们是如何设计积分系统的，然后借鉴到我们的产品中</h4><p>你可以自己亲自用用淘宝，看看积分是怎么使用的，也可以直接百度一下“淘宝积分规则”。基于这两个输入，我们基本上就大致能摸清楚积分系统该如何设计了。除此之外，我们还要充分了解自己公司的产品，将借鉴来的东西糅合在我们自己的产品中，并做适当的微创新。</p>
+<h4 id="2-通过产品的线框图、用户用例（user-case-）或者叫用户故事（user-story）来细化业务流程，挖掘一些比较细节的、不容易想到的功能点。"><a href="#2-通过产品的线框图、用户用例（user-case-）或者叫用户故事（user-story）来细化业务流程，挖掘一些比较细节的、不容易想到的功能点。" class="headerlink" title="2. 通过产品的线框图、用户用例（user case ）或者叫用户故事（user story）来细化业务流程，挖掘一些比较细节的、不容易想到的功能点。"></a>2. 通过产品的线框图、用户用例（user case ）或者叫用户故事（user story）来细化业务流程，挖掘一些比较细节的、不容易想到的功能点。</h4><p>用户用例有点儿类似我们后面要讲的单元测试用例。它侧重情景化，其实就是模拟用户如何使用我们的产品，描述用户在一个特定的应用场景里的一个完整的业务操作流程。所以，它包含更多的细节，且更加容易被人理解。<br>比如，有关积分有效期的用户用例，我们可以进行如下的设计：</p>
+<ul>
+<li>用户在获取积分的时候，会告知积分的有效期；</li>
+<li>用户在使用积分的时候，会优先使用快过期的积分；</li>
+<li>用户在查询积分明细的时候，会显示积分的有效期和状态（是否过期）；</li>
+<li>用户在查询总可用积分的时候，会排除掉过期的积分。</li>
+</ul>
+<h4 id="3-大致梳理出需求功能点"><a href="#3-大致梳理出需求功能点" class="headerlink" title="3. 大致梳理出需求功能点"></a>3. 大致梳理出需求功能点</h4><ul>
+<li>积分赚取和兑换规则</li>
+<li>积分消费和兑换规则</li>
+<li>积分及其明细查询</li>
+</ul>
+<h3 id="系统设计"><a href="#系统设计" class="headerlink" title="系统设计"></a>系统设计</h3><h4 id="1-合理地将功能划分到不同模块"><a href="#1-合理地将功能划分到不同模块" class="headerlink" title="1. 合理地将功能划分到不同模块"></a>1. 合理地将功能划分到不同模块</h4><p>除此之外，为了避免业务知识的耦合，让下层系统更加通用，一般来讲，我们不希望下层系统（也就是被调用的系统）包含太多上层系统（也就是调用系统）的业务信息，但是，可以接受上层系统包含下层系统的业务信息。比如，订单系统、优惠券系统、换购商城等作为调用积分系统的上层系统，可以包含一些积分相关的业务信息。但是，反过来，积分系统中最好不要包含太多跟订单、优惠券、换购等相关的信息。</p>
+<p>可以这样划分：积分赚取渠道及兑换规则、消费渠道及兑换规则的管理和维护（增删改查），不划分到积分系统中，而是放到更上层的营销系统中。这样积分系统就会变得非常简单，只需要负责增加积分、减少积分、查询积分、查询积分明细等这几个工作。</p>
+<h4 id="2-设计模块与模块之间的交互关系"><a href="#2-设计模块与模块之间的交互关系" class="headerlink" title="2. 设计模块与模块之间的交互关系"></a>2. 设计模块与模块之间的交互关系</h4><p>比较常见的系统之间的交互方式有两种，一种是同步接口调用，另一种是利用消息中间件异步调用。第一种方式简单直接，第二种方式的解耦效果更好</p>
+<p>比如，用户下订单成功之后，订单系统推送一条消息到消息中间件，营销系统订阅订单成功消息，触发执行相应的积分兑换逻辑。这样订单系统就跟营销系统完全解耦，订单系统不需要知道任何跟积分相关的逻辑，而营销系统也不需要直接跟订单系统交互。</p>
+<p>除此之外，上下层系统之间的调用倾向于通过同步接口，同层之间的调用倾向于异步消息调用。比如，营销系统和积分系统是上下层关系，它们之间就比较推荐使用同步接口调用。</p>
+<h4 id="3-设计模块的接口、数据库、业务模型"><a href="#3-设计模块的接口、数据库、业务模型" class="headerlink" title="3. 设计模块的接口、数据库、业务模型"></a>3. 设计模块的接口、数据库、业务模型</h4><p>务系统本身的设计无外乎有这样三方面的工作要做：接口设计、数据库设计和业务模型设计。</p>
+<h3 id="小结-1"><a href="#小结-1" class="headerlink" title="小结"></a>小结</h3><ol>
+<li><p>技术人也要有一些产品思维。对于产品设计、需求分析，我们要学会“借鉴”，一定不要自己闷头想。一方面这样做很难想全面，另一方面从零开始设计也比较浪费时间。除此之外，我们还可以通过线框图和用户用例来细化业务流程，挖掘一些比较细节的、不容易想到的功能点。</p>
+</li>
+<li><p>面向对象设计聚焦在代码层面（主要是针对类），那系统设计就是聚焦在架构层面（主要是针对模块），两者有很多相似之处。很多设计原则和思想不仅仅可以应用到代码设计中，还能用到架构设计中。实际上，我们可以借鉴面向对象设计的步骤，来做系统设计。</p>
+</li>
+<li><p>面向对象设计的本质就是把合适的代码放到合适的类中。合理地划分代码可以实现代码的高内聚、低耦合，类与类之间的交互简单清晰，代码整体结构一目了然。类比面向对象设计，系统设计实际上就是将合适的功能放到合适的模块中。合理地划分模块也可以做到模块层面的高内聚、低耦合，架构整洁清晰。在面向对象设计中，类设计好之后，我们需要设计类之间的交互关系。类比到系统设计，系统职责划分好之后，接下来就是设计系统之间的交互了。</p>
+</li>
+</ol>
+<h2 id="实战一（下）：如何实现一个遵从设计原则的积分兑换系统？"><a href="#实战一（下）：如何实现一个遵从设计原则的积分兑换系统？" class="headerlink" title="实战一（下）：如何实现一个遵从设计原则的积分兑换系统？"></a>实战一（下）：如何实现一个遵从设计原则的积分兑换系统？</h2><p>我们平时做业务系统的设计与开发，无外乎有这样三方面的工作要做：接口设计、数据库设计和业务模型设计（也就是业务逻辑）。</p>
+<p>数据库和接口的设计非常重要，一旦设计好并投入使用之后，这两部分都不能轻易改动。改动数据库表结构，需要涉及数据的迁移和适配；改动接口，需要推动接口的使用者作相应的代码修改。这两种情况，即便是微小的改动，执行起来都会非常麻烦。因此，我们在设计接口和数据库的时候，一定要多花点心思和时间，切不可过于随意。相反，业务逻辑代码侧重内部实现，不涉及被外部依赖的接口，也不包含持久化的数据，所以对改动的容忍性更大。</p>
+<h3 id="针对积分系统，我们先来看，如何设计数据库。"><a href="#针对积分系统，我们先来看，如何设计数据库。" class="headerlink" title="针对积分系统，我们先来看，如何设计数据库。"></a>针对积分系统，我们先来看，如何设计数据库。</h3><p><img src="evernotecid://B93CACCF-EBD1-4485-9709-207B83E62B19/appyinxiangcom/22404617/ENResource/p2453" alt="e9562c46bcb8fc45634f0d870c4778c4.jpeg"></p>
+<h3 id="如何设计积分系统的接口"><a href="#如何设计积分系统的接口" class="headerlink" title="如何设计积分系统的接口"></a>如何设计积分系统的接口</h3><p>为了兼顾易用性和性能，我们可以借鉴 facade（外观）设计模式，在职责单一的细粒度接口之上，再封装一层粗粒度的接口给外部使用。<br><img src="evernotecid://B93CACCF-EBD1-4485-9709-207B83E62B19/appyinxiangcom/22404617/ENResource/p2454" alt="7b9008f6bc107add2b21d3dba901deaf.jpeg"></p>
+<h3 id="业务模型"><a href="#业务模型" class="headerlink" title="业务模型"></a>业务模型</h3><p>从代码实现角度来说，大部分业务系统的开发都可以分为 Controller、Service、Repository 三层。Controller 层负责接口暴露，Repository 层负责数据读写，Service 层负责核心业务逻辑，也就是这里说的业务模型，对于我们要开发的积分系统来说，因为业务相对比较简单，所以，选择简单的基于贫血模型的传统开发模式就足够了。</p>
+<h3 id="为什么要分-MVC-三层开发？"><a href="#为什么要分-MVC-三层开发？" class="headerlink" title="为什么要分 MVC 三层开发？"></a>为什么要分 MVC 三层开发？</h3><ul>
+<li>分层能起到代码复用的作用</li>
+<li>分层能起到隔离变化的作用</li>
+<li>分层能起到隔离关注点的作用</li>
+<li>分层能提高代码的可测试性</li>
+<li>分层能应对系统的复杂性</li>
+</ul>
+<h3 id="BO、VO、Entity-存在的意义是什么？"><a href="#BO、VO、Entity-存在的意义是什么？" class="headerlink" title="BO、VO、Entity 存在的意义是什么？"></a>BO、VO、Entity 存在的意义是什么？</h3><p>对于每层定义各自的数据对象来说，是不是定义一个公共的数据对象更好些呢？实际上，我更加推荐每层都定义各自的数据对象这种设计思路，主要有以下 3 个方面的原因。</p>
+<p>1.VO、BO、Entity 并非完全一样。比如，我们可以在 UserEntity、UserBo 中定义 Password 字段，但显然不能在 UserVo 中定义 Password 字段，否则就会将用户的密码暴露出去。</p>
+<p>2.VO、BO、Entity 三个类虽然代码重复，但功能语义不重复，从职责上讲是不一样的。所以，也并不能算违背 DRY 原则。在前面讲到 DRY 原则的时候，针对这种情况，如果合并为同一个类，那也会存在后期因为需求的变化而需要再拆分的问题。</p>
+<p>为了尽量减少每层之间的耦合，把职责边界划分明确，每层都会维护自己的数据对象，层与层之间通过接口交互。数据从下一层传递到上一层的时候，将下一层的数据对象转化成上一层的数据对象，再继续处理。虽然这样的设计稍微有些繁琐，每层都需要定义各自的数据对象，需要做数据对象之间的转化，但是分层清晰。对于非常大的项目来说，结构清晰是第一位的！</p>
+<h3 id="VO、BO、Entity-都是基于贫血模型的，而且为了兼容框架或开发库（比如-MyBatis、Dozer、BeanUtils），我们还需要定义每个字段的-set"><a href="#VO、BO、Entity-都是基于贫血模型的，而且为了兼容框架或开发库（比如-MyBatis、Dozer、BeanUtils），我们还需要定义每个字段的-set" class="headerlink" title="VO、BO、Entity 都是基于贫血模型的，而且为了兼容框架或开发库（比如 MyBatis、Dozer、BeanUtils），我们还需要定义每个字段的 set"></a>VO、BO、Entity 都是基于贫血模型的，而且为了兼容框架或开发库（比如 MyBatis、Dozer、BeanUtils），我们还需要定义每个字段的 set</h3><ol>
+<li><p>VO、BO、Entity 都是基于贫血模型的，而且为了兼容框架或开发库（比如 MyBatis、Dozer、BeanUtils），我们还需要定义每个字段的 set</p>
+</li>
+<li><p>Service 层包含比较多的业务逻辑代码，所以 BO 就存在被任意修改的风险了。但是，设计的问题本身就没有最优解，只有权衡。为了使用方便，我们只能做一些妥协，放弃 BO 的封装特性，由程序员自己来负责这些数据对象的不被错误使用。</p>
+</li>
+</ol>
+<h2 id="实战二（上）：针对非业务的通用框架开发，如何做需求分析和设计？"><a href="#实战二（上）：针对非业务的通用框架开发，如何做需求分析和设计？" class="headerlink" title="实战二（上）：针对非业务的通用框架开发，如何做需求分析和设计？"></a>实战二（上）：针对非业务的通用框架开发，如何做需求分析和设计？</h2><h3 id="项目背景"><a href="#项目背景" class="headerlink" title="项目背景"></a>项目背景</h3><p>我们希望设计开发一个小的框架，能够获取接口调用的各种统计信息，比如，响应时间的最大值（max）、最小值（min）、平均值（avg）、百分位值（percentile）、接口调用次数（count）、频率（tps） 等，并且支持将统计结果以各种显示格式（比如：JSON 格式、网页格式、自定义显示格式等）输出到各种终端（Console 命令行、HTTP 网页、Email、日志文件、自定义输出终端等），以方便查看。</p>
+<h3 id="需求分析-1"><a href="#需求分析-1" class="headerlink" title="需求分析"></a>需求分析</h3><p>性能计数器作为一个跟业务无关的功能，我们完全可以把它开发成一个独立的框架或者类库，集成到很多业务系统中。而作为可被复用的框架，除了功能性需求之外，非功能性需求也非常重要。</p>
+<h4 id="1-功能性需求分析"><a href="#1-功能性需求分析" class="headerlink" title="1.功能性需求分析"></a>1.功能性需求分析</h4><ul>
+<li>接口统计信息：包括接口响应时间的统计信息，以及接口调用次数的统计信息等。</li>
+<li>统计信息的类型：max、min、avg、percentile、count、tps 等。</li>
+<li>统计信息显示格式：Json、Html、自定义显示格式。</li>
+<li>统计信息显示终端：Console、Email、HTTP 网页、日志、自定义显示终端</li>
+</ul>
+<p>借助设计产品的时候，经常用到的线框图，把最终数据的显示样式画出来<br><img src="evernotecid://B93CACCF-EBD1-4485-9709-207B83E62B19/appyinxiangcom/22404617/ENResource/p2455" alt="f04b341ad5fda418ae24f166d0a4dde5.jpeg"></p>
+<p>实际上，从线框图中，我们还能挖掘出了下面几个隐藏的需求。</p>
+<ul>
+<li>统计触发方式：包括主动和被动两种。主动表示以一定的频率定时统计数据，并主动推送到显示终端，比如邮件推送。被动表示用户触发统计，比如用户在网页中选择要统计的时间区间，触发统计，并将结果显示给用户。</li>
+<li>统计时间区间：框架需要支持自定义统计时间区间，比如统计最近 10 分钟的某接口的 tps、访问次数，或者统计 12 月 11 日 00 点到 12 月 12 日 00 点之间某接口响应时间的最大值、最小值、平均值等。</li>
+<li>统计时间间隔：对于主动触发统计，我们还要支持指定统计时间间隔，也就是多久触发一次统计显示。比如，每间隔 10s 统计一次接口信息并显示到命令行中，每间隔 24 小时发送一封统计信息邮件。</li>
+</ul>
+<h4 id="2-非功能性需求分析"><a href="#2-非功能性需求分析" class="headerlink" title="2.非功能性需求分析"></a>2.非功能性需求分析</h4><h5 id="易用性"><a href="#易用性" class="headerlink" title="易用性"></a>易用性</h5><p>在开发这样一个技术框架的时候，也要有产品意识。框架是否易集成、易插拔、跟业务代码是否松耦合、提供的接口是否够灵活等等，都是我们应该花心思去思考和设计的。有的时候，文档写得好坏甚至都有可能决定一个框架是否受欢迎。</p>
+<h5 id="性能"><a href="#性能" class="headerlink" title="性能"></a>性能</h5><p>对于性能计数器这个框架来说，一方面，我们希望它是低延迟的，也就是说，统计代码不影响或很少影响接口本身的响应时间；另一方面，我们希望框架本身对内存的消耗不能太大。</p>
+<h5 id="扩展性"><a href="#扩展性" class="headerlink" title="扩展性"></a>扩展性</h5><p>从框架使用者的角度来说的，特指使用者可以在不修改框架源码，甚至不拿到框架源码的情况下，为框架扩展新的功能。这就有点类似给框架开发插件</p>
+<h5 id="容错性"><a href="#容错性" class="headerlink" title="容错性"></a>容错性</h5><p>要对框架可能存在的各种异常情况都考虑全面，对外暴露的接口抛出的所有运行时、非运行时异常都进行捕获处理。</p>
+<h5 id="通用性"><a href="#通用性" class="headerlink" title="通用性"></a>通用性</h5><p>为了提高框架的复用性，能够灵活应用到各种场景中。框架在设计的时候，要尽可能通用。我们要多去思考一下，除了接口统计这样一个需求，还可以适用到其他哪些场景中，比如是否还可以处理其他事件的统计信息，比如 SQL 请求时间的统计信息、业务统计信息（比如支付成功率）等。</p>
+<h3 id="框架设计"><a href="#框架设计" class="headerlink" title="框架设计"></a>框架设计</h3><p>借鉴 TDD（测试驱动开发）和 Prototype（最小原型）的思想，先聚焦于一个简单的应用场景，基于此设计实现一个简单的原型。尽管这个最小原型系统在功能和非功能特性上都不完善，但它能够看得见、摸得着，比较具体、不抽象，能够很有效地帮助我缕清更复杂的设计思路，是迭代设计的基础。</p>
+<p>，我们可以先聚焦于一个非常具体、简单的应用场景，比如统计用户注册、登录这两个接口的响应时间的最大值和平均值、接口调用次数，并且将统计结果以 JSON 的格式输出到命令行中。现在这个需求简单、具体、明确，设计实现起来难度降低了很多。</p>
+<p>首先要采集每次接口请求的响应时间，并且存储起来，然后按照某个时间间隔做聚合统计，最后才是将结果输出。在原型系统的代码实现中，我们可以把所有代码都塞到一个类中，暂时不用考虑任何代码质量、线程安全、性能、扩展性等等问题，怎么简单怎么来就行。</p>
+<p>最小原型的代码实现如下所示。其中，recordResponseTime() 和 recordTimestamp() 两个函数分别用来记录接口请求的响应时间和访问时间。startRepeatedReport() 函数以指定的频率统计数据并输出结果。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">public class Metrics &#123;</span><br><span class="line">  &#x2F;&#x2F; Map的key是接口名称，value对应接口请求的响应时间或时间戳；</span><br><span class="line">  private Map&lt;String, List&lt;Double&gt;&gt; responseTimes &#x3D; new HashMap&lt;&gt;();</span><br><span class="line">  private Map&lt;String, List&lt;Double&gt;&gt; timestamps &#x3D; new HashMap&lt;&gt;();</span><br><span class="line">  private ScheduledExecutorService executor &#x3D; Executors.newSingleThreadScheduledExecutor();</span><br><span class="line"></span><br><span class="line">  public void recordResponseTime(String apiName, double responseTime) &#123;</span><br><span class="line">    responseTimes.putIfAbsent(apiName, new ArrayList&lt;&gt;());</span><br><span class="line">    responseTimes.get(apiName).add(responseTime);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  public void recordTimestamp(String apiName, double timestamp) &#123;</span><br><span class="line">    timestamps.putIfAbsent(apiName, new ArrayList&lt;&gt;());</span><br><span class="line">    timestamps.get(apiName).add(timestamp);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  public void startRepeatedReport(long period, TimeUnit unit)&#123;</span><br><span class="line">    executor.scheduleAtFixedRate(new Runnable() &#123;</span><br><span class="line">      @Override</span><br><span class="line">      public void run() &#123;</span><br><span class="line">        Gson gson &#x3D; new Gson();</span><br><span class="line">        Map&lt;String, Map&lt;String, Double&gt;&gt; stats &#x3D; new HashMap&lt;&gt;();</span><br><span class="line">        for (Map.Entry&lt;String, List&lt;Double&gt;&gt; entry : responseTimes.entrySet()) &#123;</span><br><span class="line">          String apiName &#x3D; entry.getKey();</span><br><span class="line">          List&lt;Double&gt; apiRespTimes &#x3D; entry.getValue();</span><br><span class="line">          stats.putIfAbsent(apiName, new HashMap&lt;&gt;());</span><br><span class="line">          stats.get(apiName).put(&quot;max&quot;, max(apiRespTimes));</span><br><span class="line">          stats.get(apiName).put(&quot;avg&quot;, avg(apiRespTimes));</span><br><span class="line">        &#125;</span><br><span class="line">  </span><br><span class="line">        for (Map.Entry&lt;String, List&lt;Double&gt;&gt; entry : timestamps.entrySet()) &#123;</span><br><span class="line">          String apiName &#x3D; entry.getKey();</span><br><span class="line">          List&lt;Double&gt; apiTimestamps &#x3D; entry.getValue();</span><br><span class="line">          stats.putIfAbsent(apiName, new HashMap&lt;&gt;());</span><br><span class="line">          stats.get(apiName).put(&quot;count&quot;, (double)apiTimestamps.size());</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println(gson.toJson(stats));</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;, 0, period, unit);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  private double max(List&lt;Double&gt; dataset) &#123;&#x2F;&#x2F;省略代码实现&#125;</span><br><span class="line">  private double avg(List&lt;Double&gt; dataset) &#123;&#x2F;&#x2F;省略代码实现&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>使用：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">&#x2F;&#x2F;应用场景：统计下面两个接口(注册和登录）的响应时间和访问次数</span><br><span class="line">public class UserController &#123;</span><br><span class="line">  private Metrics metrics &#x3D; new Metrics();</span><br><span class="line">  </span><br><span class="line">  public UserController() &#123;</span><br><span class="line">    metrics.startRepeatedReport(60, TimeUnit.SECONDS);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  public void register(UserVo user) &#123;</span><br><span class="line">    long startTimestamp &#x3D; System.currentTimeMillis();</span><br><span class="line">    metrics.recordTimestamp(&quot;regsiter&quot;, startTimestamp);</span><br><span class="line">    &#x2F;&#x2F;...</span><br><span class="line">    long respTime &#x3D; System.currentTimeMillis() - startTimestamp;</span><br><span class="line">    metrics.recordResponseTime(&quot;register&quot;, respTime);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  public UserVo login(String telephone, String password) &#123;</span><br><span class="line">    long startTimestamp &#x3D; System.currentTimeMillis();</span><br><span class="line">    metrics.recordTimestamp(&quot;login&quot;, startTimestamp);</span><br><span class="line">    &#x2F;&#x2F;...</span><br><span class="line">    long respTime &#x3D; System.currentTimeMillis() - startTimestamp;</span><br><span class="line">    metrics.recordResponseTime(&quot;login&quot;, respTime);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="基于最新的原型进一步考虑"><a href="#基于最新的原型进一步考虑" class="headerlink" title="基于最新的原型进一步考虑"></a>基于最新的原型进一步考虑</h3><p>图可以非常直观地体现设计思想，并且能有效地帮助我们释放更多的脑空间，来思考其他细节问题。</p>
+<p><img src="evernotecid://B93CACCF-EBD1-4485-9709-207B83E62B19/appyinxiangcom/22404617/ENResource/p2456" alt="926561b82b49c937dcf4a2b9e6b35c16.jpeg"></p>
+<p>把整个框架分为四个模块：数据采集、存储、聚合统计、显示。每个模块负责的工作简单罗列如下。</p>
+<ul>
+<li>数据采集：负责打点采集原始数据，包括记录每次接口请求的响应时间和请求时间。数据采集过程要高度容错，不能影响到接口本身的可用性。除此之外，因为这部分功能是暴露给框架的使用者的，所以在设计数据采集 API 的时候，我们也要尽量考虑其易用性。</li>
+<li>存储：负责将采集的原始数据保存下来，以便后面做聚合统计。数据的存储方式有多种，比如：Redis、MySQL、HBase、日志、文件、内存等。数据存储比较耗时，为了尽量地减少对接口性能（比如响应时间）的影响，采集和存储的过程异步完成。</li>
+<li>聚合统计：负责将原始数据聚合为统计数据，比如：max、min、avg、pencentile、count、tps 等。为了支持更多的聚合统计规则，代码希望尽可能灵活、可扩展。</li>
+<li>显示：负责将统计数据以某种格式显示到终端，比如：输出到命令行、邮件、网页、自定义显示终端等。</li>
+</ul>
+<h3 id="小结-2"><a href="#小结-2" class="headerlink" title="小结"></a>小结</h3><ol>
+<li>对于非业务通用框架的开发，我们在做需求分析的时候，除了功能性需求分析之外，还需要考虑框架的非功能性需求。比如，框架的易用性、性能、扩展性、容错性、通用性等。</li>
+</ol>
+<p>2.对于复杂框架的设计，很多人往往觉得无从下手。今天我们分享了几个小技巧，其中包括：画产品线框图、聚焦简单应用场景、设计实现最小原型、画系统设计图等。这些方法的目的都是为了让问题简化、具体、明确，提供一个迭代设计开发的基础，逐步推进。</p>
+<p>3.面向对象分析、设计和实现的时候，我们讲到设计阶段最终输出的是类的设计，</p>
+<h2 id="实战二（下）：如何实现一个支持各种统计规则的性能计数器？"><a href="#实战二（下）：如何实现一个支持各种统计规则的性能计数器？" class="headerlink" title="实战二（下）：如何实现一个支持各种统计规则的性能计数器？"></a>实战二（下）：如何实现一个支持各种统计规则的性能计数器？</h2><p>即便你有能力将所有需求都实现，可能也要花费很大的设计精力和开发时间，迟迟没有产出，你的 leader 会因此产生很强的不可控感。对于现在的互联网项目来说，小步快跑、逐步迭代是一种更好的开发模式。所以，我们应该分多个版本逐步完善这个框架。第一个版本可以先实现一些基本功能，对于更高级、更复杂的功能，以及非功能性需求不做过高的要求，在后续的 v2.0、v3.0……版本中继续迭代优化。</p>
+<ul>
+<li>数据采集：负责打点采集原始数据，包括记录每次接口请求的响应时间和请求时间。</li>
+<li>存储：负责将采集的原始数据保存下来，以便之后做聚合统计。数据的存储方式有很多种，我们暂时只支持 Redis 这一种存储方式，并且，采集与存储两个过程同步执行。</li>
+<li>聚合统计：负责将原始数据聚合为统计数据，包括响应时间的最大值、最小值、平均值、99.9 百分位值、99 百分位值，以及接口请求的次数和 tps。</li>
+<li>显示：负责将统计数据以某种格式显示到终端，暂时只支持主动推送给命令行和邮件。命令行间隔 n 秒统计显示上 m 秒的数据（比如，间隔 60s 统计上 60s 的数据）。邮件每日统计上日的数据。</li>
+</ul>
+<h3 id="1-划分职责进而识别出有哪些类"><a href="#1-划分职责进而识别出有哪些类" class="headerlink" title="1. 划分职责进而识别出有哪些类"></a>1. 划分职责进而识别出有哪些类</h3><p>先大致识别出下面几个接口或类：</p>
+<ul>
+<li>MetricsCollector 类负责提供 API，来采集接口请求的原始数据。我们可以为 MetricsCollector 抽象出一个接口，但这并不是必须的，因为暂时我们只能想到一个 MetricsCollector 的实现方式。</li>
+<li>MetricsStorage 接口负责原始数据存储，RedisMetricsStorage 类实现 MetricsStorage 接口。这样做是为了今后灵活地扩展新的存储方法，比如用 HBase 来存储。</li>
+<li>Aggregator 类负责根据原始数据计算统计数据。</li>
+<li>ConsoleReporter 类、EmailReporter 类分别负责以一定频率统计并发送统计数据到命令行和邮件。至于 ConsoleReporter 和 EmailReporter 是否可以抽象出可复用的抽象类，或者抽象出一个公共的接口，我们暂时还不能确定。</li>
+</ul>
+<h3 id="2-定义类及类与类之间的关系"><a href="#2-定义类及类与类之间的关系" class="headerlink" title="2. 定义类及类与类之间的关系"></a>2. 定义类及类与类之间的关系</h3><p>接下来就是定义类及属性和方法，定义类与类之间的关系：</p>
+<p>大致地识别出几个核心的类之后，我的习惯性做法是，先在 IDE 中创建好这几个类，然后开始试着定义它们的属性和方法。在设计类、类与类之间交互的时候，我会不断地用之前学过的设计原则和思想来审视设计是否合理，比如，是否满足单一职责原则、开闭原则、依赖注入、KISS 原则、DRY 原则、迪米特法则，是否符合基于接口而非实现编程思想，代码是否高内聚、低耦合，是否可以抽象出可复用代码等等。</p>
+<p>MetricsCollector 代码</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line">public class MetricsCollector &#123;</span><br><span class="line">  private MetricsStorage metricsStorage;&#x2F;&#x2F;基于接口而非实现编程</span><br><span class="line"></span><br><span class="line">  &#x2F;&#x2F;依赖注入</span><br><span class="line">  public MetricsCollector(MetricsStorage metricsStorage) &#123;</span><br><span class="line">    this.metricsStorage &#x3D; metricsStorage;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  &#x2F;&#x2F;用一个函数代替了最小原型中的两个函数</span><br><span class="line">  public void recordRequest(RequestInfo requestInfo) &#123;</span><br><span class="line">    if (requestInfo &#x3D;&#x3D; null || StringUtils.isBlank(requestInfo.getApiName())) &#123;</span><br><span class="line">      return;</span><br><span class="line">    &#125;</span><br><span class="line">    metricsStorage.saveRequestInfo(requestInfo);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class RequestInfo &#123;</span><br><span class="line">  private String apiName;</span><br><span class="line">  private double responseTime;</span><br><span class="line">  private long timestamp;</span><br><span class="line">  &#x2F;&#x2F;...省略constructor&#x2F;getter&#x2F;setter方法...</span><br><span class="line">&#125; &#123;</span><br><span class="line">  private MetricsStorage metricsStorage;&#x2F;&#x2F;基于接口而非实现编程</span><br><span class="line"></span><br><span class="line">  &#x2F;&#x2F;依赖注入</span><br><span class="line">  public MetricsCollector(MetricsStorage metricsStorage) &#123;</span><br><span class="line">    this.metricsStorage &#x3D; metricsStorage;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  &#x2F;&#x2F;用一个函数代替了最小原型中的两个函数</span><br><span class="line">  public void recordRequest(RequestInfo requestInfo) &#123;</span><br><span class="line">    if (requestInfo &#x3D;&#x3D; null || StringUtils.isBlank(requestInfo.getApiName())) &#123;</span><br><span class="line">      return;</span><br><span class="line">    &#125;</span><br><span class="line">    metricsStorage.saveRequestInfo(requestInfo);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class RequestInfo &#123;</span><br><span class="line">  private String apiName;</span><br><span class="line">  private double responseTime;</span><br><span class="line">  private long timestamp;</span><br><span class="line">  &#x2F;&#x2F;...省略constructor&#x2F;getter&#x2F;setter方法...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>MetricsStorage、RedisMetricsStorage 代码</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">public interface MetricsStorage &#123;</span><br><span class="line">  void saveRequestInfo(RequestInfo requestInfo);</span><br><span class="line"></span><br><span class="line">  List&lt;RequestInfo&gt; getRequestInfos(String apiName, long startTimeInMillis, long endTimeInMillis);</span><br><span class="line"></span><br><span class="line">  Map&lt;String, List&lt;RequestInfo&gt;&gt; getRequestInfos(long startTimeInMillis, long endTimeInMillis);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class RedisMetricsStorage implements MetricsStorage &#123;</span><br><span class="line">  &#x2F;&#x2F;...省略属性和构造函数等...</span><br><span class="line">  @Override</span><br><span class="line">  public void saveRequestInfo(RequestInfo requestInfo) &#123;</span><br><span class="line">    &#x2F;&#x2F;...</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  @Override</span><br><span class="line">  public List&lt;RequestInfo&gt; getRequestInfos(String apiName, long startTimestamp, long endTimestamp) &#123;</span><br><span class="line">    &#x2F;&#x2F;...</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  @Override</span><br><span class="line">  public Map&lt;String, List&lt;RequestInfo&gt;&gt; getRequestInfos(long startTimestamp, long endTimestamp) &#123;</span><br><span class="line">    &#x2F;&#x2F;...</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Aggregator 代码</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">public class Aggregator &#123;</span><br><span class="line">  public static RequestStat aggregate(List&lt;RequestInfo&gt; requestInfos, long durationInMillis) &#123;</span><br><span class="line">    double maxRespTime &#x3D; Double.MIN_VALUE;</span><br><span class="line">    double minRespTime &#x3D; Double.MAX_VALUE;</span><br><span class="line">    double avgRespTime &#x3D; -1;</span><br><span class="line">    double p999RespTime &#x3D; -1;</span><br><span class="line">    double p99RespTime &#x3D; -1;</span><br><span class="line">    double sumRespTime &#x3D; 0;</span><br><span class="line">    long count &#x3D; 0;</span><br><span class="line">    for (RequestInfo requestInfo : requestInfos) &#123;</span><br><span class="line">      ++count;</span><br><span class="line">      double respTime &#x3D; requestInfo.getResponseTime();</span><br><span class="line">      if (maxRespTime &lt; respTime) &#123;</span><br><span class="line">        maxRespTime &#x3D; respTime;</span><br><span class="line">      &#125;</span><br><span class="line">      if (minRespTime &gt; respTime) &#123;</span><br><span class="line">        minRespTime &#x3D; respTime;</span><br><span class="line">      &#125;</span><br><span class="line">      sumRespTime +&#x3D; respTime;</span><br><span class="line">    &#125;</span><br><span class="line">    if (count !&#x3D; 0) &#123;</span><br><span class="line">      avgRespTime &#x3D; sumRespTime &#x2F; count;</span><br><span class="line">    &#125;</span><br><span class="line">    long tps &#x3D; (long)(count &#x2F; durationInMillis * 1000);</span><br><span class="line">    Collections.sort(requestInfos, new Comparator&lt;RequestInfo&gt;() &#123;</span><br><span class="line">      @Override</span><br><span class="line">      public int compare(RequestInfo o1, RequestInfo o2) &#123;</span><br><span class="line">        double diff &#x3D; o1.getResponseTime() - o2.getResponseTime();</span><br><span class="line">        if (diff &lt; 0.0) &#123;</span><br><span class="line">          return -1;</span><br><span class="line">        &#125; else if (diff &gt; 0.0) &#123;</span><br><span class="line">          return 1;</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">          return 0;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">    int idx999 &#x3D; (int)(count * 0.999);</span><br><span class="line">    int idx99 &#x3D; (int)(count * 0.99);</span><br><span class="line">    if (count !&#x3D; 0) &#123;</span><br><span class="line">      p999RespTime &#x3D; requestInfos.get(idx999).getResponseTime();</span><br><span class="line">      p99RespTime &#x3D; requestInfos.get(idx99).getResponseTime();</span><br><span class="line">    &#125;</span><br><span class="line">    RequestStat requestStat &#x3D; new RequestStat();</span><br><span class="line">    requestStat.setMaxResponseTime(maxRespTime);</span><br><span class="line">    requestStat.setMinResponseTime(minRespTime);</span><br><span class="line">    requestStat.setAvgResponseTime(avgRespTime);</span><br><span class="line">    requestStat.setP999ResponseTime(p999RespTime);</span><br><span class="line">    requestStat.setP99ResponseTime(p99RespTime);</span><br><span class="line">    requestStat.setCount(count);</span><br><span class="line">    requestStat.setTps(tps);</span><br><span class="line">    return requestStat;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class RequestStat &#123;</span><br><span class="line">  private double maxResponseTime;</span><br><span class="line">  private double minResponseTime;</span><br><span class="line">  private double avgResponseTime;</span><br><span class="line">  private double p999ResponseTime;</span><br><span class="line">  private double p99ResponseTime;</span><br><span class="line">  private long count;</span><br><span class="line">  private long tps;</span><br><span class="line">  &#x2F;&#x2F;...省略getter&#x2F;setter方法...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>ConsoleReporter、EmailReporterv 代码</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line">public class ConsoleReporter &#123;</span><br><span class="line">  private MetricsStorage metricsStorage;</span><br><span class="line">  private ScheduledExecutorService executor;</span><br><span class="line"></span><br><span class="line">  public ConsoleReporter(MetricsStorage metricsStorage) &#123;</span><br><span class="line">    this.metricsStorage &#x3D; metricsStorage;</span><br><span class="line">    this.executor &#x3D; Executors.newSingleThreadScheduledExecutor();</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  &#x2F;&#x2F; 第4个代码逻辑：定时触发第1、2、3代码逻辑的执行；</span><br><span class="line">  public void startRepeatedReport(long periodInSeconds, long durationInSeconds) &#123;</span><br><span class="line">    executor.scheduleAtFixedRate(new Runnable() &#123;</span><br><span class="line">      @Override</span><br><span class="line">      public void run() &#123;</span><br><span class="line">        &#x2F;&#x2F; 第1个代码逻辑：根据给定的时间区间，从数据库中拉取数据；</span><br><span class="line">        long durationInMillis &#x3D; durationInSeconds * 1000;</span><br><span class="line">        long endTimeInMillis &#x3D; System.currentTimeMillis();</span><br><span class="line">        long startTimeInMillis &#x3D; endTimeInMillis - durationInMillis;</span><br><span class="line">        Map&lt;String, List&lt;RequestInfo&gt;&gt; requestInfos &#x3D;</span><br><span class="line">                metricsStorage.getRequestInfos(startTimeInMillis, endTimeInMillis);</span><br><span class="line">        Map&lt;String, RequestStat&gt; stats &#x3D; new HashMap&lt;&gt;();</span><br><span class="line">        for (Map.Entry&lt;String, List&lt;RequestInfo&gt;&gt; entry : requestInfos.entrySet()) &#123;</span><br><span class="line">          String apiName &#x3D; entry.getKey();</span><br><span class="line">          List&lt;RequestInfo&gt; requestInfosPerApi &#x3D; entry.getValue();</span><br><span class="line">          &#x2F;&#x2F; 第2个代码逻辑：根据原始数据，计算得到统计数据；</span><br><span class="line">          RequestStat requestStat &#x3D; Aggregator.aggregate(requestInfosPerApi, durationInMillis);</span><br><span class="line">          stats.put(apiName, requestStat);</span><br><span class="line">        &#125;</span><br><span class="line">        &#x2F;&#x2F; 第3个代码逻辑：将统计数据显示到终端（命令行或邮件）；</span><br><span class="line">        System.out.println(&quot;Time Span: [&quot; + startTimeInMillis + &quot;, &quot; + endTimeInMillis + &quot;]&quot;);</span><br><span class="line">        Gson gson &#x3D; new Gson();</span><br><span class="line">        System.out.println(gson.toJson(stats));</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;, 0, periodInSeconds, TimeUnit.SECONDS);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class EmailReporter &#123;</span><br><span class="line">  private static final Long DAY_HOURS_IN_SECONDS &#x3D; 86400L;</span><br><span class="line"></span><br><span class="line">  private MetricsStorage metricsStorage;</span><br><span class="line">  private EmailSender emailSender;</span><br><span class="line">  private List&lt;String&gt; toAddresses &#x3D; new ArrayList&lt;&gt;();</span><br><span class="line"></span><br><span class="line">  public EmailReporter(MetricsStorage metricsStorage) &#123;</span><br><span class="line">    this(metricsStorage, new EmailSender(&#x2F;*省略参数*&#x2F;));</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  public EmailReporter(MetricsStorage metricsStorage, EmailSender emailSender) &#123;</span><br><span class="line">    this.metricsStorage &#x3D; metricsStorage;</span><br><span class="line">    this.emailSender &#x3D; emailSender;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  public void addToAddress(String address) &#123;</span><br><span class="line">    toAddresses.add(address);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  public void startDailyReport() &#123;</span><br><span class="line">    Calendar calendar &#x3D; Calendar.getInstance();</span><br><span class="line">    calendar.add(Calendar.DATE, 1);</span><br><span class="line">    calendar.set(Calendar.HOUR_OF_DAY, 0);</span><br><span class="line">    calendar.set(Calendar.MINUTE, 0);</span><br><span class="line">    calendar.set(Calendar.SECOND, 0);</span><br><span class="line">    calendar.set(Calendar.MILLISECOND, 0);</span><br><span class="line">    Date firstTime &#x3D; calendar.getTime();</span><br><span class="line">    Timer timer &#x3D; new Timer();</span><br><span class="line">    timer.schedule(new TimerTask() &#123;</span><br><span class="line">      @Override</span><br><span class="line">      public void run() &#123;</span><br><span class="line">        long durationInMillis &#x3D; DAY_HOURS_IN_SECONDS * 1000;</span><br><span class="line">        long endTimeInMillis &#x3D; System.currentTimeMillis();</span><br><span class="line">        long startTimeInMillis &#x3D; endTimeInMillis - durationInMillis;</span><br><span class="line">        Map&lt;String, List&lt;RequestInfo&gt;&gt; requestInfos &#x3D;</span><br><span class="line">                metricsStorage.getRequestInfos(startTimeInMillis, endTimeInMillis);</span><br><span class="line">        Map&lt;String, RequestStat&gt; stats &#x3D; new HashMap&lt;&gt;();</span><br><span class="line">        for (Map.Entry&lt;String, List&lt;RequestInfo&gt;&gt; entry : requestInfos.entrySet()) &#123;</span><br><span class="line">          String apiName &#x3D; entry.getKey();</span><br><span class="line">          List&lt;RequestInfo&gt; requestInfosPerApi &#x3D; entry.getValue();</span><br><span class="line">          RequestStat requestStat &#x3D; Aggregator.aggregate(requestInfosPerApi, durationInMillis);</span><br><span class="line">          stats.put(apiName, requestStat);</span><br><span class="line">        &#125;</span><br><span class="line">        &#x2F;&#x2F; TODO: 格式化为html格式，并且发送邮件</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;, firstTime, DAY_HOURS_IN_SECONDS * 1000);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p> 将类组装起来并提供执行入口<br> <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line">public class Demo &#123;</span><br><span class="line">  public static void main(String[] args) &#123;</span><br><span class="line">    MetricsStorage storage &#x3D; new RedisMetricsStorage();</span><br><span class="line">    ConsoleReporter consoleReporter &#x3D; new ConsoleReporter(storage);</span><br><span class="line">    consoleReporter.startRepeatedReport(60, 60);</span><br><span class="line"></span><br><span class="line">    EmailReporter emailReporter &#x3D; new EmailReporter(storage);</span><br><span class="line">    emailReporter.addToAddress(&quot;wangzheng@xzg.com&quot;);</span><br><span class="line">    emailReporter.startDailyReport();</span><br><span class="line"></span><br><span class="line">    MetricsCollector collector &#x3D; new MetricsCollector(storage);</span><br><span class="line">    collector.recordRequest(new RequestInfo(&quot;register&quot;, 123, 10234));</span><br><span class="line">    collector.recordRequest(new RequestInfo(&quot;register&quot;, 223, 11234));</span><br><span class="line">    collector.recordRequest(new RequestInfo(&quot;register&quot;, 323, 12334));</span><br><span class="line">    collector.recordRequest(new RequestInfo(&quot;login&quot;, 23, 12434));</span><br><span class="line">    collector.recordRequest(new RequestInfo(&quot;login&quot;, 1223, 14234));</span><br><span class="line"></span><br><span class="line">    try &#123;</span><br><span class="line">      Thread.sleep(100000);</span><br><span class="line">    &#125; catch (InterruptedException e) &#123;</span><br><span class="line">      e.printStackTrace();</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="Review-设计与实现-以及问题分析"><a href="#Review-设计与实现-以及问题分析" class="headerlink" title="Review 设计与实现 以及问题分析"></a>Review 设计与实现 以及问题分析</h3><ul>
+<li><p>Aggregator 类是一个工具类，里面只有一个静态函数，有 50 行左右的代码量，负责各种统计数据的计算。当需要扩展新的统计功能的时候，需要修改 aggregate() 函数代码，并且一旦越来越多的统计功能添加进来之后，这个函数的代码量会持续增加，可读性、可维护性就变差了。所以，从刚刚的分析来看，这个类的设计可能存在职责不够单一、不易扩展等问题，需要在之后的版本中，对其结构做优化。</p>
+</li>
+<li><p>ConsoleReporter、EmailReporterConsoleReporter 和 EmailReporter 中存在代码重复问题。在这两个类中，从数据库中取数据、做统计的逻辑都是相同的，可以抽取出来复用，否则就违反了 DRY 原则。而且整个类负责的事情比较多，职责不是太单一。特别是显示部分的代码，可能会比较复杂（比如 Email 的展示方式），最好是将显示部分的代码逻辑拆分成独立的类。除此之外，因为代码中涉及线程操作，并且调用了 Aggregator 的静态函数，所以代码的可测试性不好。</p>
+</li>
+</ul>
+<h3 id="小结-3"><a href="#小结-3" class="headerlink" title="小结"></a>小结</h3><ol>
+<li><p>写代码的过程本就是一个修修改改、不停调整的过程，肯定不是一气呵成的。你看到的那些大牛开源项目的设计和实现，也都是在不停优化、修改过程中产生的。比如，我们熟悉的 Unix 系统，第一版很简单、粗糙，代码不到 1 万行。所以，迭代思维很重要，不要刚开始就追求完美。</p>
+</li>
+<li><p>面向对象设计和实现要做的事情，就是把合适的代码放到合适的类中。至于到底选择哪种划分方法，判定的标准是让代码尽量地满足低耦合、高内聚、单一职责、对扩展开放对修改关闭等之前讲的各种设计原则和思想，尽量地做到代码可复用、易读、易扩展、易维护。</p>
+</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Design-Pattern-Design-Principle/" rel="tag"># Design Pattern Design-Principle</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/10/07/design-pattern-refactoring/" rel="prev" title="设计模式之美-笔记Part4：规范与重构">
+      <i class="fa fa-chevron-left"></i> 设计模式之美-笔记Part4：规范与重构
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/10/03/design-pattern-object-oriented02/" rel="next" title="设计模式之美-笔记Part2：面向对象-实战如何写出高质量的代码">
+      设计模式之美-笔记Part2：面向对象-实战如何写出高质量的代码 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#设计原则概述"><span class="nav-number">1.</span> <span class="nav-text">设计原则概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#理论一：对于单一职责原则，如何判定某个类的职责是否够“单一”？"><span class="nav-number">2.</span> <span class="nav-text">理论一：对于单一职责原则，如何判定某个类的职责是否够“单一”？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-如何理解单一职责原则（SRP）？"><span class="nav-number">2.1.</span> <span class="nav-text">1. 如何理解单一职责原则（SRP）？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-如何判断类的职责是否足够单一？"><span class="nav-number">2.2.</span> <span class="nav-text">2. 如何判断类的职责是否足够单一？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-类的职责是否设计得越单一越好？"><span class="nav-number">2.3.</span> <span class="nav-text">3. 类的职责是否设计得越单一越好？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#理论二：开闭原则，如何做到“对扩展开放、修改关闭”？扩展和修改各指什么？"><span class="nav-number">3.</span> <span class="nav-text">理论二：开闭原则，如何做到“对扩展开放、修改关闭”？扩展和修改各指什么？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-如何理解“对扩展开放、对修改关闭”？"><span class="nav-number">3.1.</span> <span class="nav-text">1.如何理解“对扩展开放、对修改关闭”？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-如何做到“对扩展开放、修改关闭”？"><span class="nav-number">3.2.</span> <span class="nav-text">2. 如何做到“对扩展开放、修改关闭”？</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#通过多态实现"><span class="nav-number">3.2.1.</span> <span class="nav-text">通过多态实现</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#通过接口实现"><span class="nav-number">3.2.2.</span> <span class="nav-text">通过接口实现</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#通过各种设计模式实现（比如，装饰、策略、模板、职责链、状态）"><span class="nav-number">3.2.3.</span> <span class="nav-text">通过各种设计模式实现（比如，装饰、策略、模板、职责链、状态）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-如何在项目中合理应用开闭原则？"><span class="nav-number">3.3.</span> <span class="nav-text">3.如何在项目中合理应用开闭原则？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#理论三：里式替换（LSP）跟多态有何区别？哪些代码违背了LSP？"><span class="nav-number">4.</span> <span class="nav-text">理论三：里式替换（LSP）跟多态有何区别？哪些代码违背了LSP？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#里式替换原则的理解"><span class="nav-number">4.1.</span> <span class="nav-text">里式替换原则的理解</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#符合里式替换原则的代码示例"><span class="nav-number">4.2.</span> <span class="nav-text">符合里式替换原则的代码示例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#哪些代码违背了里式替换原则"><span class="nav-number">4.3.</span> <span class="nav-text">哪些代码违背了里式替换原则</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-子类违背父类声明要实现的功能"><span class="nav-number">4.3.1.</span> <span class="nav-text">1. 子类违背父类声明要实现的功能</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-子类违背父类对输入、输出、异常的约定"><span class="nav-number">4.3.2.</span> <span class="nav-text">2. 子类违背父类对输入、输出、异常的约定</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-子类违背父类注释中所罗列的任何特殊说明"><span class="nav-number">4.3.3.</span> <span class="nav-text">3. 子类违背父类注释中所罗列的任何特殊说明</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#判断子类的设计实现是否违背里式替换原则的小窍门"><span class="nav-number">4.4.</span> <span class="nav-text">判断子类的设计实现是否违背里式替换原则的小窍门</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#里式替换与多态的区别"><span class="nav-number">4.5.</span> <span class="nav-text">里式替换与多态的区别</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#理论四：接口隔离原则有哪三种应用？原则中的“接口”该如何理解？"><span class="nav-number">5.</span> <span class="nav-text">理论四：接口隔离原则有哪三种应用？原则中的“接口”该如何理解？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-如何理解“接口隔离原则”"><span class="nav-number">5.1.</span> <span class="nav-text">1.如何理解“接口隔离原则”</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#把“接口”理解为一组-API-接口集合"><span class="nav-number">5.1.1.</span> <span class="nav-text">把“接口”理解为一组 API 接口集合</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#把“接口”理解为单个-API-接口或函数"><span class="nav-number">5.1.2.</span> <span class="nav-text">把“接口”理解为单个 API 接口或函数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#把“接口”理解为-OOP-中的接口概念"><span class="nav-number">5.1.3.</span> <span class="nav-text">把“接口”理解为 OOP 中的接口概念</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-接口隔离原则与单一职责原则的区别"><span class="nav-number">5.2.</span> <span class="nav-text">2.接口隔离原则与单一职责原则的区别</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#理论五：控制反转、依赖反转、依赖注入，这三者有何区别和联系？"><span class="nav-number">6.</span> <span class="nav-text">理论五：控制反转、依赖反转、依赖注入，这三者有何区别和联系？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#控制反转（IOC）"><span class="nav-number">6.1.</span> <span class="nav-text">控制反转（IOC）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#依赖注入（DI）"><span class="nav-number">6.2.</span> <span class="nav-text">依赖注入（DI）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#依赖注入框架（DI-Framework）"><span class="nav-number">6.3.</span> <span class="nav-text">依赖注入框架（DI Framework）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#依赖反转原则（DIP）"><span class="nav-number">6.4.</span> <span class="nav-text">依赖反转原则（DIP）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#理论六：为何-KISS、YAGNI原则看似简单，却经常被用错？"><span class="nav-number">7.</span> <span class="nav-text">理论六：为何 KISS、YAGNI原则看似简单，却经常被用错？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#如何写出满足-KISS-原则的代码？"><span class="nav-number">7.1.</span> <span class="nav-text">如何写出满足 KISS 原则的代码？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#YAGNI-原则"><span class="nav-number">7.2.</span> <span class="nav-text">YAGNI 原则</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#小结"><span class="nav-number">7.3.</span> <span class="nav-text">小结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#理论七：重复的代码就一定违背DRY吗？如何提高代码的复用性？"><span class="nav-number">8.</span> <span class="nav-text">理论七：重复的代码就一定违背DRY吗？如何提高代码的复用性？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#DRY-原则（Don’t-Repeat-Yourself）"><span class="nav-number">8.1.</span> <span class="nav-text">DRY 原则（Don’t Repeat Yourself）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#怎么提高代码复用性？"><span class="nav-number">8.2.</span> <span class="nav-text">怎么提高代码复用性？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#理论八：如何用迪米特法则（LOD）实现“高内聚、松耦合”？"><span class="nav-number">9.</span> <span class="nav-text">理论八：如何用迪米特法则（LOD）实现“高内聚、松耦合”？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#如何理解“高内聚、松耦合”？"><span class="nav-number">9.1.</span> <span class="nav-text">如何理解“高内聚、松耦合”？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-如何理解“迪米特法则”？"><span class="nav-number">9.2.</span> <span class="nav-text">2. 如何理解“迪米特法则”？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-“高内聚、松耦合”“单一职责原则”“接口隔离原则”“基于接口而非实现编程”“迪米特法则”，你能总结一下它们之间的区别和联系吗？"><span class="nav-number">9.3.</span> <span class="nav-text">3. “高内聚、松耦合”“单一职责原则”“接口隔离原则”“基于接口而非实现编程”“迪米特法则”，你能总结一下它们之间的区别和联系吗？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#实战一（上）：针对业务系统的开发，如何做需求分析和设计？"><span class="nav-number">10.</span> <span class="nav-text">实战一（上）：针对业务系统的开发，如何做需求分析和设计？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#需求分析"><span class="nav-number">10.1.</span> <span class="nav-text">需求分析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-我们可以找几个类似的产品，比如淘宝，看看它们是如何设计积分系统的，然后借鉴到我们的产品中"><span class="nav-number">10.1.1.</span> <span class="nav-text">1. 我们可以找几个类似的产品，比如淘宝，看看它们是如何设计积分系统的，然后借鉴到我们的产品中</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-通过产品的线框图、用户用例（user-case-）或者叫用户故事（user-story）来细化业务流程，挖掘一些比较细节的、不容易想到的功能点。"><span class="nav-number">10.1.2.</span> <span class="nav-text">2. 通过产品的线框图、用户用例（user case ）或者叫用户故事（user story）来细化业务流程，挖掘一些比较细节的、不容易想到的功能点。</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-大致梳理出需求功能点"><span class="nav-number">10.1.3.</span> <span class="nav-text">3. 大致梳理出需求功能点</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#系统设计"><span class="nav-number">10.2.</span> <span class="nav-text">系统设计</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-合理地将功能划分到不同模块"><span class="nav-number">10.2.1.</span> <span class="nav-text">1. 合理地将功能划分到不同模块</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-设计模块与模块之间的交互关系"><span class="nav-number">10.2.2.</span> <span class="nav-text">2. 设计模块与模块之间的交互关系</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-设计模块的接口、数据库、业务模型"><span class="nav-number">10.2.3.</span> <span class="nav-text">3. 设计模块的接口、数据库、业务模型</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#小结-1"><span class="nav-number">10.3.</span> <span class="nav-text">小结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#实战一（下）：如何实现一个遵从设计原则的积分兑换系统？"><span class="nav-number">11.</span> <span class="nav-text">实战一（下）：如何实现一个遵从设计原则的积分兑换系统？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#针对积分系统，我们先来看，如何设计数据库。"><span class="nav-number">11.1.</span> <span class="nav-text">针对积分系统，我们先来看，如何设计数据库。</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如何设计积分系统的接口"><span class="nav-number">11.2.</span> <span class="nav-text">如何设计积分系统的接口</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#业务模型"><span class="nav-number">11.3.</span> <span class="nav-text">业务模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#为什么要分-MVC-三层开发？"><span class="nav-number">11.4.</span> <span class="nav-text">为什么要分 MVC 三层开发？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#BO、VO、Entity-存在的意义是什么？"><span class="nav-number">11.5.</span> <span class="nav-text">BO、VO、Entity 存在的意义是什么？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#VO、BO、Entity-都是基于贫血模型的，而且为了兼容框架或开发库（比如-MyBatis、Dozer、BeanUtils），我们还需要定义每个字段的-set"><span class="nav-number">11.6.</span> <span class="nav-text">VO、BO、Entity 都是基于贫血模型的，而且为了兼容框架或开发库（比如 MyBatis、Dozer、BeanUtils），我们还需要定义每个字段的 set</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#实战二（上）：针对非业务的通用框架开发，如何做需求分析和设计？"><span class="nav-number">12.</span> <span class="nav-text">实战二（上）：针对非业务的通用框架开发，如何做需求分析和设计？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#项目背景"><span class="nav-number">12.1.</span> <span class="nav-text">项目背景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#需求分析-1"><span class="nav-number">12.2.</span> <span class="nav-text">需求分析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-功能性需求分析"><span class="nav-number">12.2.1.</span> <span class="nav-text">1.功能性需求分析</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-非功能性需求分析"><span class="nav-number">12.2.2.</span> <span class="nav-text">2.非功能性需求分析</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#易用性"><span class="nav-number">12.2.2.1.</span> <span class="nav-text">易用性</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#性能"><span class="nav-number">12.2.2.2.</span> <span class="nav-text">性能</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#扩展性"><span class="nav-number">12.2.2.3.</span> <span class="nav-text">扩展性</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#容错性"><span class="nav-number">12.2.2.4.</span> <span class="nav-text">容错性</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#通用性"><span class="nav-number">12.2.2.5.</span> <span class="nav-text">通用性</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#框架设计"><span class="nav-number">12.3.</span> <span class="nav-text">框架设计</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#基于最新的原型进一步考虑"><span class="nav-number">12.4.</span> <span class="nav-text">基于最新的原型进一步考虑</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#小结-2"><span class="nav-number">12.5.</span> <span class="nav-text">小结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#实战二（下）：如何实现一个支持各种统计规则的性能计数器？"><span class="nav-number">13.</span> <span class="nav-text">实战二（下）：如何实现一个支持各种统计规则的性能计数器？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-划分职责进而识别出有哪些类"><span class="nav-number">13.1.</span> <span class="nav-text">1. 划分职责进而识别出有哪些类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-定义类及类与类之间的关系"><span class="nav-number">13.2.</span> <span class="nav-text">2. 定义类及类与类之间的关系</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Review-设计与实现-以及问题分析"><span class="nav-number">13.3.</span> <span class="nav-text">Review 设计与实现 以及问题分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#小结-3"><span class="nav-number">13.4.</span> <span class="nav-text">小结</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="crazyfzw"
+      src="/uploads/avatar.jpg">
+  <p class="site-author-name" itemprop="name">crazyfzw</p>
+  <div class="site-description" itemprop="description">做个有趣的技术人</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">43</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">140</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/crazyfzw" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;crazyfzw" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://book.douban.com/people/crazyfzw/" title="Booklist → https:&#x2F;&#x2F;book.douban.com&#x2F;people&#x2F;crazyfzw&#x2F;" rel="noopener" target="_blank"><i class="fab fa-skype fa-fw"></i>Booklist</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:crazyfzw@gmail.com" title="E-Mail → mailto:crazyfzw@gmail.com" rel="noopener" target="_blank"><i class="fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://plus.google.com/104894167431407693109" title="Google → https:&#x2F;&#x2F;plus.google.com&#x2F;104894167431407693109" rel="noopener" target="_blank"><i class="fab fa-google fa-fw"></i>Google</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.facebook.com/profile.php?id=100011315733045" title="Facebook → https:&#x2F;&#x2F;www.facebook.com&#x2F;profile.php?id&#x3D;100011315733045" rel="noopener" target="_blank"><i class="fab fa-facebook fa-fw"></i>Facebook</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/u/3829383159" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;3829383159" rel="noopener" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://ifeve.com/" title="http:&#x2F;&#x2F;ifeve.com&#x2F;" rel="noopener" target="_blank">并发编程网</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="http://www.importnew.com/" title="http:&#x2F;&#x2F;www.importnew.com&#x2F;" rel="noopener" target="_blank">ImportNew</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="http://jm.taobao.org/categories/" title="http:&#x2F;&#x2F;jm.taobao.org&#x2F;categories&#x2F;" rel="noopener" target="_blank">阿里中间件团队博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.ibm.com/developerworks/cn/java/" title="https:&#x2F;&#x2F;www.ibm.com&#x2F;developerworks&#x2F;cn&#x2F;java&#x2F;" rel="noopener" target="_blank">IBM developerworks</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tech.meituan.com/" title="https:&#x2F;&#x2F;tech.meituan.com&#x2F;" rel="noopener" target="_blank">美团点评技术团队</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="http://calvin1978.blogcn.com/" title="http:&#x2F;&#x2F;calvin1978.blogcn.com&#x2F;" rel="noopener" target="_blank">江南白衣的博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="http://blog.720ui.com/" title="http:&#x2F;&#x2F;blog.720ui.com" rel="noopener" target="_blank">梁桂钊的博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.jianshu.com/u/581f548ef0ec" title="https:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;581f548ef0ec" rel="noopener" target="_blank">李艳鹏的博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="http://jinnianshilongnian.iteye.com/" title="http:&#x2F;&#x2F;jinnianshilongnian.iteye.com&#x2F;" rel="noopener" target="_blank">张开涛的博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/zuoxiaolong" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;zuoxiaolong" rel="noopener" target="_blank">左潇龙的博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/xrq730/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;xrq730&#x2F;" rel="noopener" target="_blank">五月的仓颉</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://yikun.github.io/" title="https:&#x2F;&#x2F;yikun.github.io&#x2F;" rel="noopener" target="_blank">Yikun的博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="http://www.ruanyifeng.com/" title="http:&#x2F;&#x2F;www.ruanyifeng.com" rel="noopener" target="_blank">阮一峰的个人网站</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">crazyfzw</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">458k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">6:56</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : false,
+      appId      : 'jyxPxkBMeEmDfMMTuuyBdGdu-gzGzoHsz',
+      appKey     : '7SEECyfT4R10oTtj4zDMOdBt',
+      placeholder: "ヾﾉ≧∀≦)o 来呀！吐槽一番吧！",
+      avatar     : 'monsterid',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : '' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

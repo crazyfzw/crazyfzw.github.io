@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"crazyfzw.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"valine","storage":true,"lazyload":true,"nav":null,"activeClass":"valine"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="概述创建型模式主要解决对象的创建问题，封装复杂的创建过程，解耦对象的创建代码和使用代码。  单例模式用来创建全局唯一的对象。  工厂模式用来创建不同但是相关类型的对象（继承同一父类或者接口的一组子类），由给定的参数来决定创建哪种类型的对象。  建造者模式是用来创建复杂对象，可以通过设置不同的可选参数，“定制化”地创建不同的对象。  原型模式针对创建成本比较大的对象，利用对已有对象进行复制的方式进行">
+<meta property="og:type" content="article">
+<meta property="og:title" content="设计模式之美-笔记Part5：设计模式与范式-创建型">
+<meta property="og:url" content="https://crazyfzw.github.io/2020/10/09/design-pattern-creational-pattern/index.html">
+<meta property="og:site_name" content="Crazyfzw&#39;s blog">
+<meta property="og:description" content="概述创建型模式主要解决对象的创建问题，封装复杂的创建过程，解耦对象的创建代码和使用代码。  单例模式用来创建全局唯一的对象。  工厂模式用来创建不同但是相关类型的对象（继承同一父类或者接口的一组子类），由给定的参数来决定创建哪种类型的对象。  建造者模式是用来创建复杂对象，可以通过设置不同的可选参数，“定制化”地创建不同的对象。  原型模式针对创建成本比较大的对象，利用对已有对象进行复制的方式进行">
+<meta property="og:image" content="evernotecid://B93CACCF-EBD1-4485-9709-207B83E62B19/appyinxiangcom/22404617/ENResource/p2466">
+<meta property="og:image" content="evernotecid://B93CACCF-EBD1-4485-9709-207B83E62B19/appyinxiangcom/22404617/ENResource/p2467">
+<meta property="og:image" content="evernotecid://B93CACCF-EBD1-4485-9709-207B83E62B19/appyinxiangcom/22404617/ENResource/p2468">
+<meta property="og:image" content="evernotecid://B93CACCF-EBD1-4485-9709-207B83E62B19/appyinxiangcom/22404617/ENResource/p2469">
+<meta property="article:published_time" content="2020-10-09T03:32:23.000Z">
+<meta property="article:modified_time" content="2020-12-22T05:21:39.191Z">
+<meta property="article:author" content="crazyfzw">
+<meta property="article:tag" content="Design Pattern creational-Pattern">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="evernotecid://B93CACCF-EBD1-4485-9709-207B83E62B19/appyinxiangcom/22404617/ENResource/p2466">
+
+<link rel="canonical" href="https://crazyfzw.github.io/2020/10/09/design-pattern-creational-pattern/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-Hans'
+  };
+</script>
+
+  <title>设计模式之美-笔记Part5：设计模式与范式-创建型 | Crazyfzw's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Crazyfzw's blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Crazyfzw's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Return to base, step by step.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="https://crazyfzw.github.io/2020/10/09/design-pattern-creational-pattern/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/uploads/avatar.jpg">
+      <meta itemprop="name" content="crazyfzw">
+      <meta itemprop="description" content="做个有趣的技术人">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Crazyfzw's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          设计模式之美-笔记Part5：设计模式与范式-创建型
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-10-09 11:32:23" itemprop="dateCreated datePublished" datetime="2020-10-09T11:32:23+08:00">2020-10-09</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-12-22 13:21:39" itemprop="dateModified" datetime="2020-12-22T13:21:39+08:00">2020-12-22</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Design-Pattern/" itemprop="url" rel="index"><span itemprop="name">Design Pattern</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2020/10/09/design-pattern-creational-pattern/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/10/09/design-pattern-creational-pattern/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>31k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>29 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>创建型模式主要解决对象的创建问题，封装复杂的创建过程，解耦对象的创建代码和使用代码。</p>
+<ul>
+<li><p>单例模式用来创建全局唯一的对象。</p>
+</li>
+<li><p>工厂模式用来创建不同但是相关类型的对象（继承同一父类或者接口的一组子类），由给定的参数来决定创建哪种类型的对象。</p>
+</li>
+<li><p>建造者模式是用来创建复杂对象，可以通过设置不同的可选参数，“定制化”地创建不同的对象。</p>
+</li>
+<li><p>原型模式针对创建成本比较大的对象，利用对已有对象进行复制的方式进行创建，以达到节省创建时间的目的。</p>
+</li>
+</ul>
+<a id="more"></a>
+<h2 id="单例模式"><a href="#单例模式" class="headerlink" title="单例模式"></a>单例模式</h2><p>单例设计模式（Singleton Design Pattern）理解起来非常简单。一个类只允许创建一个对象（或者实例），那这个类就是一个单例类，这种设计模式就叫作单例设计模式，简称单例模式。</p>
+<h3 id="为什么要使用单例？"><a href="#为什么要使用单例？" class="headerlink" title="为什么要使用单例？"></a>为什么要使用单例？</h3><h4 id="处理资源访问冲突"><a href="#处理资源访问冲突" class="headerlink" title="处理资源访问冲突"></a>处理资源访问冲突</h4><p>可以使用单例解决资源访问冲突的问题。</p>
+<p>案例：实现了一个往文件中打印日志的 Logger 类</p>
+<p>第一版代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">public class Logger &#123;</span><br><span class="line">  private FileWriter writer;</span><br><span class="line">  </span><br><span class="line">  public Logger() &#123;</span><br><span class="line">    File file &#x3D; new File(&quot;&#x2F;Users&#x2F;wangzheng&#x2F;log.txt&quot;);</span><br><span class="line">    writer &#x3D; new FileWriter(file, true); &#x2F;&#x2F;true表示追加写入</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  public void log(String message) &#123;</span><br><span class="line">    writer.write(mesasge);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; Logger类的应用示例：</span><br><span class="line">public class UserController &#123;</span><br><span class="line">  private Logger logger &#x3D; new Logger();</span><br><span class="line">  </span><br><span class="line">  public void login(String username, String password) &#123;</span><br><span class="line">    &#x2F;&#x2F; ...省略业务逻辑代码...</span><br><span class="line">    logger.log(username + &quot; logined!&quot;);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class OrderController &#123;</span><br><span class="line">  private Logger logger &#x3D; new Logger();</span><br><span class="line">  </span><br><span class="line">  public void create(OrderVo order) &#123;</span><br><span class="line">    &#x2F;&#x2F; ...省略业务逻辑代码...</span><br><span class="line">    logger.log(&quot;Created an order: &quot; + order.toString());</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>分别创建两个 Logger 对象。在 Web 容器的 Servlet 多线程环境下，如果两个 Servlet 线程同时分别执行 login() 和 create() 两个函数，并且同时写日志到 log.txt 文件中，那就有可能存在日志信息互相覆盖的情况。</p>
+<p><img src="evernotecid://B93CACCF-EBD1-4485-9709-207B83E62B19/appyinxiangcom/22404617/ENResource/p2466" alt="2b0e6141d10399430c59169af4edc3c2.jpeg"></p>
+<p>改造一：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">public class Logger &#123;</span><br><span class="line">  private FileWriter writer;</span><br><span class="line"></span><br><span class="line">  public Logger() &#123;</span><br><span class="line">    File file &#x3D; new File(&quot;&#x2F;Users&#x2F;wangzheng&#x2F;log.txt&quot;);</span><br><span class="line">    writer &#x3D; new FileWriter(file, true); &#x2F;&#x2F;true表示追加写入</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  public void log(String message) &#123;</span><br><span class="line">    synchronized(this) &#123;</span><br><span class="line">      writer.write(mesasge);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这种锁是一个对象级别的锁，一个对象在不同的线程下同时调用 log() 函数，会被强制要求顺序执行。但是，不同的对象之间并不共享同一把锁。在不同的线程下，通过不同的对象调用执行 log() 函数，锁并不会起作用，仍然有可能存在写入日志互相覆盖的问题。</p>
+<p><img src="evernotecid://B93CACCF-EBD1-4485-9709-207B83E62B19/appyinxiangcom/22404617/ENResource/p2467" alt="203eb5070c3820b48500d4ab95732f29.jpeg"></p>
+<p>FileWriter 本身就是线程安全的，它的内部实现中本身就加了对象级别的锁，因此，在外层调用 write() 函数的时候，再加对象级别的锁实际上是多此一举。因为不同的 Logger 对象不共享 FileWriter 对象，所以，FileWriter 对象级别的锁也解决不了数据写入互相覆盖的问题。</p>
+<h5 id="通过类级别的锁解决日志覆盖问题"><a href="#通过类级别的锁解决日志覆盖问题" class="headerlink" title="通过类级别的锁解决日志覆盖问题"></a>通过类级别的锁解决日志覆盖问题</h5><p>把对象级别的锁，换成类级别的锁就可以了。让所有的对象都共享同一把锁。这样就避免了不同对象之间同时调用 log() 函数，而导致的日志覆盖问题。</p>
+<p>单例模式相对于之前类级别锁的好处是，不用创建那么多 Logger 对象，一方面节省内存空间，另一方面节省系统文件句柄（对于操作系统来说，文件句柄也是一种资源，不能随便浪费）。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">public class Logger &#123;</span><br><span class="line">  private FileWriter writer;</span><br><span class="line"></span><br><span class="line">  public Logger() &#123;</span><br><span class="line">    File file &#x3D; new File(&quot;&#x2F;Users&#x2F;wangzheng&#x2F;log.txt&quot;);</span><br><span class="line">    writer &#x3D; new FileWriter(file, true); &#x2F;&#x2F;true表示追加写入</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  public void log(String message) &#123;</span><br><span class="line">    synchronized(Logger.class) &#123; &#x2F;&#x2F; 类级别的锁</span><br><span class="line">      writer.write(mesasge);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="通过单例更优雅的解决日志覆盖问题"><a href="#通过单例更优雅的解决日志覆盖问题" class="headerlink" title="通过单例更优雅的解决日志覆盖问题"></a>通过单例更优雅的解决日志覆盖问题</h5><p>将 Logger 设计成一个单例类，程序中只允许创建一个 Logger 对象，所有的线程共享使用的这一个 Logger 对象，共享一个 FileWriter 对象，而 FileWriter 本身是对象级别线程安全的，也就避免了多线程情况下写日志会互相覆盖的问题。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">public class Logger &#123;</span><br><span class="line">  private FileWriter writer;</span><br><span class="line">  private static final Logger instance &#x3D; new Logger();</span><br><span class="line"></span><br><span class="line">  private Logger() &#123;</span><br><span class="line">    File file &#x3D; new File(&quot;&#x2F;Users&#x2F;wangzheng&#x2F;log.txt&quot;);</span><br><span class="line">    writer &#x3D; new FileWriter(file, true); &#x2F;&#x2F;true表示追加写入</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  public static Logger getInstance() &#123;</span><br><span class="line">    return instance;</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  public void log(String message) &#123;</span><br><span class="line">    writer.write(mesasge);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; Logger类的应用示例：</span><br><span class="line">public class UserController &#123;</span><br><span class="line">  public void login(String username, String password) &#123;</span><br><span class="line">    &#x2F;&#x2F; ...省略业务逻辑代码...</span><br><span class="line">    Logger.getInstance().log(username + &quot; logined!&quot;);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class OrderController &#123;  </span><br><span class="line">  public void create(OrderVo order) &#123;</span><br><span class="line">    &#x2F;&#x2F; ...省略业务逻辑代码...</span><br><span class="line">    Logger.getInstance().log(&quot;Created a order: &quot; + order.toString());</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="表示全局唯一类"><a href="#表示全局唯一类" class="headerlink" title="表示全局唯一类"></a>表示全局唯一类</h4><p>从业务概念上，有些数据在系统中只应该保存一份，就比较适合设计为单例类。比如，系统的配置信息类。</p>
+<p>案例：实现一个唯一递增 ID 号码生成器</p>
+<p>如果程序中有两个对象，那就会存在生成重复 ID 的情况，所以，我们应该将 ID 生成器类设计为单例。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">import java.util.concurrent.atomic.AtomicLong;</span><br><span class="line">public class IdGenerator &#123;</span><br><span class="line">  &#x2F;&#x2F; AtomicLong是一个Java并发库中提供的一个原子变量类型,</span><br><span class="line">  &#x2F;&#x2F; 它将一些线程不安全需要加锁的复合操作封装为了线程安全的原子操作，</span><br><span class="line">  &#x2F;&#x2F; 比如下面会用到的incrementAndGet().</span><br><span class="line">  private AtomicLong id &#x3D; new AtomicLong(0);</span><br><span class="line">  private static final IdGenerator instance &#x3D; new IdGenerator();</span><br><span class="line">  private IdGenerator() &#123;&#125;</span><br><span class="line">  public static IdGenerator getInstance() &#123;</span><br><span class="line">    return instance;</span><br><span class="line">  &#125;</span><br><span class="line">  public long getId() &#123; </span><br><span class="line">    return id.incrementAndGet();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; IdGenerator使用举例</span><br><span class="line">long id &#x3D; IdGenerator.getInstance().getId();</span><br></pre></td></tr></table></figure>
+
+<h3 id="如何实现一个单例？"><a href="#如何实现一个单例？" class="headerlink" title="如何实现一个单例？"></a>如何实现一个单例？</h3><p>要实现一个单例，主要关下面几个要点：</p>
+<ul>
+<li>构造函数需要是 private 访问权限的，这样才能避免外部通过 new 创建实例；</li>
+<li>考虑对象创建时的线程安全问题；</li>
+<li>考虑是否支持延迟加载；</li>
+<li>考虑 getInstance() 性能是否高（是否加锁）。</li>
+</ul>
+<h4 id="饿汉式-不支持延迟加载"><a href="#饿汉式-不支持延迟加载" class="headerlink" title="饿汉式(不支持延迟加载)"></a>饿汉式(不支持延迟加载)</h4><p>在类加载的时候，instance 静态实例就已经创建并初始化好了，所以，instance 实例的创建过程是线程安全的。不过，这样的实现方式不支持延迟加载.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">public class IdGenerator &#123; </span><br><span class="line">  private AtomicLong id &#x3D; new AtomicLong(0);</span><br><span class="line">  private static final IdGenerator instance &#x3D; new IdGenerator();</span><br><span class="line">  private IdGenerator() &#123;&#125;</span><br><span class="line">  public static IdGenerator getInstance() &#123;</span><br><span class="line">    return instance;</span><br><span class="line">  &#125;</span><br><span class="line">  public long getId() &#123; </span><br><span class="line">    return id.incrementAndGet();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="懒汉式（支持延迟加载、并发度低）"><a href="#懒汉式（支持延迟加载、并发度低）" class="headerlink" title="懒汉式（支持延迟加载、并发度低）"></a>懒汉式（支持延迟加载、并发度低）</h4><p>懒汉式相对于饿汉式的优势是支持延迟加载。给 getInstance() 这个方法加了一把大锁（synchronzed），这种实现方式会导致频繁加锁、释放锁，以及并发度低等问题。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">public class IdGenerator &#123; </span><br><span class="line">  private AtomicLong id &#x3D; new AtomicLong(0);</span><br><span class="line">  private static IdGenerator instance;</span><br><span class="line">  private IdGenerator() &#123;&#125;</span><br><span class="line">  public static synchronized IdGenerator getInstance() &#123;</span><br><span class="line">    if (instance &#x3D;&#x3D; null) &#123;</span><br><span class="line">      instance &#x3D; new IdGenerator();</span><br><span class="line">    &#125;</span><br><span class="line">    return instance;</span><br><span class="line">  &#125;</span><br><span class="line">  public long getId() &#123; </span><br><span class="line">    return id.incrementAndGet();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="双重检测-（支持延迟加载，支持高并发）"><a href="#双重检测-（支持延迟加载，支持高并发）" class="headerlink" title="双重检测 （支持延迟加载，支持高并发）"></a>双重检测 （支持延迟加载，支持高并发）</h4><p>双重检测实现方式既支持延迟加载、又支持高并发的单例实现方式。只要 instance 被创建之后，再调用 getInstance() 函数都不会进入到加锁逻辑中。所以，这种实现方式解决了懒汉式并发度低的问题。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">public class IdGenerator &#123; </span><br><span class="line">  private AtomicLong id &#x3D; new AtomicLong(0);</span><br><span class="line">  private static IdGenerator instance;</span><br><span class="line">  private IdGenerator() &#123;&#125;</span><br><span class="line">  public static IdGenerator getInstance() &#123;</span><br><span class="line">    if (instance &#x3D;&#x3D; null) &#123;</span><br><span class="line">      synchronized(IdGenerator.class) &#123; &#x2F;&#x2F; 此处为类级别的锁</span><br><span class="line">        if (instance &#x3D;&#x3D; null) &#123;</span><br><span class="line">          instance &#x3D; new IdGenerator();</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    return instance;</span><br><span class="line">  &#125;</span><br><span class="line">  public long getId() &#123; </span><br><span class="line">    return id.incrementAndGet();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>低版本的JDK 因为指令重排序，可能会导致 IdGenerator 对象被 new 出来，并且赋值给 instance 之后，还没来得及初始化（执行构造函数中的代码逻辑），就被另一个线程使用了。可以通过给 instance 成员变量加上 volatile 关键字，禁止指令重排序解决这个问题。  </p>
+<p>需要注意的是高版本的 Java 已经在 JDK 内部实现中解决了这个问题（解决的方法很简单，只要把对象 new 操作和初始化操作设计为原子操作，就自然能禁止重排序）。</p>
+<h4 id="静态内部类-既保证了线程安全，又能做到延迟加载"><a href="#静态内部类-既保证了线程安全，又能做到延迟加载" class="headerlink" title="静态内部类 (既保证了线程安全，又能做到延迟加载)"></a>静态内部类 (既保证了线程安全，又能做到延迟加载)</h4><p>利用 Java 的静态内部类来实现单例。这种实现方式，既支持延迟加载，也支持高并发，实现起来也比双重检测简单。</p>
+<p>SingletonHolder 是一个静态内部类，当外部类 IdGenerator 被加载的时候，并不会创建 SingletonHolder 实例对象。只有当调用 getInstance() 方法时，SingletonHolder 才会被加载，这个时候才会创建 instance。instance 的唯一性、创建过程的线程安全性，都由 JVM 来保证。所以，这种实现方法既保证了线程安全，又能做到延迟加载。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">public class IdGenerator &#123; </span><br><span class="line">  private AtomicLong id &#x3D; new AtomicLong(0);</span><br><span class="line">  private IdGenerator() &#123;&#125;</span><br><span class="line"></span><br><span class="line">  private static class SingletonHolder&#123;</span><br><span class="line">    private static final IdGenerator instance &#x3D; new IdGenerator();</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  public static IdGenerator getInstance() &#123;</span><br><span class="line">    return SingletonHolder.instance;</span><br><span class="line">  &#125;</span><br><span class="line"> </span><br><span class="line">  public long getId() &#123; </span><br><span class="line">    return id.incrementAndGet();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="枚举"><a href="#枚举" class="headerlink" title="枚举"></a>枚举</h4><p>最简单的实现方式，基于枚举类型的单例实现。这种实现方式通过 Java 枚举类型本身的特性，保证了实例创建的线程安全性和实例的唯一性。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">public enum IdGenerator &#123;</span><br><span class="line">  INSTANCE;</span><br><span class="line">  private AtomicLong id &#x3D; new AtomicLong(0);</span><br><span class="line"> </span><br><span class="line">  public long getId() &#123; </span><br><span class="line">    return id.incrementAndGet();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="评论区给出的一种Spring-源码中的实现"><a href="#评论区给出的一种Spring-源码中的实现" class="headerlink" title="评论区给出的一种Spring 源码中的实现"></a>评论区给出的一种Spring 源码中的实现</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">ublic class Singleton &#123;</span><br><span class="line">    private static volatile Singleton instance&#x3D;null;</span><br><span class="line">    private Singleton() &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static Singleton getInstance() &#123;&#x2F;&#x2F;</span><br><span class="line">        Singleton temp&#x3D;instance; &#x2F;&#x2F; 为什么要用局部变量来接收</span><br><span class="line">        if (null &#x3D;&#x3D; temp) &#123;</span><br><span class="line">            synchronized (Singleton.class) &#123;</span><br><span class="line">                temp&#x3D;instance;</span><br><span class="line">                if (null &#x3D;&#x3D; temp) &#123;</span><br><span class="line">                    temp&#x3D;new Singleton();</span><br><span class="line">                    instance&#x3D;temp;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        return instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>spring源码 如 ReactiveAdapterRegistry。<br>JDK 源码 如 AbstractQueuedSynchronizer。<br>很多地方 都有用 局部变量 来接收 静态的成员变量， 请问下 这么写有什么性能上的优化点吗？</p>
+<p>Using localRef, we are reducing the access of volatile variable to just one for positive usecase. If we do not use localRef, then we would have to access volatile variable twice - once for checking null and then at method return time.<br>Accessing volatile memory is quite an expensive affair because it involves reaching out to main memory.<br>参考链接：<a href="https://www.javacodemonk.com/threadsafe-singleton-design-pattern-java-806ad7e6" target="_blank" rel="noopener">https://www.javacodemonk.com/threadsafe-singleton-design-pattern-java-806ad7e6</a></p>
+<h3 id="单例存在哪些问题？"><a href="#单例存在哪些问题？" class="headerlink" title="单例存在哪些问题？"></a>单例存在哪些问题？</h3><ul>
+<li>单例对 OOP 特性的支持不友好</li>
+<li>单例会隐藏类之间的依赖关系</li>
+<li>单例对代码的扩展性不友好</li>
+<li>单例对代码的可测试性不友好</li>
+<li>单例不支持有参数的构造函数</li>
+</ul>
+<h3 id="有何替代的解决方案？"><a href="#有何替代的解决方案？" class="headerlink" title="有何替代的解决方案？"></a>有何替代的解决方案？</h3><p>为了保证全局唯一，除了使用单例，我们还可以用静态方法来实现。不过，静态方法这种实现思路，并不能解决我们之前提到的问题。如果要完全解决这些问题，我们可能要从根上，寻找其他方式来实现全局唯一类了。比如，通过工厂模式、IOC 容器（比如 Spring IOC 容器）来保证，由程序员自己来保证（自己在编写代码的时候自己保证不要创建两个类对象）。</p>
+<p>如果单例类并没有后续扩展的需求，并且不依赖外部系统，那设计成单例类就没有太大问题。对于一些全局的类，我们在其他地方 new 的话，还要在类之间传来传去，不如直接做成单例类，使用起来简洁方便。</p>
+<h3 id="如何设计实现一个集群环境下的分布式单例模式？"><a href="#如何设计实现一个集群环境下的分布式单例模式？" class="headerlink" title="如何设计实现一个集群环境下的分布式单例模式？"></a>如何设计实现一个集群环境下的分布式单例模式？</h3><h4 id="如何理解单例模式中的唯一性？"><a href="#如何理解单例模式中的唯一性？" class="headerlink" title="如何理解单例模式中的唯一性？"></a>如何理解单例模式中的唯一性？</h4><p>单例类中对象的唯一性的作用范围是“进程唯一”的。“进程唯一”指的是进程内唯一，进程间不唯一；“线程唯一”指的是线程内唯一，线程间可以不唯一。实际上，“进程唯一”就意味着线程内、线程间都唯一，这也是“进程唯一”和“线程唯一”的区别之处。“集群唯一”指的是进程内唯一、进程间也唯一。</p>
+<h4 id="如何实现线程唯一的单例？"><a href="#如何实现线程唯一的单例？" class="headerlink" title="如何实现线程唯一的单例？"></a>如何实现线程唯一的单例？</h4><p>通过一个 HashMap 来存储对象，其中 key 是线程 ID，value 是对象。这样我们就可以做到，不同的线程对应不同的对象，同一个线程只能对应一个对象。实际上，Java 语言本身提供了 ThreadLocal 并发工具类，可以更加轻松地实现线程唯一单例。</p>
+<p>实现代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">public class IdGenerator &#123;</span><br><span class="line">  private AtomicLong id &#x3D; new AtomicLong(0);</span><br><span class="line"></span><br><span class="line">  private static final ConcurrentHashMap&lt;Long, IdGenerator&gt; instances</span><br><span class="line">          &#x3D; new ConcurrentHashMap&lt;&gt;();</span><br><span class="line"></span><br><span class="line">  private IdGenerator() &#123;&#125;</span><br><span class="line"></span><br><span class="line">  public static IdGenerator getInstance() &#123;</span><br><span class="line">    Long currentThreadId &#x3D; Thread.currentThread().getId();</span><br><span class="line">    instances.putIfAbsent(currentThreadId, new IdGenerator());</span><br><span class="line">    return instances.get(currentThreadId);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  public long getId() &#123;</span><br><span class="line">    return id.incrementAndGet();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="如何实现集群环境下的单例？"><a href="#如何实现集群环境下的单例？" class="headerlink" title="如何实现集群环境下的单例？"></a>如何实现集群环境下的单例？</h4><p>这个单例对象序列化并存储到外部共享存储区（比如文件）。进程在使用这个单例对象的时候，需要先从外部共享存储区中将它读取到内存，并反序列化成对象，然后再使用，使用完成之后还需要再存储回外部共享存储区。为了保证任何时刻在进程间都只有一份对象存在，一个进程在获取到对象之后，需要对对象加锁，避免其他进程再将其获取。在进程使用完这个对象之后，需要显式地将对象从内存中删除，并且释放对对象的加锁。</p>
+<p>实现代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">public class IdGenerator &#123;</span><br><span class="line">  private AtomicLong id &#x3D; new AtomicLong(0);</span><br><span class="line">  private static IdGenerator instance;</span><br><span class="line">  private static SharedObjectStorage storage &#x3D; FileSharedObjectStorage(&#x2F;*入参省略，比如文件地址*&#x2F;);</span><br><span class="line">  private static DistributedLock lock &#x3D; new DistributedLock();</span><br><span class="line">  </span><br><span class="line">  private IdGenerator() &#123;&#125;</span><br><span class="line"></span><br><span class="line">  public synchronized static IdGenerator getInstance() </span><br><span class="line">    if (instance &#x3D;&#x3D; null) &#123;</span><br><span class="line">      lock.lock();</span><br><span class="line">      instance &#x3D; storage.load(IdGenerator.class);</span><br><span class="line">    &#125;</span><br><span class="line">    return instance;</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  public synchroinzed void freeInstance() &#123;</span><br><span class="line">    storage.save(this, IdGeneator.class);</span><br><span class="line">    instance &#x3D; null; &#x2F;&#x2F;释放对象</span><br><span class="line">    lock.unlock();</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  public long getId() &#123; </span><br><span class="line">    return id.incrementAndGet();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; IdGenerator使用举例</span><br><span class="line">IdGenerator idGeneator &#x3D; IdGenerator.getInstance();</span><br><span class="line">long id &#x3D; idGenerator.getId();</span><br><span class="line">IdGenerator.freeInstance();</span><br></pre></td></tr></table></figure>
+
+<h4 id="如何实现一个多例模式？"><a href="#如何实现一个多例模式？" class="headerlink" title="如何实现一个多例模式？"></a>如何实现一个多例模式？</h4><p>“单例”指的是一个类只能创建一个对象。对应地，“多例”指的就是一个类可以创建多个对象，但是个数是有限制的，比如只能创建 3 个对象。多例的实现也比较简单，通过一个 Map 来存储对象类型和对象之间的对应关系，来控制对象的个数。</p>
+<h5 id="创建指定数量的对象："><a href="#创建指定数量的对象：" class="headerlink" title="创建指定数量的对象："></a>创建指定数量的对象：</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">public class BackendServer &#123;</span><br><span class="line">  private long serverNo;</span><br><span class="line">  private String serverAddress;</span><br><span class="line"></span><br><span class="line">  private static final int SERVER_COUNT &#x3D; 3;</span><br><span class="line">  private static final Map&lt;Long, BackendServer&gt; serverInstances &#x3D; new HashMap&lt;&gt;();</span><br><span class="line"></span><br><span class="line">  static &#123;</span><br><span class="line">    serverInstances.put(1L, new BackendServer(1L, &quot;192.134.22.138:8080&quot;));</span><br><span class="line">    serverInstances.put(2L, new BackendServer(2L, &quot;192.134.22.139:8080&quot;));</span><br><span class="line">    serverInstances.put(3L, new BackendServer(3L, &quot;192.134.22.140:8080&quot;));</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  private BackendServer(long serverNo, String serverAddress) &#123;</span><br><span class="line">    this.serverNo &#x3D; serverNo;</span><br><span class="line">    this.serverAddress &#x3D; serverAddress;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  public BackendServer getInstance(long serverNo) &#123;</span><br><span class="line">    return serverInstances.get(serverNo);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  public BackendServer getRandomInstance() &#123;</span><br><span class="line">    Random r &#x3D; new Random();</span><br><span class="line">    int no &#x3D; r.nextInt(SERVER_COUNT)+1;</span><br><span class="line">    return serverInstances.get(no);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="不同类型创建多个对象"><a href="#不同类型创建多个对象" class="headerlink" title="不同类型创建多个对象"></a>不同类型创建多个对象</h5><p>对于多例模式，还有一种理解方式：同一类型的只能创建一个对象，不同类型的可以创建多个对象。</p>
+<p>实现代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">public class Logger &#123;</span><br><span class="line">  private static final ConcurrentHashMap&lt;String, Logger&gt; instances</span><br><span class="line">          &#x3D; new ConcurrentHashMap&lt;&gt;();</span><br><span class="line"></span><br><span class="line">  private Logger() &#123;&#125;</span><br><span class="line"></span><br><span class="line">  public static Logger getInstance(String loggerName) &#123;</span><br><span class="line">    instances.putIfAbsent(loggerName, new Logger());</span><br><span class="line">    return instances.get(loggerName);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  public void log() &#123;</span><br><span class="line">    &#x2F;&#x2F;...</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;l1&#x3D;&#x3D;l2, l1!&#x3D;l3</span><br><span class="line">Logger l1 &#x3D; Logger.getInstance(&quot;User.class&quot;);</span><br><span class="line">Logger l2 &#x3D; Logger.getInstance(&quot;User.class&quot;);</span><br><span class="line">Logger l3 &#x3D; Logger.getInstance(&quot;Order.class&quot;);</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="如何理解单例类对象的唯一性的作用范围是类加载器"><a href="#如何理解单例类对象的唯一性的作用范围是类加载器" class="headerlink" title="如何理解单例类对象的唯一性的作用范围是类加载器"></a>如何理解单例类对象的唯一性的作用范围是类加载器</h3><p>对于 Java 语言来说，单例类对象的唯一性的作用范围并非进程，而是类加载器（Class Loader）,怎么理解？</p>
+<p>java中，两个类来源于同一个Class文件，被同一个虚拟机加载，只要加载它们的类加载器不同，那这两个类就必定不相等。单例类对象的唯一性前提也必须保证该类被同一个类加载器加载！</p>
+<h2 id="工厂模式"><a href="#工厂模式" class="headerlink" title="工厂模式"></a>工厂模式</h2><p>工厂模式是一种非常常用的设计模式，在很多开源项目、工具类中到处可见，比如 Java 中的 Calendar、DateFormat 类。</p>
+<p>工厂模式分为三种更加细分的类型：简单工厂、工厂方法和抽象工厂。简单工厂、工厂方法原理比较简单，在实际的项目中也比较常用。而抽象工厂的原理稍微复杂点，在实际的项目中相对也不常用。</p>
+<h3 id="简单工厂（Simple-Factory）"><a href="#简单工厂（Simple-Factory）" class="headerlink" title="简单工厂（Simple Factory）"></a>简单工厂（Simple Factory）</h3><p>例子： 根据配置文件的后缀（json、xml、yaml、properties），选择不同的解析器（JsonRuleConfigParser、XmlRuleConfigParser……），将存储在文件中的配置解析成内存对象 RuleConfig。</p>
+<p>简单工厂的第一种实现：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">public class RuleConfigSource &#123;</span><br><span class="line">  public RuleConfig load(String ruleConfigFilePath) &#123;</span><br><span class="line">    String ruleConfigFileExtension &#x3D; getFileExtension(ruleConfigFilePath);</span><br><span class="line">    IRuleConfigParser parser &#x3D; RuleConfigParserFactory.createParser(ruleConfigFileExtension);</span><br><span class="line">    if (parser &#x3D;&#x3D; null) &#123;</span><br><span class="line">      throw new InvalidRuleConfigException(</span><br><span class="line">              &quot;Rule config file format is not supported: &quot; + ruleConfigFilePath);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    String configText &#x3D; &quot;&quot;;</span><br><span class="line">    &#x2F;&#x2F;从ruleConfigFilePath文件中读取配置文本到configText中</span><br><span class="line">    RuleConfig ruleConfig &#x3D; parser.parse(configText);</span><br><span class="line">    return ruleConfig;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  private String getFileExtension(String filePath) &#123;</span><br><span class="line">    &#x2F;&#x2F;...解析文件名获取扩展名，比如rule.json，返回json</span><br><span class="line">    return &quot;json&quot;;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class RuleConfigParserFactory &#123;</span><br><span class="line">  public static IRuleConfigParser createParser(String configFormat) &#123;</span><br><span class="line">    IRuleConfigParser parser &#x3D; null;</span><br><span class="line">    if (&quot;json&quot;.equalsIgnoreCase(configFormat)) &#123;</span><br><span class="line">      parser &#x3D; new JsonRuleConfigParser();</span><br><span class="line">    &#125; else if (&quot;xml&quot;.equalsIgnoreCase(configFormat)) &#123;</span><br><span class="line">      parser &#x3D; new XmlRuleConfigParser();</span><br><span class="line">    &#125; else if (&quot;yaml&quot;.equalsIgnoreCase(configFormat)) &#123;</span><br><span class="line">      parser &#x3D; new YamlRuleConfigParser();</span><br><span class="line">    &#125; else if (&quot;properties&quot;.equalsIgnoreCase(configFormat)) &#123;</span><br><span class="line">      parser &#x3D; new PropertiesRuleConfigParser();</span><br><span class="line">    &#125;</span><br><span class="line">    return parser;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>为了节省内存和对象创建的时间，我们可以将 parser 事先创建好缓存起来。当调用 createParser() 函数的时候，我们从缓存中取出 parser 对象直接使用。</p>
+<p>简单工厂的第二种实现：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">public class RuleConfigParserFactory &#123;</span><br><span class="line">  private static final Map&lt;String, RuleConfigParser&gt; cachedParsers &#x3D; new HashMap&lt;&gt;();</span><br><span class="line"></span><br><span class="line">  static &#123;</span><br><span class="line">    cachedParsers.put(&quot;json&quot;, new JsonRuleConfigParser());</span><br><span class="line">    cachedParsers.put(&quot;xml&quot;, new XmlRuleConfigParser());</span><br><span class="line">    cachedParsers.put(&quot;yaml&quot;, new YamlRuleConfigParser());</span><br><span class="line">    cachedParsers.put(&quot;properties&quot;, new PropertiesRuleConfigParser());</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  public static IRuleConfigParser createParser(String configFormat) &#123;</span><br><span class="line">    if (configFormat &#x3D;&#x3D; null || configFormat.isEmpty()) &#123;</span><br><span class="line">      return null;&#x2F;&#x2F;返回null还是IllegalArgumentException全凭你自己说了算</span><br><span class="line">    &#125;</span><br><span class="line">    IRuleConfigParser parser &#x3D; cachedParsers.get(configFormat.toLowerCase());</span><br><span class="line">    return parser;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="工厂方法（Factory-Method）"><a href="#工厂方法（Factory-Method）" class="headerlink" title="工厂方法（Factory Method）"></a>工厂方法（Factory Method）</h3><p>可以利用多态去掉if分支逻辑</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">public interface IRuleConfigParserFactory &#123;</span><br><span class="line">  IRuleConfigParser createParser();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class JsonRuleConfigParserFactory implements IRuleConfigParserFactory &#123;</span><br><span class="line">  @Override</span><br><span class="line">  public IRuleConfigParser createParser() &#123;</span><br><span class="line">    return new JsonRuleConfigParser();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class XmlRuleConfigParserFactory implements IRuleConfigParserFactory &#123;</span><br><span class="line">  @Override</span><br><span class="line">  public IRuleConfigParser createParser() &#123;</span><br><span class="line">    return new XmlRuleConfigParser();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class YamlRuleConfigParserFactory implements IRuleConfigParserFactory &#123;</span><br><span class="line">  @Override</span><br><span class="line">  public IRuleConfigParser createParser() &#123;</span><br><span class="line">    return new YamlRuleConfigParser();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class PropertiesRuleConfigParserFactory implements IRuleConfigParserFactory &#123;</span><br><span class="line">  @Override</span><br><span class="line">  public IRuleConfigParser createParser() &#123;</span><br><span class="line">    return new PropertiesRuleConfigParser();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们可以为工厂类再创建一个简单工厂，也就是工厂的工厂，用来创建工厂类对象。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">public class RuleConfigSource &#123;</span><br><span class="line">  public RuleConfig load(String ruleConfigFilePath) &#123;</span><br><span class="line">    String ruleConfigFileExtension &#x3D; getFileExtension(ruleConfigFilePath);</span><br><span class="line"></span><br><span class="line">    IRuleConfigParserFactory parserFactory &#x3D; RuleConfigParserFactoryMap.getParserFactory(ruleConfigFileExtension);</span><br><span class="line">    if (parserFactory &#x3D;&#x3D; null) &#123;</span><br><span class="line">      throw new InvalidRuleConfigException(&quot;Rule config file format is not supported: &quot; + ruleConfigFilePath);</span><br><span class="line">    &#125;</span><br><span class="line">    IRuleConfigParser parser &#x3D; parserFactory.createParser();</span><br><span class="line"></span><br><span class="line">    String configText &#x3D; &quot;&quot;;</span><br><span class="line">    &#x2F;&#x2F;从ruleConfigFilePath文件中读取配置文本到configText中</span><br><span class="line">    RuleConfig ruleConfig &#x3D; parser.parse(configText);</span><br><span class="line">    return ruleConfig;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  private String getFileExtension(String filePath) &#123;</span><br><span class="line">    &#x2F;&#x2F;...解析文件名获取扩展名，比如rule.json，返回json</span><br><span class="line">    return &quot;json&quot;;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;因为工厂类只包含方法，不包含成员变量，完全可以复用，</span><br><span class="line">&#x2F;&#x2F;不需要每次都创建新的工厂类对象，所以，简单工厂模式的第二种实现思路更加合适。</span><br><span class="line">public class RuleConfigParserFactoryMap &#123; &#x2F;&#x2F;工厂的工厂</span><br><span class="line">  private static final Map&lt;String, IRuleConfigParserFactory&gt; cachedFactories &#x3D; new HashMap&lt;&gt;();</span><br><span class="line"></span><br><span class="line">  static &#123;</span><br><span class="line">    cachedFactories.put(&quot;json&quot;, new JsonRuleConfigParserFactory());</span><br><span class="line">    cachedFactories.put(&quot;xml&quot;, new XmlRuleConfigParserFactory());</span><br><span class="line">    cachedFactories.put(&quot;yaml&quot;, new YamlRuleConfigParserFactory());</span><br><span class="line">    cachedFactories.put(&quot;properties&quot;, new PropertiesRuleConfigParserFactory());</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  public static IRuleConfigParserFactory getParserFactory(String type) &#123;</span><br><span class="line">    if (type &#x3D;&#x3D; null || type.isEmpty()) &#123;</span><br><span class="line">      return null;</span><br><span class="line">    &#125;</span><br><span class="line">    IRuleConfigParserFactory parserFactory &#x3D; cachedFactories.get(type.toLowerCase());</span><br><span class="line">    return parserFactory;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="抽象工厂（Abstract-Factory）"><a href="#抽象工厂（Abstract-Factory）" class="headerlink" title="抽象工厂（Abstract Factory）"></a>抽象工厂（Abstract Factory）</h3><p>在简单工厂和工厂方法中，类只有一种分类方式。比如，在规则配置解析那个例子中，解析器类只会根据配置文件格式（Json、Xml、Yaml……）来分类。但是，如果类有两种分类方式，比如，我们既可以按照配置文件格式来分类，也可以按照解析的对象（Rule 规则配置还是 System 系统配置）来分类，那就会对应下面这 8 个 parser 类。</p>
+<p>抽象工厂就是针对这种非常特殊的场景而诞生的。我们可以让一个工厂负责创建多个不同类型的对象（IRuleConfigParser、ISystemConfigParser 等），而不是只创建一种 parser 对象。这样就可以有效地减少工厂类的个数。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">public interface IConfigParserFactory &#123;</span><br><span class="line">  IRuleConfigParser createRuleParser();</span><br><span class="line">  ISystemConfigParser createSystemParser();</span><br><span class="line">  &#x2F;&#x2F;此处可以扩展新的parser类型，比如IBizConfigParser</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class JsonConfigParserFactory implements IConfigParserFactory &#123;</span><br><span class="line">  @Override</span><br><span class="line">  public IRuleConfigParser createRuleParser() &#123;</span><br><span class="line">    return new JsonRuleConfigParser();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  @Override</span><br><span class="line">  public ISystemConfigParser createSystemParser() &#123;</span><br><span class="line">    return new JsonSystemConfigParser();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class XmlConfigParserFactory implements IConfigParserFactory &#123;</span><br><span class="line">  @Override</span><br><span class="line">  public IRuleConfigParser createRuleParser() &#123;</span><br><span class="line">    return new XmlRuleConfigParser();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  @Override</span><br><span class="line">  public ISystemConfigParser createSystemParser() &#123;</span><br><span class="line">    return new XmlSystemConfigParser();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; 省略YamlConfigParserFactory和PropertiesConfigParserFactory代码</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h3><h4 id="什么时候该用工厂模式？"><a href="#什么时候该用工厂模式？" class="headerlink" title="什么时候该用工厂模式？"></a>什么时候该用工厂模式？</h4><ul>
+<li><p>第一种情况：类似规则配置解析的例子，代码中存在 if-else 分支判断，动态地根据不同的类型创建不同的对象。针对这种情况，我们就考虑使用工厂模式，将这一大坨 if-else 创建对象的代码抽离出来，放到工厂类中。</p>
+</li>
+<li><p>还有一种情况，尽管我们不需要根据不同的类型创建不同的对象，但是，单个对象本身的创建过程比较复杂，比如前面提到的要组合其他类对象，做各种初始化操作。在这种情况下，我们也可以考虑使用工厂模式，将对象的创建过程封装到工厂类中。</p>
+</li>
+</ul>
+<p>对于第一种情况，当每个对象的创建逻辑都比较简单的时候，我推荐使用简单工厂模式，将多个对象的创建逻辑放到一个工厂类中。当每个对象的创建逻辑都比较复杂的时候，为了避免设计一个过于庞大的简单工厂类，我推荐使用工厂方法模式，将创建逻辑拆分得更细，每个对象的创建逻辑独立到各自的工厂类中。同理，对于第二种情况，因为单个对象本身的创建逻辑就比较复杂，所以，我建议使用工厂方法模式。</p>
+<h4 id="复杂度无法被消除，只能被转移："><a href="#复杂度无法被消除，只能被转移：" class="headerlink" title="复杂度无法被消除，只能被转移："></a>复杂度无法被消除，只能被转移：</h4><ul>
+<li>不用工厂模式，if-else 逻辑、创建逻辑和业务代码耦合在一起</li>
+<li>简单工厂是将不同创建逻辑放到一个工厂类中，if-else 逻辑在这个工厂类中</li>
+<li>工厂方法是将不同创建逻辑放到不同工厂类中，先用一个工厂类的工厂来来得到某个工厂，再用这个工厂来创建，if-else 逻辑在工厂类的工厂中</li>
+</ul>
+<h3 id="工厂模式和-DI-容器有何区别？"><a href="#工厂模式和-DI-容器有何区别？" class="headerlink" title="工厂模式和 DI 容器有何区别？"></a>工厂模式和 DI 容器有何区别？</h3><p>一个工厂类只负责某个类对象或者某一组相关类对象（继承自同一抽象类或者接口的子类）的创建，而 DI 容器负责的是整个应用中所有类对象的创建。DI 容器在一些软件开发中已经成为了标配，比如 Spring IOC、Google Guice。</p>
+<p>DI 容器底层最基本的设计思路就是基于工厂模式的。DI 容器相当于一个大的工厂类，负责在程序启动的时候，根据配置（要创建哪些类对象，每个类对象的创建需要依赖哪些其他类对象）事先创建好对象。当应用程序需要使用某个类对象的时候，直接从容器中获取即可。正是因为它持有一堆对象，所以这个框架才被称为“容器”。</p>
+<p>DI 容器负责的事情要比单纯的工厂模式要多。比如，它还包括配置的解析、对象生命周期的管理。</p>
+<h3 id="DI-容器的核心功能有哪些？"><a href="#DI-容器的核心功能有哪些？" class="headerlink" title="DI 容器的核心功能有哪些？"></a>DI 容器的核心功能有哪些？</h3><p>一个简单的 DI 容器的核心功能一般有三个：配置解析、对象创建和对象生命周期管理。</p>
+<h3 id="如何实现一个简单的DI容器"><a href="#如何实现一个简单的DI容器" class="headerlink" title="如何实现一个简单的DI容器"></a>如何实现一个简单的DI容器</h3><p>一个简单的 DI 容器的实现原理，核心逻辑主要包括：配置文件解析，以及根据配置文件通过“反射”语法来创建对象。其中，创建对象的过程就应用到了我们在学的工厂模式。对象创建、组装、管理完全有 DI 容器来负责，跟具体业务代码解耦，让程序员聚焦在业务代码的开发上。</p>
+<h4 id="1-最小原型设计"><a href="#1-最小原型设计" class="headerlink" title="1.最小原型设计"></a>1.最小原型设计</h4><p>配置文件beans.xml</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&lt;beans&gt;</span><br><span class="line">   &lt;bean id&#x3D;&quot;rateLimiter&quot; class&#x3D;&quot;com.xzg.RateLimiter&quot;&gt;</span><br><span class="line">      &lt;constructor-arg ref&#x3D;&quot;redisCounter&quot;&#x2F;&gt;</span><br><span class="line">   &lt;&#x2F;bean&gt;</span><br><span class="line"> </span><br><span class="line">   &lt;bean id&#x3D;&quot;redisCounter&quot; class&#x3D;&quot;com.xzg.redisCounter&quot; scope&#x3D;&quot;singleton&quot; lazy-init&#x3D;&quot;true&quot;&gt;</span><br><span class="line">     &lt;constructor-arg type&#x3D;&quot;String&quot; value&#x3D;&quot;127.0.0.1&quot;&gt;</span><br><span class="line">     &lt;constructor-arg type&#x3D;&quot;int&quot; value&#x3D;1234&gt;</span><br><span class="line">   &lt;&#x2F;bean&gt;</span><br><span class="line">&lt;&#x2F;bean&gt;</span><br></pre></td></tr></table></figure>
+
+<p>最小原型的使用方式跟 Spring 框架非常类似</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">public class Demo &#123;</span><br><span class="line">  public static void main(String[] args) &#123;</span><br><span class="line">    ApplicationContext applicationContext &#x3D; new ClassPathXmlApplicationContext(</span><br><span class="line">            &quot;beans.xml&quot;);</span><br><span class="line">    RateLimiter rateLimiter &#x3D; (RateLimiter) applicationContext.getBean(&quot;rateLimiter&quot;);</span><br><span class="line">    rateLimiter.test();</span><br><span class="line">    &#x2F;&#x2F;...</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-执行入口"><a href="#2-执行入口" class="headerlink" title="2.执行入口"></a>2.执行入口</h4><p>通过刚刚的最小原型使用示例代码，我们可以看出，执行入口主要包含两部分：ApplicationContext 和 ClassPathXmlApplicationContext。其中，ApplicationContext 是接口ClassPathXmlApplicationContext 是接口的实现类。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">public interface ApplicationContext &#123;</span><br><span class="line">  Object getBean(String beanId);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class ClassPathXmlApplicationContext implements ApplicationContext &#123;</span><br><span class="line">  private BeansFactory beansFactory;</span><br><span class="line">  private BeanConfigParser beanConfigParser;</span><br><span class="line"></span><br><span class="line">  public ClassPathXmlApplicationContext(String configLocation) &#123;</span><br><span class="line">    this.beansFactory &#x3D; new BeansFactory();</span><br><span class="line">    this.beanConfigParser &#x3D; new XmlBeanConfigParser();</span><br><span class="line">    loadBeanDefinitions(configLocation);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  private void loadBeanDefinitions(String configLocation) &#123;</span><br><span class="line">    InputStream in &#x3D; null;</span><br><span class="line">    try &#123;</span><br><span class="line">      in &#x3D; this.getClass().getResourceAsStream(&quot;&#x2F;&quot; + configLocation);</span><br><span class="line">      if (in &#x3D;&#x3D; null) &#123;</span><br><span class="line">        throw new RuntimeException(&quot;Can not find config file: &quot; + configLocation);</span><br><span class="line">      &#125;</span><br><span class="line">      List&lt;BeanDefinition&gt; beanDefinitions &#x3D; beanConfigParser.parse(in);</span><br><span class="line">      beansFactory.addBeanDefinitions(beanDefinitions);</span><br><span class="line">    &#125; finally &#123;</span><br><span class="line">      if (in !&#x3D; null) &#123;</span><br><span class="line">        try &#123;</span><br><span class="line">          in.close();</span><br><span class="line">        &#125; catch (IOException e) &#123;</span><br><span class="line">          &#x2F;&#x2F; TODO: log error</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  @Override</span><br><span class="line">  public Object getBean(String beanId) &#123;</span><br><span class="line">    return beansFactory.getBean(beanId);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>ClassPathXmlApplicationContext 负责组装 BeansFactory 和 BeanConfigParser 两个类，串联执行流程：从 classpath 中加载 XML 格式的配置文件，通过 BeanConfigParser 解析为统一的 BeanDefinition 格式，然后，BeansFactory 根据 BeanDefinition 来创建对象。</p>
+<h4 id="3-配置文件解析"><a href="#3-配置文件解析" class="headerlink" title="3.配置文件解析"></a>3.配置文件解析</h4><p>配置文件解析主要包含 BeanConfigParser 接口和 XmlBeanConfigParser 实现类，负责将配置文件解析为 BeanDefinition 结构，以便 BeansFactory 根据这个结构来创建对象。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line">public interface BeanConfigParser &#123;</span><br><span class="line">  List&lt;BeanDefinition&gt; parse(InputStream inputStream);</span><br><span class="line">  List&lt;BeanDefinition&gt; parse(String configContent);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class XmlBeanConfigParser implements BeanConfigParser &#123;</span><br><span class="line"></span><br><span class="line">  @Override</span><br><span class="line">  public List&lt;BeanDefinition&gt; parse(InputStream inputStream) &#123;</span><br><span class="line">    String content &#x3D; null;</span><br><span class="line">    &#x2F;&#x2F; TODO:...</span><br><span class="line">    return parse(content);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  @Override</span><br><span class="line">  public List&lt;BeanDefinition&gt; parse(String configContent) &#123;</span><br><span class="line">    List&lt;BeanDefinition&gt; beanDefinitions &#x3D; new ArrayList&lt;&gt;();</span><br><span class="line">    &#x2F;&#x2F; TODO:...</span><br><span class="line">    return beanDefinitions;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class BeanDefinition &#123;</span><br><span class="line">  private String id;</span><br><span class="line">  private String className;</span><br><span class="line">  private List&lt;ConstructorArg&gt; constructorArgs &#x3D; new ArrayList&lt;&gt;();</span><br><span class="line">  private Scope scope &#x3D; Scope.SINGLETON;</span><br><span class="line">  private boolean lazyInit &#x3D; false;</span><br><span class="line">  &#x2F;&#x2F; 省略必要的getter&#x2F;setter&#x2F;constructors</span><br><span class="line"> </span><br><span class="line">  public boolean isSingleton() &#123;</span><br><span class="line">    return scope.equals(Scope.SINGLETON);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  public static enum Scope &#123;</span><br><span class="line">    SINGLETON,</span><br><span class="line">    PROTOTYPE</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  public static class ConstructorArg &#123;</span><br><span class="line">    private boolean isRef;</span><br><span class="line">    private Class type;</span><br><span class="line">    private Object arg;</span><br><span class="line">    &#x2F;&#x2F; 省略必要的getter&#x2F;setter&#x2F;constructors</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="4-核心工厂类设计"><a href="#4-核心工厂类设计" class="headerlink" title="4.核心工厂类设计"></a>4.核心工厂类设计</h4><p>BeansFactory 创建对象用到的主要技术点就是 Java 中的反射语法：一种动态加载类和创建对象的机制。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line">public class BeansFactory &#123;</span><br><span class="line">  private ConcurrentHashMap&lt;String, Object&gt; singletonObjects &#x3D; new ConcurrentHashMap&lt;&gt;();</span><br><span class="line">  private ConcurrentHashMap&lt;String, BeanDefinition&gt; beanDefinitions &#x3D; new ConcurrentHashMap&lt;&gt;();</span><br><span class="line"></span><br><span class="line">  public void addBeanDefinitions(List&lt;BeanDefinition&gt; beanDefinitionList) &#123;</span><br><span class="line">    for (BeanDefinition beanDefinition : beanDefinitionList) &#123;</span><br><span class="line">      this.beanDefinitions.putIfAbsent(beanDefinition.getId(), beanDefinition);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    for (BeanDefinition beanDefinition : beanDefinitionList) &#123;</span><br><span class="line">      if (beanDefinition.isLazyInit() &#x3D;&#x3D; false &amp;&amp; beanDefinition.isSingleton()) &#123;</span><br><span class="line">        createBean(beanDefinition);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  public Object getBean(String beanId) &#123;</span><br><span class="line">    BeanDefinition beanDefinition &#x3D; beanDefinitions.get(beanId);</span><br><span class="line">    if (beanDefinition &#x3D;&#x3D; null) &#123;</span><br><span class="line">      throw new NoSuchBeanDefinitionException(&quot;Bean is not defined: &quot; + beanId);</span><br><span class="line">    &#125;</span><br><span class="line">    return createBean(beanDefinition);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  @VisibleForTesting</span><br><span class="line">  protected Object createBean(BeanDefinition beanDefinition) &#123;</span><br><span class="line">    if (beanDefinition.isSingleton() &amp;&amp; singletonObjects.contains(beanDefinition.getId())) &#123;</span><br><span class="line">      return singletonObjects.get(beanDefinition.getId());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    Object bean &#x3D; null;</span><br><span class="line">    try &#123;</span><br><span class="line">      Class beanClass &#x3D; Class.forName(beanDefinition.getClassName());</span><br><span class="line">      List&lt;BeanDefinition.ConstructorArg&gt; args &#x3D; beanDefinition.getConstructorArgs();</span><br><span class="line">      if (args.isEmpty()) &#123;</span><br><span class="line">        bean &#x3D; beanClass.newInstance();</span><br><span class="line">      &#125; else &#123;</span><br><span class="line">        Class[] argClasses &#x3D; new Class[args.size()];</span><br><span class="line">        Object[] argObjects &#x3D; new Object[args.size()];</span><br><span class="line">        for (int i &#x3D; 0; i &lt; args.size(); ++i) &#123;</span><br><span class="line">          BeanDefinition.ConstructorArg arg &#x3D; args.get(i);</span><br><span class="line">          if (!arg.getIsRef()) &#123;</span><br><span class="line">            argClasses[i] &#x3D; arg.getType();</span><br><span class="line">            argObjects[i] &#x3D; arg.getArg();</span><br><span class="line">          &#125; else &#123;</span><br><span class="line">            BeanDefinition refBeanDefinition &#x3D; beanDefinitions.get(arg.getArg());</span><br><span class="line">            if (refBeanDefinition &#x3D;&#x3D; null) &#123;</span><br><span class="line">              throw new NoSuchBeanDefinitionException(&quot;Bean is not defined: &quot; + arg.getArg());</span><br><span class="line">            &#125;</span><br><span class="line">            argClasses[i] &#x3D; Class.forName(refBeanDefinition.getClassName());</span><br><span class="line">            argObjects[i] &#x3D; createBean(refBeanDefinition);</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        bean &#x3D; beanClass.getConstructor(argClasses).newInstance(argObjects);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125; catch (ClassNotFoundException | IllegalAccessException</span><br><span class="line">            | InstantiationException | NoSuchMethodException | InvocationTargetException e) &#123;</span><br><span class="line">      throw new BeanCreationFailureException(&quot;&quot;, e);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    if (bean !&#x3D; null &amp;&amp; beanDefinition.isSingleton()) &#123;</span><br><span class="line">      singletonObjects.putIfAbsent(beanDefinition.getId(), bean);</span><br><span class="line">      return singletonObjects.get(beanDefinition.getId());</span><br><span class="line">    &#125;</span><br><span class="line">    return bean;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="建造者模式"><a href="#建造者模式" class="headerlink" title="建造者模式"></a>建造者模式</h2><p>Builder 模式，中文翻译为建造者模式或者构建者模式，也有人叫它生成器模式。</p>
+<h3 id="1-使用场景："><a href="#1-使用场景：" class="headerlink" title="1.使用场景："></a>1.使用场景：</h3><ul>
+<li>类的构造函数必填属性很多，通过set设置，没有办法校验必填属性</li>
+<li>如果类的属性之间有一定的依赖关系，构造函数配合set方式，无法进行依赖关系和约束条件校验</li>
+<li>需要创建不可变对象，不能暴露set方法。<br>（前提是需要传递很多的属性，如果属性很少，可以不需要建造者模式）</li>
+</ul>
+<h3 id="2-实现方式："><a href="#2-实现方式：" class="headerlink" title="2.实现方式："></a>2.实现方式：</h3><p>把构造函数定义为private，定义public static class Builder 内部类，通过Builder 类的set方法设置属性，调用build方法创建对象。</p>
+<p>比如：</p>
+<p>代码实现</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br></pre></td><td class="code"><pre><span class="line">public class ResourcePoolConfig &#123;</span><br><span class="line">  private String name;</span><br><span class="line">  private int maxTotal;</span><br><span class="line">  private int maxIdle;</span><br><span class="line">  private int minIdle;</span><br><span class="line"></span><br><span class="line">  private ResourcePoolConfig(Builder builder) &#123;</span><br><span class="line">    this.name &#x3D; builder.name;</span><br><span class="line">    this.maxTotal &#x3D; builder.maxTotal;</span><br><span class="line">    this.maxIdle &#x3D; builder.maxIdle;</span><br><span class="line">    this.minIdle &#x3D; builder.minIdle;</span><br><span class="line">  &#125;</span><br><span class="line">  &#x2F;&#x2F;...省略getter方法...</span><br><span class="line"></span><br><span class="line">  &#x2F;&#x2F;我们将Builder类设计成了ResourcePoolConfig的内部类。</span><br><span class="line">  &#x2F;&#x2F;我们也可以将Builder类设计成独立的非内部类ResourcePoolConfigBuilder。</span><br><span class="line">  public static class Builder &#123;</span><br><span class="line">    private static final int DEFAULT_MAX_TOTAL &#x3D; 8;</span><br><span class="line">    private static final int DEFAULT_MAX_IDLE &#x3D; 8;</span><br><span class="line">    private static final int DEFAULT_MIN_IDLE &#x3D; 0;</span><br><span class="line"></span><br><span class="line">    private String name;</span><br><span class="line">    private int maxTotal &#x3D; DEFAULT_MAX_TOTAL;</span><br><span class="line">    private int maxIdle &#x3D; DEFAULT_MAX_IDLE;</span><br><span class="line">    private int minIdle &#x3D; DEFAULT_MIN_IDLE;</span><br><span class="line"></span><br><span class="line">    public ResourcePoolConfig build() &#123;</span><br><span class="line">      &#x2F;&#x2F; 校验逻辑放到这里来做，包括必填项校验、依赖关系校验、约束条件校验等</span><br><span class="line">      if (StringUtils.isBlank(name)) &#123;</span><br><span class="line">        throw new IllegalArgumentException(&quot;...&quot;);</span><br><span class="line">      &#125;</span><br><span class="line">      if (maxIdle &gt; maxTotal) &#123;</span><br><span class="line">        throw new IllegalArgumentException(&quot;...&quot;);</span><br><span class="line">      &#125;</span><br><span class="line">      if (minIdle &gt; maxTotal || minIdle &gt; maxIdle) &#123;</span><br><span class="line">        throw new IllegalArgumentException(&quot;...&quot;);</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      return new ResourcePoolConfig(this);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public Builder setName(String name) &#123;</span><br><span class="line">      if (StringUtils.isBlank(name)) &#123;</span><br><span class="line">        throw new IllegalArgumentException(&quot;...&quot;);</span><br><span class="line">      &#125;</span><br><span class="line">      this.name &#x3D; name;</span><br><span class="line">      return this;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public Builder setMaxTotal(int maxTotal) &#123;</span><br><span class="line">      if (maxTotal &lt;&#x3D; 0) &#123;</span><br><span class="line">        throw new IllegalArgumentException(&quot;...&quot;);</span><br><span class="line">      &#125;</span><br><span class="line">      this.maxTotal &#x3D; maxTotal;</span><br><span class="line">      return this;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public Builder setMaxIdle(int maxIdle) &#123;</span><br><span class="line">      if (maxIdle &lt; 0) &#123;</span><br><span class="line">        throw new IllegalArgumentException(&quot;...&quot;);</span><br><span class="line">      &#125;</span><br><span class="line">      this.maxIdle &#x3D; maxIdle;</span><br><span class="line">      return this;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public Builder setMinIdle(int minIdle) &#123;</span><br><span class="line">      if (minIdle &lt; 0) &#123;</span><br><span class="line">        throw new IllegalArgumentException(&quot;...&quot;);</span><br><span class="line">      &#125;</span><br><span class="line">      this.minIdle &#x3D; minIdle;</span><br><span class="line">      return this;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; 这段代码会抛出IllegalArgumentException，因为minIdle&gt;maxIdle</span><br><span class="line">ResourcePoolConfig config &#x3D; new ResourcePoolConfig.Builder()</span><br><span class="line">        .setName(&quot;dbconnectionpool&quot;)</span><br><span class="line">        .setMaxTotal(16)</span><br><span class="line">        .setMaxIdle(10)</span><br><span class="line">        .setMinIdle(12)</span><br><span class="line">        .build();</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-和工厂模式的区别："><a href="#3-和工厂模式的区别：" class="headerlink" title="3.和工厂模式的区别："></a>3.和工厂模式的区别：</h3><ul>
+<li>工厂模式：创建不同的同一类型对象（集成同一个父类或是接口的一组子类），由给定的参数来创建哪种类型的对象；</li>
+<li>建造者模式：创建一种类型的复杂对象，通过很多可设置参数，“定制化”的创建对象</li>
+</ul>
+<h2 id="原型模式"><a href="#原型模式" class="headerlink" title="原型模式"></a>原型模式</h2><h3 id="1-什么是原型模式"><a href="#1-什么是原型模式" class="headerlink" title="1.什么是原型模式"></a>1.什么是原型模式</h3><p>如果对象的创建成本比较大，而同一个类的不同对象之间差别不大（大部分字段都相同），在这种情况下，我们可以利用对已有对象（原型）进行复制（或者叫拷贝）的方式，来创建新对象，以达到节省创建时间的目的。这种基于原型来创建对象的方式就叫作原型设计模式，简称原型模式。</p>
+<h3 id="2-原型模式的两种实现方法"><a href="#2-原型模式的两种实现方法" class="headerlink" title="2.原型模式的两种实现方法"></a>2.原型模式的两种实现方法</h3><p>原型模式有两种实现方法，深拷贝和浅拷贝。</p>
+<ul>
+<li>浅拷贝只会复制对象中基本数据类型数据（比如，int、long）和引用对象的内存地址，不会递归地复制引用对象，以及引用对象的引用对象<br><img src="evernotecid://B93CACCF-EBD1-4485-9709-207B83E62B19/appyinxiangcom/22404617/ENResource/p2468" alt="74bceb7a0736957daaa4abeba6826182.jpeg"></li>
+</ul>
+<ul>
+<li>深拷贝得到的是一份完完全全独立的对象。所以，深拷贝比起浅拷贝来说，更加耗时，更加耗内存空间。<br><img src="evernotecid://B93CACCF-EBD1-4485-9709-207B83E62B19/appyinxiangcom/22404617/ENResource/p2469" alt="b978d054ab3183b9e0ae461e6abac81b.jpeg"></li>
+</ul>
+<p>如果要拷贝的对象是不可变对象，浅拷贝共享不可变对象是没问题的，但对于可变对象来说，浅拷贝得到的对象和原始对象会共享部分数据，就有可能出现数据被修改的风险。</p>
+<h3 id="实现深拷贝的两种常见方式"><a href="#实现深拷贝的两种常见方式" class="headerlink" title="实现深拷贝的两种常见方式"></a>实现深拷贝的两种常见方式</h3><p>那如何实现深拷贝呢？</p>
+<p>第一种方法：递归拷贝对象、对象的引用对象以及引用对象的引用对象……直到要拷贝的对象只包含基本数据类型数据，没有引用对象为止。根据这个思路对之前的代码进行重构。</p>
+<p>第二种方法：先将对象序列化，然后再反序列化成新的对象。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">public Object deepCopy(Object object) &#123;</span><br><span class="line">  ByteArrayOutputStream bo &#x3D; new ByteArrayOutputStream();</span><br><span class="line">  ObjectOutputStream oo &#x3D; new ObjectOutputStream(bo);</span><br><span class="line">  oo.writeObject(object);</span><br><span class="line">  </span><br><span class="line">  ByteArrayInputStream bi &#x3D; new ByteArrayInputStream(bo.toByteArray());</span><br><span class="line">  ObjectInputStream oi &#x3D; new ObjectInputStream(bi);</span><br><span class="line">  </span><br><span class="line">  return oi.readObject();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-如何最快速地clone一个包含10万数据的HashMap散列表"><a href="#3-如何最快速地clone一个包含10万数据的HashMap散列表" class="headerlink" title="3.如何最快速地clone一个包含10万数据的HashMap散列表"></a>3.如何最快速地clone一个包含10万数据的HashMap散列表</h3><p>使用深拷贝</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">public class Demo &#123;</span><br><span class="line">  private HashMap&lt;String, SearchWord&gt; currentKeywords&#x3D;new HashMap&lt;&gt;();</span><br><span class="line">  private long lastUpdateTime &#x3D; -1;</span><br><span class="line"></span><br><span class="line">  public void refresh() &#123;</span><br><span class="line">    &#x2F;&#x2F; Deep copy</span><br><span class="line">    HashMap&lt;String, SearchWord&gt; newKeywords &#x3D; new HashMap&lt;&gt;();</span><br><span class="line">    for (HashMap.Entry&lt;String, SearchWord&gt; e : currentKeywords.entrySet()) &#123;</span><br><span class="line">      SearchWord searchWord &#x3D; e.getValue();</span><br><span class="line">      SearchWord newSearchWord &#x3D; new SearchWord(</span><br><span class="line">              searchWord.getKeyword(), searchWord.getCount(), searchWord.getLastUpdateTime());</span><br><span class="line">      newKeywords.put(e.getKey(), newSearchWord);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F; 从数据库中取出更新时间&gt;lastUpdateTime的数据，放入到newKeywords中</span><br><span class="line">    List&lt;SearchWord&gt; toBeUpdatedSearchWords &#x3D; getSearchWords(lastUpdateTime);</span><br><span class="line">    long maxNewUpdatedTime &#x3D; lastUpdateTime;</span><br><span class="line">    for (SearchWord searchWord : toBeUpdatedSearchWords) &#123;</span><br><span class="line">      if (searchWord.getLastUpdateTime() &gt; maxNewUpdatedTime) &#123;</span><br><span class="line">        maxNewUpdatedTime &#x3D; searchWord.getLastUpdateTime();</span><br><span class="line">      &#125;</span><br><span class="line">      if (newKeywords.containsKey(searchWord.getKeyword())) &#123;</span><br><span class="line">        SearchWord oldSearchWord &#x3D; newKeywords.get(searchWord.getKeyword());</span><br><span class="line">        oldSearchWord.setCount(searchWord.getCount());</span><br><span class="line">        oldSearchWord.setLastUpdateTime(searchWord.getLastUpdateTime());</span><br><span class="line">      &#125; else &#123;</span><br><span class="line">        newKeywords.put(searchWord.getKeyword(), searchWord);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    lastUpdateTime &#x3D; maxNewUpdatedTime;</span><br><span class="line">    currentKeywords &#x3D; newKeywords;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  private List&lt;SearchWord&gt; getSearchWords(long lastUpdateTime) &#123;</span><br><span class="line">    &#x2F;&#x2F; TODO: 从数据库中取出更新时间&gt;lastUpdateTime的数据</span><br><span class="line">    return null;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>刚刚的两种实现方法，不管采用哪种，深拷贝都要比浅拷贝耗时、耗内存空间。针对这种特别大数据量大场景，有没有更快、更省内存的实现方式呢？</p>
+<p>方案是：先采用浅拷贝的方式创建 newKeywords。对于需要更新的 SearchWord 对象，我们再使用深度拷贝的方式创建一份新的对象，替换 newKeywords 中的老对象。</p>
+<p>优化代码</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">public class Demo &#123;</span><br><span class="line">  private HashMap&lt;String, SearchWord&gt; currentKeywords&#x3D;new HashMap&lt;&gt;();</span><br><span class="line">  private long lastUpdateTime &#x3D; -1;</span><br><span class="line"></span><br><span class="line">  public void refresh() &#123;</span><br><span class="line">    &#x2F;&#x2F; Shallow copy</span><br><span class="line">    HashMap&lt;String, SearchWord&gt; newKeywords &#x3D; (HashMap&lt;String, SearchWord&gt;) currentKeywords.clone();</span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F; 从数据库中取出更新时间&gt;lastUpdateTime的数据，放入到newKeywords中</span><br><span class="line">    List&lt;SearchWord&gt; toBeUpdatedSearchWords &#x3D; getSearchWords(lastUpdateTime);</span><br><span class="line">    long maxNewUpdatedTime &#x3D; lastUpdateTime;</span><br><span class="line">    for (SearchWord searchWord : toBeUpdatedSearchWords) &#123;</span><br><span class="line">      if (searchWord.getLastUpdateTime() &gt; maxNewUpdatedTime) &#123;</span><br><span class="line">        maxNewUpdatedTime &#x3D; searchWord.getLastUpdateTime();</span><br><span class="line">      &#125;</span><br><span class="line">      if (newKeywords.containsKey(searchWord.getKeyword())) &#123;</span><br><span class="line">        newKeywords.remove(searchWord.getKeyword());</span><br><span class="line">      &#125;</span><br><span class="line">      newKeywords.put(searchWord.getKeyword(), searchWord);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    lastUpdateTime &#x3D; maxNewUpdatedTime;</span><br><span class="line">    currentKeywords &#x3D; newKeywords;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  private List&lt;SearchWord&gt; getSearchWords(long lastUpdateTime) &#123;</span><br><span class="line">    &#x2F;&#x2F; TODO: 从数据库中取出更新时间&gt;lastUpdateTime的数据</span><br><span class="line">    return null;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="4-什么时候该用深拷贝，什么时候该用还是浅拷贝"><a href="#4-什么时候该用深拷贝，什么时候该用还是浅拷贝" class="headerlink" title="4.什么时候该用深拷贝，什么时候该用还是浅拷贝"></a>4.什么时候该用深拷贝，什么时候该用还是浅拷贝</h3><ul>
+<li>当需要复制的对象只包含基本类型数据的时候，或者要考呗的对象是不可变对象的时候 选择使用浅拷贝。</li>
+<li>当需要拷贝的对象包含其他对象的时候，使用深拷贝</li>
+</ul>
+<p>不管采用哪种，深拷贝都要比浅拷贝耗时、耗内存空间，当数量特别大的时候也可以使用案例的优化方式，但没有充分的理由，在包含对象的时候，不要为了一点点的性能提升而使用浅拷贝。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Design-Pattern-creational-Pattern/" rel="tag"># Design Pattern creational-Pattern</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/10/09/design-pattern-structural-pattern/" rel="prev" title="设计模式之美-笔记Part6：设计模式与范式-结构型">
+      <i class="fa fa-chevron-left"></i> 设计模式之美-笔记Part6：设计模式与范式-结构型
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/10/08/design-pattern05/" rel="next" title="总结回顾面向对象、设计原则、编程规范、重构技巧等知识点（Part1~Part4）">
+      总结回顾面向对象、设计原则、编程规范、重构技巧等知识点（Part1~Part4） <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#概述"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#单例模式"><span class="nav-number">2.</span> <span class="nav-text">单例模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#为什么要使用单例？"><span class="nav-number">2.1.</span> <span class="nav-text">为什么要使用单例？</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#处理资源访问冲突"><span class="nav-number">2.1.1.</span> <span class="nav-text">处理资源访问冲突</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#通过类级别的锁解决日志覆盖问题"><span class="nav-number">2.1.1.1.</span> <span class="nav-text">通过类级别的锁解决日志覆盖问题</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#通过单例更优雅的解决日志覆盖问题"><span class="nav-number">2.1.1.2.</span> <span class="nav-text">通过单例更优雅的解决日志覆盖问题</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#表示全局唯一类"><span class="nav-number">2.1.2.</span> <span class="nav-text">表示全局唯一类</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如何实现一个单例？"><span class="nav-number">2.2.</span> <span class="nav-text">如何实现一个单例？</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#饿汉式-不支持延迟加载"><span class="nav-number">2.2.1.</span> <span class="nav-text">饿汉式(不支持延迟加载)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#懒汉式（支持延迟加载、并发度低）"><span class="nav-number">2.2.2.</span> <span class="nav-text">懒汉式（支持延迟加载、并发度低）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#双重检测-（支持延迟加载，支持高并发）"><span class="nav-number">2.2.3.</span> <span class="nav-text">双重检测 （支持延迟加载，支持高并发）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#静态内部类-既保证了线程安全，又能做到延迟加载"><span class="nav-number">2.2.4.</span> <span class="nav-text">静态内部类 (既保证了线程安全，又能做到延迟加载)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#枚举"><span class="nav-number">2.2.5.</span> <span class="nav-text">枚举</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#评论区给出的一种Spring-源码中的实现"><span class="nav-number">2.2.6.</span> <span class="nav-text">评论区给出的一种Spring 源码中的实现</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#单例存在哪些问题？"><span class="nav-number">2.3.</span> <span class="nav-text">单例存在哪些问题？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#有何替代的解决方案？"><span class="nav-number">2.4.</span> <span class="nav-text">有何替代的解决方案？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如何设计实现一个集群环境下的分布式单例模式？"><span class="nav-number">2.5.</span> <span class="nav-text">如何设计实现一个集群环境下的分布式单例模式？</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#如何理解单例模式中的唯一性？"><span class="nav-number">2.5.1.</span> <span class="nav-text">如何理解单例模式中的唯一性？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#如何实现线程唯一的单例？"><span class="nav-number">2.5.2.</span> <span class="nav-text">如何实现线程唯一的单例？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#如何实现集群环境下的单例？"><span class="nav-number">2.5.3.</span> <span class="nav-text">如何实现集群环境下的单例？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#如何实现一个多例模式？"><span class="nav-number">2.5.4.</span> <span class="nav-text">如何实现一个多例模式？</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#创建指定数量的对象："><span class="nav-number">2.5.4.1.</span> <span class="nav-text">创建指定数量的对象：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#不同类型创建多个对象"><span class="nav-number">2.5.4.2.</span> <span class="nav-text">不同类型创建多个对象</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如何理解单例类对象的唯一性的作用范围是类加载器"><span class="nav-number">2.6.</span> <span class="nav-text">如何理解单例类对象的唯一性的作用范围是类加载器</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#工厂模式"><span class="nav-number">3.</span> <span class="nav-text">工厂模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#简单工厂（Simple-Factory）"><span class="nav-number">3.1.</span> <span class="nav-text">简单工厂（Simple Factory）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#工厂方法（Factory-Method）"><span class="nav-number">3.2.</span> <span class="nav-text">工厂方法（Factory Method）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#抽象工厂（Abstract-Factory）"><span class="nav-number">3.3.</span> <span class="nav-text">抽象工厂（Abstract Factory）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#小结"><span class="nav-number">3.4.</span> <span class="nav-text">小结</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#什么时候该用工厂模式？"><span class="nav-number">3.4.1.</span> <span class="nav-text">什么时候该用工厂模式？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#复杂度无法被消除，只能被转移："><span class="nav-number">3.4.2.</span> <span class="nav-text">复杂度无法被消除，只能被转移：</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#工厂模式和-DI-容器有何区别？"><span class="nav-number">3.5.</span> <span class="nav-text">工厂模式和 DI 容器有何区别？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DI-容器的核心功能有哪些？"><span class="nav-number">3.6.</span> <span class="nav-text">DI 容器的核心功能有哪些？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如何实现一个简单的DI容器"><span class="nav-number">3.7.</span> <span class="nav-text">如何实现一个简单的DI容器</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-最小原型设计"><span class="nav-number">3.7.1.</span> <span class="nav-text">1.最小原型设计</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-执行入口"><span class="nav-number">3.7.2.</span> <span class="nav-text">2.执行入口</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-配置文件解析"><span class="nav-number">3.7.3.</span> <span class="nav-text">3.配置文件解析</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-核心工厂类设计"><span class="nav-number">3.7.4.</span> <span class="nav-text">4.核心工厂类设计</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#建造者模式"><span class="nav-number">4.</span> <span class="nav-text">建造者模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-使用场景："><span class="nav-number">4.1.</span> <span class="nav-text">1.使用场景：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-实现方式："><span class="nav-number">4.2.</span> <span class="nav-text">2.实现方式：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-和工厂模式的区别："><span class="nav-number">4.3.</span> <span class="nav-text">3.和工厂模式的区别：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#原型模式"><span class="nav-number">5.</span> <span class="nav-text">原型模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-什么是原型模式"><span class="nav-number">5.1.</span> <span class="nav-text">1.什么是原型模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-原型模式的两种实现方法"><span class="nav-number">5.2.</span> <span class="nav-text">2.原型模式的两种实现方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#实现深拷贝的两种常见方式"><span class="nav-number">5.3.</span> <span class="nav-text">实现深拷贝的两种常见方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-如何最快速地clone一个包含10万数据的HashMap散列表"><span class="nav-number">5.4.</span> <span class="nav-text">3.如何最快速地clone一个包含10万数据的HashMap散列表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-什么时候该用深拷贝，什么时候该用还是浅拷贝"><span class="nav-number">5.5.</span> <span class="nav-text">4.什么时候该用深拷贝，什么时候该用还是浅拷贝</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="crazyfzw"
+      src="/uploads/avatar.jpg">
+  <p class="site-author-name" itemprop="name">crazyfzw</p>
+  <div class="site-description" itemprop="description">做个有趣的技术人</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">43</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">140</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/crazyfzw" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;crazyfzw" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://book.douban.com/people/crazyfzw/" title="Booklist → https:&#x2F;&#x2F;book.douban.com&#x2F;people&#x2F;crazyfzw&#x2F;" rel="noopener" target="_blank"><i class="fab fa-skype fa-fw"></i>Booklist</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:crazyfzw@gmail.com" title="E-Mail → mailto:crazyfzw@gmail.com" rel="noopener" target="_blank"><i class="fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://plus.google.com/104894167431407693109" title="Google → https:&#x2F;&#x2F;plus.google.com&#x2F;104894167431407693109" rel="noopener" target="_blank"><i class="fab fa-google fa-fw"></i>Google</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.facebook.com/profile.php?id=100011315733045" title="Facebook → https:&#x2F;&#x2F;www.facebook.com&#x2F;profile.php?id&#x3D;100011315733045" rel="noopener" target="_blank"><i class="fab fa-facebook fa-fw"></i>Facebook</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/u/3829383159" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;3829383159" rel="noopener" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://ifeve.com/" title="http:&#x2F;&#x2F;ifeve.com&#x2F;" rel="noopener" target="_blank">并发编程网</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="http://www.importnew.com/" title="http:&#x2F;&#x2F;www.importnew.com&#x2F;" rel="noopener" target="_blank">ImportNew</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="http://jm.taobao.org/categories/" title="http:&#x2F;&#x2F;jm.taobao.org&#x2F;categories&#x2F;" rel="noopener" target="_blank">阿里中间件团队博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.ibm.com/developerworks/cn/java/" title="https:&#x2F;&#x2F;www.ibm.com&#x2F;developerworks&#x2F;cn&#x2F;java&#x2F;" rel="noopener" target="_blank">IBM developerworks</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tech.meituan.com/" title="https:&#x2F;&#x2F;tech.meituan.com&#x2F;" rel="noopener" target="_blank">美团点评技术团队</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="http://calvin1978.blogcn.com/" title="http:&#x2F;&#x2F;calvin1978.blogcn.com&#x2F;" rel="noopener" target="_blank">江南白衣的博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="http://blog.720ui.com/" title="http:&#x2F;&#x2F;blog.720ui.com" rel="noopener" target="_blank">梁桂钊的博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.jianshu.com/u/581f548ef0ec" title="https:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;581f548ef0ec" rel="noopener" target="_blank">李艳鹏的博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="http://jinnianshilongnian.iteye.com/" title="http:&#x2F;&#x2F;jinnianshilongnian.iteye.com&#x2F;" rel="noopener" target="_blank">张开涛的博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/zuoxiaolong" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;zuoxiaolong" rel="noopener" target="_blank">左潇龙的博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/xrq730/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;xrq730&#x2F;" rel="noopener" target="_blank">五月的仓颉</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://yikun.github.io/" title="https:&#x2F;&#x2F;yikun.github.io&#x2F;" rel="noopener" target="_blank">Yikun的博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="http://www.ruanyifeng.com/" title="http:&#x2F;&#x2F;www.ruanyifeng.com" rel="noopener" target="_blank">阮一峰的个人网站</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">crazyfzw</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">458k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">6:56</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : false,
+      appId      : 'jyxPxkBMeEmDfMMTuuyBdGdu-gzGzoHsz',
+      appKey     : '7SEECyfT4R10oTtj4zDMOdBt',
+      placeholder: "ヾﾉ≧∀≦)o 来呀！吐槽一番吧！",
+      avatar     : 'monsterid',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : '' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>
