@@ -964,8 +964,8 @@ CORS 全称为 Cross Origin Resource Sharing（跨域资源共享），CORS 支�
       </tags>
   </entry>
   <entry>
-    <title>Java 虚拟机 3 ：Java的类加载机制</title>
-    <url>/2018/07/05/classloader/</url>
+    <title>Java 虚拟机 4 ：Java的类加载机制</title>
+    <url>/2018/07/12/classloader/</url>
     <content><![CDATA[<h2 id="一、Class文件"><a href="#一、Class文件" class="headerlink" title="一、Class文件"></a>一、Class文件</h2><p>在开始讲类加载机制之前，不妨先来了解一下 java 中的这个 ”类“。我们都知道 java 最著名的优点之一就是 摆脱了硬件平台的束缚，实现了”一次编写、到处运行“，那么 java 是怎么做到这种跨平台的呢？答案是通过  虚拟机 + “字节码”。</p>
 <a id="more"></a>
 
@@ -1794,7 +1794,7 @@ http://www.cnblogs.com/TimeStory/p/3858479.html
       </tags>
   </entry>
   <entry>
-    <title>java 虚拟机 5：Java内存区域划分以及对象创建的过程</title>
+    <title>java 虚拟机 3：Java内存模型-内存区域划分以及对象创建的过程</title>
     <url>/2018/07/11/jvm-memory-division/</url>
     <content><![CDATA[<h2 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h2><p>与 C、C++ 相比，Java 把内存控制权交给了虚拟机，在虚拟机自动内存管理机制的帮助下，不再需要为每一个new操作去配对delete/free代码，最直接的好处就是不容易出现内存泄露和内存溢出问题，但是一旦出现内存泄露和内存溢出的问题，如果不了解JVM是如何划分内存区域的，那就难以排查问题，所以了解虚拟机的内存区域以及会引起内存泄露和内存溢出的常见场景，将会帮助我们更快的排查问题，这也是成为 OOM Killer 的基本素质。</p>
 <a id="more"></a>
@@ -2044,8 +2044,8 @@ http://www.cnblogs.com/TimeStory/p/3858479.html
       </tags>
   </entry>
   <entry>
-    <title>Java 虚拟机 4 ：Java的反射机制</title>
-    <url>/2018/07/07/jvm-java-reflection/</url>
+    <title>Java 虚拟机 5 ：Java的反射机制</title>
+    <url>/2018/07/16/jvm-java-reflection/</url>
     <content><![CDATA[<h2 id="一、什么是反射"><a href="#一、什么是反射" class="headerlink" title="一、什么是反射"></a>一、什么是反射</h2><p>在Java运行时环境中，对于任意一个类，能否知道这个类有哪些属性和方法？对于任意一个对象，能否调用它的任意一个方法？答案是肯定的。这种动态获取类的信息，以及动态调用对象的方法的功能来自于Java语言的反射（Reflection）机制。</p>
 <a id="more"></a>
 
@@ -2533,7 +2533,7 @@ http://www.cnblogs.com/TimeStory/p/3858479.html
       </tags>
   </entry>
   <entry>
-    <title>Java 虚拟机 2：Java的内存模型</title>
+    <title>Java 虚拟机 2：Java内存模型-主内存与工作内存的交互协议</title>
     <url>/2018/06/24/memory-model/</url>
     <content><![CDATA[<h2 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h2><h3 id="问题背景"><a href="#问题背景" class="headerlink" title="问题背景"></a>问题背景</h3><p>1.为了解决物理内存读写速度慢，与处理器运算速度不匹配的问题，现代操作系统在处理器和物理内存之间加入了高速缓存：将运算需要使用到的数据复制到缓存中，让运算能快速进行，当运算结束后再从缓存同步回内存之中，从而让处理器无需等待缓慢的内存读写。</p>
 <p>这种基于高速缓存的存储交互很好地解决了处理器与内存的速度矛盾，但也引发了一个新问题：缓存一致性（Cache Coherence）。在多处理器系统中，每个处理器都有自己的高速缓存，而他们又共享同一主存，这将可能导致不同处理器缓存的数据不一致的问题，这就需要一种协议来规范并保证内存与高速缓存之间的交互与访问操作。</p>
