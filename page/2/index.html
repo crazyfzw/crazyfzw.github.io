@@ -1196,7 +1196,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
-    <link itemprop="mainEntityOfPage" href="https://crazyfzw.github.io/2018/07/16/jvm-java-reflection/">
+    <link itemprop="mainEntityOfPage" href="https://crazyfzw.github.io/2018/07/18/jvm-gc-optimize/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/uploads/avatar.jpg">
@@ -1210,7 +1210,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2018/07/16/jvm-java-reflection/" class="post-title-link" itemprop="url">Java 虚拟机 5 ：Java的反射机制</a>
+            <a href="/2018/07/18/jvm-gc-optimize/" class="post-title-link" itemprop="url">Java 虚拟机 7 ：JVM监控与调优</a>
         </h2>
 
         <div class="post-meta">
@@ -1220,14 +1220,14 @@
               </span>
               <span class="post-meta-item-text">发表于</span>
 
-              <time title="创建时间：2018-07-16 10:54:50" itemprop="dateCreated datePublished" datetime="2018-07-16T10:54:50+08:00">2018-07-16</time>
+              <time title="创建时间：2018-07-18 11:24:10" itemprop="dateCreated datePublished" datetime="2018-07-18T11:24:10+08:00">2018-07-18</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-12-27 14:08:16" itemprop="dateModified" datetime="2020-12-27T14:08:16+08:00">2020-12-27</time>
+                <time title="修改时间：2020-12-29 01:02:33" itemprop="dateModified" datetime="2020-12-29T01:02:33+08:00">2020-12-29</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -1248,8 +1248,8 @@
       </span>
       <span class="post-meta-item-text">Valine：</span>
     
-    <a title="valine" href="/2018/07/16/jvm-java-reflection/#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/2018/07/16/jvm-java-reflection/" itemprop="commentCount"></span>
+    <a title="valine" href="/2018/07/18/jvm-gc-optimize/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2018/07/18/jvm-gc-optimize/" itemprop="commentCount"></span>
     </a>
   </span>
   
@@ -1259,14 +1259,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>11k</span>
+              <span>4.1k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>10 分钟</span>
+              <span>4 分钟</span>
             </span>
 
         </div>
@@ -1278,10 +1278,10 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h2 id="一、什么是反射"><a href="#一、什么是反射" class="headerlink" title="一、什么是反射"></a>一、什么是反射</h2><p>在Java运行时环境中，对于任意一个类，能否知道这个类有哪些属性和方法？对于任意一个对象，能否调用它的任意一个方法？答案是肯定的。这种动态获取类的信息，以及动态调用对象的方法的功能来自于Java语言的反射（Reflection）机制。</p>
+          <h2 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h2><p>Java所提倡的自动内存管理最终可以归结为自动的解决两个问题：给对象分配内存以及回收分配给对象的内存，对JVM参数进行合理的设置, 可以提升GC的效率，从而提升系统的性能。</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2018/07/16/jvm-java-reflection/#more" rel="contents">
+              <a class="btn" href="/2018/07/18/jvm-gc-optimize/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -1372,7 +1372,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">43</span>
+          <span class="site-state-item-count">45</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1385,7 +1385,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">140</span>
+        <span class="site-state-item-count">141</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -1488,13 +1488,13 @@
       <i class="fa fa-chart-area"></i>
     </span>
       <span class="post-meta-item-text">站点总字数：</span>
-    <span title="站点总字数">458k</span>
+    <span title="站点总字数">463k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">6:56</span>
+    <span title="站点阅读时长">7:01</span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
   </div>
