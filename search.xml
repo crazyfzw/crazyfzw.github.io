@@ -1187,13 +1187,26 @@ CORS 全称为 Cross Origin Resource Sharing（跨域资源共享），CORS 支�
 <p>代码（1）表示从 JVM 缓存查找该类，如果该类之前被加载过，则直接从 JVM 缓存返回该类。</p>
 <p>代码（2）表示如果 JVM 缓存不存在该类，则看当前类加载器是否有父加载器，若有则委托父类加载器进行加载，否者调用（3），委托 BootStrapClassloader 进行加载，如果还是没有找到，则调用当前 Classloader 的 findclass 方法进行查找。</p>
 <p>代码（5）则是当字节码加载到内存后进行链接操作，对文件格式和字节码验证，并为 static 字段分配空间并初始化，符号引用转为直接引用，访问控制，方法覆盖等。</p>
-<p>从上面源码知道要想修改类加载委托机制，实现自己的载入策略，可以通过覆盖 ClassLoader 的 findClass 方法或者覆盖 loadClass 方法来实现。</p>
+<p>从上面源码知道要想修改类加载委托机制，实现自己的载入策略，可以通过覆盖 ClassLoader 的 findClass 方法或者覆盖 loadClass 方法来实现。需要注意的是，如果不想打破双亲委派模型，那么只需要重写findClass方法即可，如果明确想打破双亲委派模型，才需要重写整个loadClass方法。当然，我们自定义的ClassLoader往往不想打破双亲委派模型，所以自定义的 ClassLoader 继承自java.lang.ClassLoader并且只重写findClass方法即可。</p>
+<p>如果想了解具体怎么去自定义一个类加载器，可以拓展阅读这篇文章：<br><a href="https://www.cnblogs.com/xrq730/p/4847337.html" target="_blank" rel="noopener">自定义一个类加载器</a></p>
 <h3 id="为什么要使用委托加载机制"><a href="#为什么要使用委托加载机制" class="headerlink" title="为什么要使用委托加载机制?"></a>为什么要使用委托加载机制?</h3><ol>
 <li><p>避免重复加载，当父类加载器已经加载了该类的时候，就没有必要子 ClassLoader 再加载一次。</p>
 </li>
 <li><p>Java类随着它的加载器一起具备了一种带有优先级的层次关系。例如java.lang.Object，存放于rt.jar中，无论哪一个类加载器要去加载这个类，最终都是由Bootstrap ClassLoader去加载，因此Object类在程序的各种类加载器环境中都是一个类。相反，如果没有双亲委派模型，由各个类自己去加载的话，如果用户自己编写了一个java.lang.Object，并放在CLASSPATH下，那系统中将会出现多个不同的Object类，Java体系中最基础的行为也将无法保证，应用程序也将会变得一片混乱。</p>
 </li>
 </ol>
+<h3 id="为打破双亲委派模型而生的加载器-线程上下文加载器（Thread-Context-ClassLoader）"><a href="#为打破双亲委派模型而生的加载器-线程上下文加载器（Thread-Context-ClassLoader）" class="headerlink" title="为打破双亲委派模型而生的加载器-线程上下文加载器（Thread Context ClassLoader）"></a>为打破双亲委派模型而生的加载器-线程上下文加载器（Thread Context ClassLoader）</h3><p>双亲委派很好地解决了各个类加载器的基础类的统一问题（越基础的类由越上层的类加载器进行加载），这些基础类总是作为被用户调用的API而使用，但凡事没有绝对的，如果基础类又要调用回用户的代码，该怎么办？</p>
+<p>典型的场景比如Java 的 SPI (Service Provider Interface)，Java 提供了很多服务提供者接口，允许第三方为这些接口提供实现。常见的 SPI 有 JDBC、JCE、JNDI、JAXP 和 JBI 等。<br>这些 SPI 的接口由 Java 核心库来提供，而这些 SPI 的实现代码则是作为 Java 应用所依赖的 jar 包被包含进类路径（CLASSPATH）里。SPI接口中的代码需要加载具体的实现类。那么问题来了，SPI的接口是Java核心库的一部分，是由启动类加载器(Bootstrap Classloader)来加载的；而SPI的实现类是由应用类加载器(Application ClassLoader)来加载的。因为依照双亲委派模型，BootstrapClassloader无法委派AppClassLoader来加载类，所以启动类加载器是无法找到 SPI 的实现类的。</p>
+<p>为了解决这个问题，Java设计团队提供了 一个特殊的加载器-线程上下文加载器（Thread Context ClassLoader）来帮助高层的类加载器调用低层类加载器。线程上下文类加载器破坏了“双亲委派模型”，可以在执行线程中抛弃双亲委派加载链模式，使程序可以逆向使用类加载器。</p>
+<p>这个类加载器可以通过 java.lang.Thread类的 setContextClassLoaser() 进行设置，如果创建线程时没设置，则继承父类线程的，如果在上层也没有设置过，那么 Thread.currentThread().getContextClassLoader() 取出的就是 默认的 应用类加载器，就可以实现不管当前程序处于何处（BootstrapClassLoader或是ExtClassLoader等），在任何需要的时候都可以用Thread.currentThread().getContextClassLoader()取出应用程序类加载器来完成需要的操作。</p>
+<p><strong>线程上下文类加载器的适用场景：</strong></p>
+<ul>
+<li><p>1.当高层提供了统一接口让低层去实现，同时又要是在高层加载（或实例化）低层的类时，必须通过线程上下文类加载器来帮助高层的ClassLoader找到并加载该类。</p>
+</li>
+<li><p>2.当使用本类托管类加载，然而加载本类的ClassLoader未知时，为了隔离不同的调用者，可以取调用者各自的线程上下文类加载器代为托管。</p>
+</li>
+</ul>
+<p>拓展阅读 <a href="https://blog.csdn.net/yangcheng33/article/details/52631940" target="_blank" rel="noopener">从JDBC案例分析对线程上下文加载器的使用</a></p>
 <h2 id="七、参考文献"><a href="#七、参考文献" class="headerlink" title="七、参考文献"></a>七、参考文献</h2><p>《深入理解Java虚拟机》 – 周志明 第六章、第七章<br><a href="https://www.ibm.com/developerworks/cn/java/j-lo-classloader/index.html" target="_blank" rel="noopener">https://www.ibm.com/developerworks/cn/java/j-lo-classloader/index.html</a><br><a href="http://www.infoq.com/cn/articles/cf-Java-class-loader" target="_blank" rel="noopener">http://www.infoq.com/cn/articles/cf-Java-class-loader</a><br><a href="http://ifeve.com/jvm-classloader/" target="_blank" rel="noopener">http://ifeve.com/jvm-classloader/</a><br><a href="https://gitbook.cn/books/5a7719e7367c47172bea2b53/index.html" target="_blank" rel="noopener">https://gitbook.cn/books/5a7719e7367c47172bea2b53/index.html</a><br><a href="http://www.cnblogs.com/xrq730/p/4845144.html" target="_blank" rel="noopener">http://www.cnblogs.com/xrq730/p/4845144.html</a><br><a href="http://www.cnblogs.com/xrq730/p/4844915.html" target="_blank" rel="noopener">http://www.cnblogs.com/xrq730/p/4844915.html</a></p>
 ]]></content>
       <categories>
