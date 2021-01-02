@@ -39,13 +39,6 @@
       <categories>
         <category>Android</category>
       </categories>
-      <tags>
-        <tag>Apktool</tag>
-        <tag>反编译</tag>
-        <tag>apktool.jar</tag>
-        <tag>apktool.bat</tag>
-        <tag>获取APP的布局文件</tag>
-      </tags>
   </entry>
   <entry>
     <title>Material Design之利用CollapsingToolbarLayout轻松实现知乎日报新闻详情页顶部效果（带banner的toolbar伸缩折叠效果）</title>
@@ -90,13 +83,6 @@
       <categories>
         <category>Android</category>
       </categories>
-      <tags>
-        <tag>CollapsingToolbarLay</tag>
-        <tag>可伸缩折叠的Toolbar</tag>
-        <tag>Collapsing</tag>
-        <tag>Toolbar</tag>
-        <tag>layout_collapseMode</tag>
-      </tags>
   </entry>
   <entry>
     <title>DrawerLayout+NavigationView打造Google原生Material Design风格侧滑菜单</title>
@@ -151,13 +137,6 @@
       <categories>
         <category>Android</category>
       </categories>
-      <tags>
-        <tag>DrawerLayout</tag>
-        <tag>NavigationView</tag>
-        <tag>inflateHeaderView</tag>
-        <tag>MaterialDrawer</tag>
-        <tag>抽屉侧滑菜单</tag>
-      </tags>
   </entry>
   <entry>
     <title>RecyclerView+SwipeRefreshLayout实现下拉刷新列表</title>
@@ -198,12 +177,6 @@
       <categories>
         <category>Android</category>
       </categories>
-      <tags>
-        <tag>RecyclerView</tag>
-        <tag>SwipeRefreshLayout</tag>
-        <tag>下拉刷新</tag>
-        <tag>RecyclerView+SwipeRefreshLayout</tag>
-      </tags>
   </entry>
   <entry>
     <title>为RecyclerView的不同item项实现不同的布局(添加分类Header)</title>
@@ -238,13 +211,6 @@
       <categories>
         <category>Android</category>
       </categories>
-      <tags>
-        <tag>RecyclerView</tag>
-        <tag>多Item布局实现</tag>
-        <tag>为RecyclerView添加头部</tag>
-        <tag>getSpanSize</tag>
-        <tag>GridLayoutManager</tag>
-      </tags>
   </entry>
   <entry>
     <title>数据存储 1：数据库索引的原理及使用策略</title>
@@ -567,11 +533,6 @@
       </categories>
       <tags>
         <tag>索引</tag>
-        <tag>索引原理</tag>
-        <tag>数据库索引</tag>
-        <tag>B+Tree</tag>
-        <tag>B-Tree</tag>
-        <tag>索引使用的注意事项</tag>
         <tag>RDBMS</tag>
       </tags>
   </entry>
@@ -630,7 +591,6 @@
         <category>Linux</category>
       </categories>
       <tags>
-        <tag>阿里云ECS</tag>
         <tag>Linux</tag>
       </tags>
   </entry>
@@ -694,10 +654,6 @@ CORS 全称为 Cross Origin Resource Sharing（跨域资源共享），CORS 支�
       </categories>
       <tags>
         <tag>跨域</tag>
-        <tag>浏览器跨域</tag>
-        <tag>cross-origin</tag>
-        <tag>postMessage</tag>
-        <tag>CORS</tag>
       </tags>
   </entry>
   <entry>
@@ -743,13 +699,6 @@ CORS 全称为 Cross Origin Resource Sharing（跨域资源共享），CORS 支�
       <categories>
         <category>Android</category>
       </categories>
-      <tags>
-        <tag>android.support.v4.a</tag>
-        <tag>Tablayout</tag>
-        <tag>ViewPager</tag>
-        <tag>Fragment</tag>
-        <tag>滑动tab</tag>
-      </tags>
   </entry>
   <entry>
     <title>轻松实现APP自动检测更新</title>
@@ -794,11 +743,6 @@ CORS 全称为 Cross Origin Resource Sharing（跨域资源共享），CORS 支�
       <categories>
         <category>Android</category>
       </categories>
-      <tags>
-        <tag>APP自动更新</tag>
-        <tag>Android auto update</tag>
-        <tag>应用自动检测更新</tag>
-      </tags>
   </entry>
   <entry>
     <title>Git 提交代码到远程仓库</title>
@@ -958,9 +902,6 @@ CORS 全称为 Cross Origin Resource Sharing（跨域资源共享），CORS 支�
       <tags>
         <tag>RDBMS</tag>
         <tag>分库分表</tag>
-        <tag>垂直分库</tag>
-        <tag>水平分表</tag>
-        <tag>垂直拆分</tag>
       </tags>
   </entry>
   <entry>
@@ -1214,12 +1155,7 @@ CORS 全称为 Cross Origin Resource Sharing（跨域资源共享），CORS 支�
       </categories>
       <tags>
         <tag>类加载机制</tag>
-        <tag>类加载</tag>
-        <tag>classLoder</tag>
         <tag>JVM</tag>
-        <tag>类的生命周期</tag>
-        <tag>双亲委派模型</tag>
-        <tag>委托机制</tag>
       </tags>
   </entry>
   <entry>
@@ -1291,9 +1227,6 @@ CORS 全称为 Cross Origin Resource Sharing（跨域资源共享），CORS 支�
       </categories>
       <tags>
         <tag>Dubbo</tag>
-        <tag>Dubbo实现原理</tag>
-        <tag>Dubbo架构</tag>
-        <tag>Microkernel + Plugin</tag>
       </tags>
   </entry>
   <entry>
@@ -1425,7 +1358,6 @@ CORS 全称为 Cross Origin Resource Sharing（跨域资源共享），CORS 支�
         <category>Interview</category>
       </categories>
       <tags>
-        <tag>android面试题</tag>
         <tag>秋招笔试面试题</tag>
       </tags>
   </entry>
@@ -1583,7 +1515,6 @@ http://www.cnblogs.com/TimeStory/p/3858479.html
       </categories>
       <tags>
         <tag>秋招笔试面试题</tag>
-        <tag>java面试题</tag>
       </tags>
   </entry>
   <entry>
@@ -1802,7 +1733,6 @@ http://www.cnblogs.com/TimeStory/p/3858479.html
         <category>Java</category>
       </categories>
       <tags>
-        <tag>进阶实战</tag>
         <tag>Java SPI</tag>
       </tags>
   </entry>
@@ -1846,8 +1776,6 @@ http://www.cnblogs.com/TimeStory/p/3858479.html
       <tags>
         <tag>JVM</tag>
         <tag>内存区域划分</tag>
-        <tag>对象的内存布局</tag>
-        <tag>对象创建的过程</tag>
       </tags>
   </entry>
   <entry>
@@ -1877,8 +1805,6 @@ http://www.cnblogs.com/TimeStory/p/3858479.html
       </categories>
       <tags>
         <tag>Linux</tag>
-        <tag>cat</tag>
-        <tag>man</tag>
       </tags>
   </entry>
   <entry>
@@ -2050,10 +1976,6 @@ http://www.cnblogs.com/TimeStory/p/3858479.html
       </categories>
       <tags>
         <tag>Linux</tag>
-        <tag>chmod</tag>
-        <tag>文件权限控制</tag>
-        <tag>useradd</tag>
-        <tag>usermod</tag>
       </tags>
   </entry>
   <entry>
@@ -2255,11 +2177,6 @@ http://www.cnblogs.com/TimeStory/p/3858479.html
         <tag>JVM</tag>
         <tag>反射机制</tag>
         <tag>java反射</tag>
-        <tag>java反射-Fields</tag>
-        <tag>java反射-Classes</tag>
-        <tag>Java反射-Method</tag>
-        <tag>Java反射-Annotation</tag>
-        <tag>动态调用</tag>
       </tags>
   </entry>
   <entry>
@@ -2311,8 +2228,6 @@ http://www.cnblogs.com/TimeStory/p/3858479.html
       </categories>
       <tags>
         <tag>maven</tag>
-        <tag>pom.xml</tag>
-        <tag>maven构建</tag>
       </tags>
   </entry>
   <entry>
@@ -2437,9 +2352,6 @@ http://www.cnblogs.com/TimeStory/p/3858479.html
       </categories>
       <tags>
         <tag>Redis</tag>
-        <tag>Redis cluster</tag>
-        <tag>Redis集群搭建</tag>
-        <tag>redis-trib.rb</tag>
       </tags>
   </entry>
   <entry>
@@ -2541,8 +2453,6 @@ http://www.cnblogs.com/TimeStory/p/3858479.html
       <tags>
         <tag>Redis</tag>
         <tag>Jedis</tag>
-        <tag>jedisPool</tag>
-        <tag>Pipelining</tag>
       </tags>
   </entry>
   <entry>
@@ -2675,10 +2585,6 @@ http://www.cnblogs.com/TimeStory/p/3858479.html
       <tags>
         <tag>JVM</tag>
         <tag>java内存模型</tag>
-        <tag>JMM</tag>
-        <tag>volatile</tag>
-        <tag>happens-before</tag>
-        <tag>并发编程</tag>
       </tags>
   </entry>
   <entry>
@@ -3043,10 +2949,6 @@ http://www.cnblogs.com/TimeStory/p/3858479.html
       </categories>
       <tags>
         <tag>Redis</tag>
-        <tag>Redis shell</tag>
-        <tag>Redis 环境搭建</tag>
-        <tag>redis-server</tag>
-        <tag>redis-cli</tag>
       </tags>
   </entry>
   <entry>
@@ -3149,7 +3051,7 @@ http://www.cnblogs.com/TimeStory/p/3858479.html
 <p>1) 线程的上下文切换都发生在用户空间，避免了模态切换（mode switch），减少了性能的开销。<br>2) 用户线程的创建不受内核资源的限制，可以支持更大规模的线程数量。</p>
 <p><strong>缺点：</strong></p>
 <p>1) 所有的线程基于一个内核调度实体即内核线程，这意味着只有一个处理器可以被利用，浪费了其它处理器资源，不支持并行，在多处理器环境下这是不能够被接受的，如果线程因为 I/O 操作陷入了内核态，内核态线程阻塞等待 I/O 数据，则所有的线程都将会被阻塞。</p>
-<p>2) 增加了复杂度，所有的线程操作都需要用户程序自己处理，而且在用户空间要想自己实现 “阻塞的时候把线程音响到其他处理器上” 异常困难。</p>
+<p>2) 增加了复杂度，所有的线程操作都需要用户程序自己处理，而且在用户空间要想自己实现 “阻塞的时候把线程映射到其他处理器上” 异常困难。</p>
 <h4 id="2-使用内核线程实现（一对一模型-1-1）"><a href="#2-使用内核线程实现（一对一模型-1-1）" class="headerlink" title="2.使用内核线程实现（一对一模型 1:1）"></a>2.使用内核线程实现（一对一模型 1:1）</h4><blockquote>
 <p>程序使用的是内核线程的一种高级接口——轻量级进程（Light Weight Process,LWP），轻量级进程就是我们通常意义上所讲的线程,轻量级进程也是属于用户线程。</p>
 </blockquote>
@@ -3178,10 +3080,6 @@ http://www.cnblogs.com/TimeStory/p/3858479.html
       <tags>
         <tag>JVM</tag>
         <tag>线程模型</tag>
-        <tag>java的线程模型</tag>
-        <tag>模态切换</tag>
-        <tag>用户态</tag>
-        <tag>内核态</tag>
       </tags>
   </entry>
   <entry>
@@ -3803,13 +3701,6 @@ http://www.cnblogs.com/TimeStory/p/3858479.html
       </categories>
       <tags>
         <tag>Redis</tag>
-        <tag>Redis有哪些数据类型</tag>
-        <tag>Redis的使用场景</tag>
-        <tag>Redis的持久化机制</tag>
-        <tag>Redis的内存淘汰机制</tag>
-        <tag>Redis为什么采用单线程设计</tag>
-        <tag>Redis为什么速度快</tag>
-        <tag>Redis的内部结构</tag>
       </tags>
   </entry>
   <entry>
@@ -3907,13 +3798,7 @@ http://www.cnblogs.com/TimeStory/p/3858479.html
         <category>RDBMS</category>
       </categories>
       <tags>
-        <tag>RDBMS</tag>
         <tag>唯一ID</tag>
-        <tag>分布式系统ID生成器</tag>
-        <tag>snowflake</tag>
-        <tag>Leaf-segment</tag>
-        <tag>Leaf-snowflake</tag>
-        <tag>seqsvr</tag>
       </tags>
   </entry>
   <entry>
@@ -3950,9 +3835,6 @@ http://www.cnblogs.com/TimeStory/p/3858479.html
       </categories>
       <tags>
         <tag>webservice</tag>
-        <tag>CXF</tag>
-        <tag>CXF 实现 webservice的发布与调用</tag>
-        <tag>JaxWsProxyFactoryBean</tag>
       </tags>
   </entry>
   <entry>
@@ -5045,8 +4927,6 @@ http://www.cnblogs.com/TimeStory/p/3858479.html
       <tags>
         <tag>Redis</tag>
         <tag>Redisson</tag>
-        <tag>RedissonLock</tag>
-        <tag>RedissonRedLock</tag>
       </tags>
   </entry>
   <entry>
@@ -5251,7 +5131,7 @@ http://www.cnblogs.com/TimeStory/p/3858479.html
         <category>Design Pattern</category>
       </categories>
       <tags>
-        <tag>Design Pattern creational-Pattern</tag>
+        <tag>Design Pattern</tag>
       </tags>
   </entry>
   <entry>
@@ -5365,7 +5245,7 @@ http://www.cnblogs.com/TimeStory/p/3858479.html
         <category>Design Pattern</category>
       </categories>
       <tags>
-        <tag>Design Pattern Object-Oriented</tag>
+        <tag>Design Pattern</tag>
       </tags>
   </entry>
   <entry>
@@ -5497,7 +5377,7 @@ http://www.cnblogs.com/TimeStory/p/3858479.html
         <category>Design Pattern</category>
       </categories>
       <tags>
-        <tag>Design Pattern Object-Oriented</tag>
+        <tag>Design Pattern</tag>
       </tags>
   </entry>
   <entry>
@@ -5760,7 +5640,7 @@ http://www.cnblogs.com/TimeStory/p/3858479.html
         <category>Design Pattern</category>
       </categories>
       <tags>
-        <tag>Design Pattern Structural-Pattern</tag>
+        <tag>Design Pattern</tag>
       </tags>
   </entry>
   <entry>
@@ -6207,7 +6087,7 @@ http://www.cnblogs.com/TimeStory/p/3858479.html
         <category>Design Pattern</category>
       </categories>
       <tags>
-        <tag>Design Pattern Refactoring-Principle</tag>
+        <tag>Design Pattern</tag>
       </tags>
   </entry>
   <entry>
@@ -6541,7 +6421,7 @@ http://www.cnblogs.com/TimeStory/p/3858479.html
         <category>Design Pattern</category>
       </categories>
       <tags>
-        <tag>Design Pattern Behavioral-Pattern</tag>
+        <tag>Design Pattern</tag>
       </tags>
   </entry>
   <entry>
@@ -6809,7 +6689,7 @@ http://www.cnblogs.com/TimeStory/p/3858479.html
         <category>Design Pattern</category>
       </categories>
       <tags>
-        <tag>Design Pattern Design-Principle</tag>
+        <tag>Design Pattern</tag>
       </tags>
   </entry>
   <entry>
