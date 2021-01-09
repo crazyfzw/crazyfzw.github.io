@@ -6997,6 +6997,8 @@ http://www.cnblogs.com/TimeStory/p/3858479.html
     <url>/2020/11/01/concurrent-base/</url>
     <content><![CDATA[<h2 id="进程与线程基本概念"><a href="#进程与线程基本概念" class="headerlink" title="进程与线程基本概念"></a>进程与线程基本概念</h2><h3 id="进程与线程的区别"><a href="#进程与线程的区别" class="headerlink" title="进程与线程的区别"></a>进程与线程的区别</h3><p>在现代操作系统中，进程是操作系统进行资源分配的基本单位(内存地址、文件 I/O 等)，而线程是操作系统进行调度的基本单位，即CPU分配时间的单位。</p>
 <p>线程是进程内部的一个执行单元。 每一个进程至少有一个主执行线程，它无需由用户去主动创建，是由系统自动创建的。用户根据需要在应用程序中创建其它线程，多个线程并发地运行于同一个进程中。</p>
+<a id="more"></a>
+
 <h3 id="图解进程和线程的关心"><a href="#图解进程和线程的关心" class="headerlink" title="图解进程和线程的关心"></a>图解进程和线程的关心</h3><p><img src="/images/con01.jpg" alt="6dfd0cc256d503449d4eb2c27d727e4c.png"></p>
 <p><a href="https://crazyfzw.github.io/2018/07/11/jvm-memory-division/">Java 虚拟机 3：Java内存模型-内存区域划分以及对象创建的过程</a></p>
 <h3 id="上下文切换"><a href="#上下文切换" class="headerlink" title="上下文切换"></a>上下文切换</h3><p>上下文切换（有时也称做进程切换或任务切换）是指 CPU 从一个进程（或线程）切换到另一个进程（或线程）。上下文是指某一时间点 CPU 寄存器和程序计数器的内容。</p>
@@ -7151,6 +7153,9 @@ http://www.cnblogs.com/TimeStory/p/3858479.html
 <p>悲观锁：<br>悲观锁就是我们常说的锁。对于悲观锁来说，它总是认为每次访问共享资源时会发生冲突，所以必须对每次数据操作加上锁，以保证临界区的程序同一时间只能有一个线程在执行。互斥同步锁就属于悲观锁，比如， synchronized. 与 ReentrantLock.</p>
 <p>乐观锁：<br>乐观锁又称为“无锁”，顾名思义，它是乐观派。乐观锁总是假设对共享资源的访问没有冲突，线程可以不停地执行，无需加锁也无需等待。而一旦多个线程发生冲突，乐观锁通常是使用一种称为CAS的技术来保证线程执行的安全性。</p>
 <p>由于无锁操作中没有锁的存在，因此不可能出现死锁的情况，也就是说乐观锁天生免疫死锁。</p>
+<a id="more"></a>
+
+
 <p><strong>乐观锁多用于“读多写少“的环境，避免频繁加锁影响性能；而悲观锁多用于”写多读少“的环境，避免频繁失败和重试影响性能。</strong></p>
 <h2 id="CAS"><a href="#CAS" class="headerlink" title="CAS"></a>CAS</h2><p>互斥同步最主要的问题就是进行线程阻塞和唤醒所带来的性能问题，因此这种同步是阻塞同步，这是一种悲观的并发策略，总是认为只要不加锁那就肯定会出现问题，无论共享数据是否真多会出现竞争，它都要进行加锁。</p>
 <p>而随着硬件指令集的发展，CAS得与实现，做法是先进行操作，如果没有其他线程争用共享数据，那操作就成功了，如果共享数据有争用，产生了冲突，那就再采取其他的补偿措施（最常见的补偿措施就是不断地重试，直到成功为止）</p>
@@ -7227,6 +7232,8 @@ http://www.cnblogs.com/TimeStory/p/3858479.html
 <li>同步：实现了同步的功能。</li>
 </ul>
 <p>AQS是一个用来构建锁和同步器的框架，使用AQS能简单且高效地构造出应用广泛的同步器，比如我们常用到的同步类 ReentrantLock、Semaphore、CountDownLatch、CyclicBarrier，ReentrantReadWriteLock，SynchronousQueue，FutureTask等等皆是基于AQS的。</p>
+<a id="more"></a>
+
 <p><img src="/images/aqs01.jpg" alt="e8860a5e5c273c648ff38504afa98c63.png"></p>
 <p>AQS 采用了模版方法实现，子类只需要根据需要去实现自己关心的protected 方法即可造出符合我们自己需求的同步器。</p>
 <h3 id="AQS-的数据结构"><a href="#AQS-的数据结构" class="headerlink" title="AQS 的数据结构"></a>AQS 的数据结构</h3><p>AQS内部使用了一个volatile的变量state来作为资源的标识。同时定义了几个获取和改版state的protected方法。</p>
@@ -7421,6 +7428,9 @@ http://www.cnblogs.com/TimeStory/p/3858479.html
 <li>提高响应速度。当任务到达时，任务可以不需要的等到线程创建就能立即执行。</li>
 <li>提高线程的可管理性。线程是稀缺资源，如果无限制的创建，不仅会消耗系统资源，还会降低系统的稳定性，使用线程池可以进行统一的分配，调优和监控。</li>
 </ul>
+<a id="more"></a>
+
+
 <h2 id="如何创建线程池"><a href="#如何创建线程池" class="headerlink" title="如何创建线程池"></a>如何创建线程池</h2><h3 id="方式一：通过-Executor-框架的工具类-Executors-来实现："><a href="#方式一：通过-Executor-框架的工具类-Executors-来实现：" class="headerlink" title="方式一：通过 Executor 框架的工具类 Executors 来实现："></a>方式一：通过 Executor 框架的工具类 Executors 来实现：</h3><p>主要是通过下面个方法：</p>
 <ul>
 <li><p>newFixedThreadPool ： 该方法返回一个固定线程数量的线程池。该线程池中的线程数量始终不变。当有一个新的任务提交时，线程池中若有空闲线程，则立即执行。若没有，则新的任务会被暂存在一个任务队列中，待有线程空闲时，便处理在任务队列中的任务。</p>
@@ -7518,6 +7528,9 @@ http://www.cnblogs.com/TimeStory/p/3858479.html
 <li>缓冲池空了，我们需要阻塞消费者，唤醒生产者；当缓冲池满了，我们需要阻塞生产者，唤醒消费者</li>
 </ul>
 <p>JDK 为此设计了 阻塞队列(BlockingQueue)，并提供了几个基于 BlockingQueue 接口 实现的一些线程安全的阻塞队列。</p>
+<a id="more"></a>
+
+
 <h2 id="BlockingQueue的操作方法"><a href="#BlockingQueue的操作方法" class="headerlink" title="BlockingQueue的操作方法:"></a>BlockingQueue的操作方法:</h2><p>阻塞队列提供了四组不同的方法用于插入、移除、检查元素：</p>
 <table>
 <thead>
