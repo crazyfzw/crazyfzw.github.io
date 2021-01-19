@@ -7521,7 +7521,7 @@ http://www.cnblogs.com/TimeStory/p/3858479.html
       </tags>
   </entry>
   <entry>
-    <title>深入浅出Java多线程-阻塞队列</title>
+    <title>深入浅出Java多线程-阻塞队列BlockingQueue</title>
     <url>/2020/11/20/concurrent-blocking-queue/</url>
     <content><![CDATA[<h2 id="阻塞队列的由来"><a href="#阻塞队列的由来" class="headerlink" title="阻塞队列的由来"></a>阻塞队列的由来</h2><p>在生产者-消费者模式中，为了使生产者消费者解藕，需要一个存放元素的容器，使生产者可以只关心往队列里添加元素下，消费者只关系从队列中取出元素进程处理。</p>
 <p>而且这个队列必须要满足两点：</p>
@@ -7849,7 +7849,7 @@ http://www.cnblogs.com/TimeStory/p/3858479.html
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">private</span> ReentrantLock lock = <span class="keyword">new</span> ReentrantLock();</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    lock.lock();</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="comment">//do bussiness</span></span><br><span class="line">    &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">        e.printStackTrace();</span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        lock.unlock();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 
-<h2 id="ReentrantLock-的源码实现"><a href="#ReentrantLock-的源码实现" class="headerlink" title="ReentrantLock 的源码实现"></a>ReentrantLock 的源码实现</h2><h3 id="公平锁的实现"><a href="#公平锁的实现" class="headerlink" title="公平锁的实现"></a>公平锁的实现</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">lock</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    sync.lock();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">final</span> <span class="keyword">void</span> <span class="title">lock</span><span class="params">()</span> </span>&#123;</span><br><span class="line">       acquire(<span class="number">1</span>); </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="ReentrantLock-的源码实现"><a href="#ReentrantLock-的源码实现" class="headerlink" title="ReentrantLock 的源码实现"></a>ReentrantLock 的源码实现</h2><h3 id="公平锁的实现"><a href="#公平锁的实现" class="headerlink" title="公平锁的实现"></a>公平锁的实现</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">lock</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    sync.lock();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">final</span> <span class="keyword">void</span> <span class="title">lock</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    acquire(<span class="number">1</span>); </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>可以看到，ReentrantLock 的lock 方法，其实是通过调用 AQS 提供的模版方法 acquire 来获取独占锁的。</p>
 <p>AbstractQueuedSynchronizer 的模版方法如下：</p>
