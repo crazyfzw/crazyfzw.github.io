@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"crazyfzw.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"valine","storage":true,"lazyload":true,"nav":null,"activeClass":"valine"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="概述HTTP 协议中有可能存在信息窃听或身份伪装等安全问题。使用 HTTPS 通信机制可以有效地防止这些问题。 HTTP 的缺点HTTP 主要有这些不足：  通信使用明文（不加密），内容可能会被窃听  不验证通信方的身份，因此有可能遭遇伪装  无法证明报文的完整性，所以有可能已遭篡改">
+<meta property="og:type" content="article">
+<meta property="og:title" content="图解HTTP-笔记Part3-HTTPS 是如何保证安全的">
+<meta property="og:url" content="https://crazyfzw.github.io/2021/01/15/network-https/index.html">
+<meta property="og:site_name" content="Crazyfzw&#39;s blog">
+<meta property="og:description" content="概述HTTP 协议中有可能存在信息窃听或身份伪装等安全问题。使用 HTTPS 通信机制可以有效地防止这些问题。 HTTP 的缺点HTTP 主要有这些不足：  通信使用明文（不加密），内容可能会被窃听  不验证通信方的身份，因此有可能遭遇伪装  无法证明报文的完整性，所以有可能已遭篡改">
+<meta property="og:image" content="https://crazyfzw.github.io/images/https01.jpg">
+<meta property="og:image" content="https://crazyfzw.github.io/images/https02.jpg">
+<meta property="og:image" content="https://crazyfzw.github.io/images/https03.jpg">
+<meta property="og:image" content="https://crazyfzw.github.io/images/https04.jpg">
+<meta property="og:image" content="https://crazyfzw.github.io/images/https05.jpg">
+<meta property="og:image" content="https://crazyfzw.github.io/images/https06.jpg">
+<meta property="og:image" content="https://crazyfzw.github.io/images/https07.jpg">
+<meta property="og:image" content="https://crazyfzw.github.io/images/https08.jpg">
+<meta property="og:image" content="https://crazyfzw.github.io/images/https09.jpg">
+<meta property="og:image" content="https://crazyfzw.github.io/images/https10.jpg">
+<meta property="og:image" content="https://crazyfzw.github.io/images/https11.jpg">
+<meta property="og:image" content="https://crazyfzw.github.io/images/https12.jpg">
+<meta property="og:image" content="https://crazyfzw.github.io/images/https13.jpg">
+<meta property="og:image" content="https://crazyfzw.github.io/images/https14.jpg">
+<meta property="og:image" content="https://crazyfzw.github.io/images/https15.jpg">
+<meta property="article:published_time" content="2021-01-15T02:11:23.000Z">
+<meta property="article:modified_time" content="2021-02-05T14:43:26.872Z">
+<meta property="article:author" content="crazyfzw">
+<meta property="article:tag" content="网络">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://crazyfzw.github.io/images/https01.jpg">
+
+<link rel="canonical" href="https://crazyfzw.github.io/2021/01/15/network-https/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-Hans'
+  };
+</script>
+
+  <title>图解HTTP-笔记Part3-HTTPS 是如何保证安全的 | Crazyfzw's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Crazyfzw's blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Crazyfzw's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Return to base, step by step.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="https://crazyfzw.github.io/2021/01/15/network-https/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/uploads/avatar.jpg">
+      <meta itemprop="name" content="crazyfzw">
+      <meta itemprop="description" content="做个有趣的技术人">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Crazyfzw's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          图解HTTP-笔记Part3-HTTPS 是如何保证安全的
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-01-15 10:11:23" itemprop="dateCreated datePublished" datetime="2021-01-15T10:11:23+08:00">2021-01-15</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-02-05 22:43:26" itemprop="dateModified" datetime="2021-02-05T22:43:26+08:00">2021-02-05</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BD%91%E7%BB%9C/" itemprop="url" rel="index"><span itemprop="name">网络</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2021/01/15/network-https/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2021/01/15/network-https/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>3.4k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>3 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>HTTP 协议中有可能存在信息窃听或身份伪装等安全问题。使用 HTTPS 通信机制可以有效地防止这些问题。</p>
+<h2 id="HTTP-的缺点"><a href="#HTTP-的缺点" class="headerlink" title="HTTP 的缺点"></a>HTTP 的缺点</h2><p>HTTP 主要有这些不足：</p>
+<ul>
+<li>通信使用明文（不加密），内容可能会被窃听 </li>
+<li>不验证通信方的身份，因此有可能遭遇伪装 </li>
+<li>无法证明报文的完整性，所以有可能已遭篡改</li>
+</ul>
+<a id="more"></a>
+
+<h3 id="通信使用明文可能会被窃听"><a href="#通信使用明文可能会被窃听" class="headerlink" title="通信使用明文可能会被窃听"></a>通信使用明文可能会被窃听</h3><p>按 TCP/IP 协议族的工作机制，通信内容在所有的通信线路上都有可能遭到窥视。互联网上的任何角落都存在通信内容被窃听的风险。比如通过一些抓包（Packet Capture）或嗅探器（Sniffer）工具就可以做到。</p>
+<p><img src="/images/https01.jpg" alt="6b37d53e8b2d30b341a56ee540162081.png"></p>
+<p>在目前大家正在研究的如何防止窃听保护信息的几种对策中，最为普及的就是加密技术。主要有：</p>
+<ul>
+<li>通信的加密</li>
+<li>内容的加密</li>
+</ul>
+<p><strong>HTTPS使用的是基于通信的加密：</strong><br>HTTP 协议中没有加密机制，但可以通过和 SSL（Secure Socket Layer，安全套接层）或 TLS（Transport Layer Security，安全层传输协议）的组合使用， 加密 HTTP 的通信内容。</p>
+<p>用 SSL建立安全通信线路之后，就可以在这条线路上进行 HTTP 通信了。与 SSL组合使用的 HTTP 被称为 HTTPS（HTTP Secure，超文本传输安全协议）或 HTTP over SSL。<br><img src="/images/https02.jpg" alt="f29ebfdcc4eb596df5774c7dec659a55.png"></p>
+<h3 id="不验证通信方的身份就可能遭遇伪装"><a href="#不验证通信方的身份就可能遭遇伪装" class="headerlink" title="不验证通信方的身份就可能遭遇伪装"></a>不验证通信方的身份就可能遭遇伪装</h3><p>HTTP 协议中的请求和响应不会对通信方进行确认。也就是说存在“服 务器是否就是发送请求中 URI 真正指定的主机，返回的响应是否真的 返回到实际提出请求的客户端”等类似问题。</p>
+<p>HTTP 协议的实现本身非常简单，不论是谁发送过来的请求都会返回响应，因此不确认通信方。</p>
+<p><strong>HTTPS 使用证书认证解决：</strong><br>虽然使用 HTTP 协议无法确定通信方，但如果使用 SSL则可以。 SSL不仅提供加密处理，而且还使用了一种被称为证书的手段， 可用于确定方。</p>
+<p>证书由值得信任的第三方机构颁发，用以证明服务器和客户端是 实际存在的。另外，伪造证书从技术角度来说是异常困难的一件 事。所以只要能够确认通信方（服务器或客户端）持有的证书， 即可判断通信方的真实意图。</p>
+<p><img src="/images/https03.jpg" alt="021d2057f281786e9e5daa60bbfec876.png"></p>
+<p>通过使用证书，以证明通信方就是意料中的服务器。这对使用者 个人来讲，也减少了个人信息泄露的危险性。<br>另外，客户端持有证书即可完成个人身份的确认，也可用于对 Web 网站的认证环节。</p>
+<h3 id="无法证明报文完整性，可能已遭篡改"><a href="#无法证明报文完整性，可能已遭篡改" class="headerlink" title="无法证明报文完整性，可能已遭篡改"></a>无法证明报文完整性，可能已遭篡改</h3><p>由于 HTTP 协议无法证明通信的报文完整性，因此，在请求或响 应送出之后直到对方接收之前的这段时间内，即使请求或响应的 内容遭到篡改，也没有办法获悉。</p>
+<p>换句话说，没有任何办法确认，发出的请求 / 响应和接收到的请 求 / 响应是前后相同的。</p>
+<p><img src="/images/https04.jpg" alt="b9bbcdb56bcbdd16898d93bcd12b1b01.png"></p>
+<p>下图展示了请求或响应在传输途中，遭攻击者拦截并篡改内容的攻 击称为中间人攻击（Man-in-the-Middle attack，MITM）。<br><img src="/images/https05.jpg" alt="2228ded1cd82921a11fc47a9b28da5b0.png"></p>
+<p>如何防止篡改 ：为了有效防止这些弊端，有必要使用 HTTPS。SSL提供认证和加 密处理及摘要功能。仅靠 HTTP 确保完整性是非常困难的，因此 通过和其他协议组合使用来实现这个目标。下节我们介绍 HTTPS 的相关内容。</p>
+<h2 id="HTTP-加密-认证-完整性保护-HTTPS"><a href="#HTTP-加密-认证-完整性保护-HTTPS" class="headerlink" title="HTTP + 加密 + 认证 + 完整性保护 = HTTPS"></a>HTTP + 加密 + 认证 + 完整性保护 = HTTPS</h2><h3 id="HTTP-加上加密处理和认证以及完整性保护后即是-HTTPS"><a href="#HTTP-加上加密处理和认证以及完整性保护后即是-HTTPS" class="headerlink" title="HTTP 加上加密处理和认证以及完整性保护后即是 HTTPS"></a>HTTP 加上加密处理和认证以及完整性保护后即是 HTTPS</h3><p>如果在 HTTP 协议通信过程中使用未经加密的明文，比如在 Web 页 面中输入信用卡号，如果这条通信线路遭到窃听，那么信用卡号就暴露了。</p>
+<p>另外，对于 HTTP 来说，服务器也好，客户端也好，都是没有办法确认通信方的。因为很有可能并不是和原本预想的通信方在实际通信。 并且还需要考虑到接收到的报文在通信途中已经遭到篡改这一可能性。</p>
+<p>为了统一解决上述这些问题，需要在 HTTP 上再加入加密处理和认证等机制。我们把添加了加密及认证机制的 HTTP 称为 HTTPS（HTTP Secure）。</p>
+<p><img src="/images/https06.jpg" alt="d71490900f503bfc915297821faa1b01.png"></p>
+<h3 id="HTTPS-是身披-SSL-外壳的-HTTP"><a href="#HTTPS-是身披-SSL-外壳的-HTTP" class="headerlink" title="HTTPS 是身披 SSL 外壳的 HTTP"></a>HTTPS 是身披 SSL 外壳的 HTTP</h3><p>HTTPS 并非是应用层的一种新协议。只是 HTTP 通信接口部分用 SSL（Secure Socket Layer）和 TLS（Transport Layer Security）协议代 替而已。</p>
+<p>通常，HTTP 直接和 TCP 通信。当使用 SSL时，则演变成先和 SSL通 信，再由 SSL和 TCP 通信了。简言之，所谓 HTTPS，其实就是身披 SSL协议这层外壳的 HTTP。</p>
+<p><img src="/images/https07.jpg" alt="3eb49e7dddbff7b67865dc0546ea41e6.png"></p>
+<p>SSL是独立于 HTTP 的协议，所以不光是 HTTP 协议，其他运行在应 用层的 SMTP 和 Telnet 等协议均可配合 SSL协议使用。可以说 SSL是 当今世界上应用最为广泛的网络安全技术。</p>
+<h3 id="HTTPS-的混合加密机制"><a href="#HTTPS-的混合加密机制" class="headerlink" title="HTTPS 的混合加密机制"></a>HTTPS 的混合加密机制</h3><h4 id="对称加密的困境（共享密钥加密）"><a href="#对称加密的困境（共享密钥加密）" class="headerlink" title="对称加密的困境（共享密钥加密）"></a>对称加密的困境（共享密钥加密）</h4><p>加密和解密同用一个密钥的方式称为共享密钥加密（Common key crypto system），也被叫做对称密钥加密。<br><img src="/images/https08.jpg" alt="6ac421ed0cc663daed9783ae8d1cf6d3.png"></p>
+<p>以共享密钥方式加密时必须将密钥也发给对方。可究竟怎样才能 安全地转交？在互联网上转发密钥时，如果通信被监听那么密钥 就可会落入攻击者之手，同时也就失去了加密的意义。另外还得 设法安全地保管接收到的密钥。</p>
+<p><img src="/images/https09.jpg" alt="b98093c01ae7a6cefe6d6be5472c44a4.png"></p>
+<h4 id="非对称加密（使用两把密钥的公开密钥加密）"><a href="#非对称加密（使用两把密钥的公开密钥加密）" class="headerlink" title="非对称加密（使用两把密钥的公开密钥加密）"></a>非对称加密（使用两把密钥的公开密钥加密）</h4><p>公开密钥加密方式很好地解决了共享密钥加密的困难。公开密钥加密使用一对非对称的密钥。一把叫做私有密钥 （private key），另一把叫做公开密钥（public key）。顾名思 义，私有密钥不能让其他任何人知道，而公开密钥则可以随意发 布，任何人都可以获得。</p>
+<p>使用公开密钥加密方式，发送密文的一方使用对方的公开密钥进 行加密处理，对方收到被加密的信息后，再使用自己的私有密钥 进行解密。利用这种方式，不需要发送用来解密的私有密钥，也 不必担心密钥被攻击者窃听而盗走。</p>
+<p>另外，要想根据密文和公开密钥，恢复到信息原文是异常困难 的，因为解密过程就是在对离散对数进行求值，这并非轻而易举 就能办到。目前的技术来看是不太现实的。</p>
+<p><img src="/images/https10.jpg" alt="947d42482a812114fd923e406313e0a9.png"></p>
+<h4 id="HTTPS-采用混合加密机制"><a href="#HTTPS-采用混合加密机制" class="headerlink" title="HTTPS 采用混合加密机制"></a>HTTPS 采用混合加密机制</h4><p>HTTPS 采用共享密钥加密和公开密钥加密两者并用的混合加密机制。若密钥能够实现安全交换，那么有可能会考虑仅使用公开密钥加密来通信。但是公开密钥加密与共享密钥加密相比，其处 理速度要慢。</p>
+<p>所以应充分利用两者各自的优势，将多种方法组合起来用于通 信。在交换密钥环节使用公开密钥加密方式，之后的建立通信交 换报文阶段则使用共享密钥加密方式。<br><img src="/images/https11.jpg" alt="ecf567e4ed94c88015b15da12ae1f795.png"></p>
+<h4 id="使用第三方证书证明公开密钥的正确性"><a href="#使用第三方证书证明公开密钥的正确性" class="headerlink" title="使用第三方证书证明公开密钥的正确性"></a>使用第三方证书证明公开密钥的正确性</h4><p>遗憾的是，公开密钥加密方式还是存在一些问题的。那就是无法证明 公开密钥本身就是货真价实的公开密钥。比如，正准备和某台服务器 建立公开密钥加密方式下的通信时，如何证明收到的公开密钥就是原 本预想的那台服务器发行的公开密钥。或许在公开密钥传输途中，真 正的公开密钥已经被攻击者替换掉了。</p>
+<p>为了解决上述问题，可以使用由数字证书认证机构（CA，Certificate Authority）和其相关机关颁发的公开密钥证书。<br><img src="/images/https12.jpg" alt="718add0e21ec8d13733c4914cb593217.png"></p>
+<h3 id="HTTPS-的安全通信机制"><a href="#HTTPS-的安全通信机制" class="headerlink" title="HTTPS 的安全通信机制"></a>HTTPS 的安全通信机制</h3><p>HTTPS 的通信步骤：</p>
+<p><img src="/images/https13.jpg" alt="bf06e5bab8abb99d51c4467619bf3809.png"></p>
+<p>下面是对整个流程的图解。图中说明了从仅使用服务器端的公开密钥 证书（服务器证书）建立 HTTPS 通信的整个过程。</p>
+<p><img src="/images/https14.jpg" alt="a4b148ffec2b4e5397c7cee0a45fe254.png"></p>
+<h3 id="HTTPS-存在的两个问题"><a href="#HTTPS-存在的两个问题" class="headerlink" title="HTTPS 存在的两个问题"></a>HTTPS 存在的两个问题</h3><p>HTTPS 也存在一些问题，那就是当使用 SSL时，它的处理速度会变慢。SSL的慢分两种。一种是指通信慢。另一种是指由于大量消耗 CPU 及内存等资源，导致处理速度变慢。</p>
+<ul>
+<li><p>和使用 HTTP 相比，网络负载可能会变慢 2 到 100 倍。除去和 TCP 连接、发送 HTTP 请求 • 响应以外，还必须进行 SSL通信， 因此整体上处理通信量不可避免会增加。</p>
+</li>
+<li><p>另一点是 SSL必须进行加密处理。在服务器和客户端都需要进行 加密和解密的运算处理。因此从结果上讲，比起 HTTP 会更多地 消耗服务器和客户端的硬件资源，导致负载增强。</p>
+</li>
+</ul>
+<p><img src="/images/https15.jpg" alt="7ec2314eaa63ea695e2d3decbdd88289.png"></p>
+<h3 id="为什么不一直使用-HTTPS"><a href="#为什么不一直使用-HTTPS" class="headerlink" title="为什么不一直使用 HTTPS"></a>为什么不一直使用 HTTPS</h3><p>既然 HTTPS 那么安全可靠，那为何所有的 Web 网站不一直使用 HTTPS ？</p>
+<ul>
+<li><p>其中一个原因是，因为与纯文本通信相比，加密通信会消耗更多的 CPU 及内存资源。如果每次通信都加密，会消耗相当多的资源，平 摊到一台计算机上时，能够处理的请求数量必定也会随之减少。因此，如果是非敏感信息则使用 HTTP 通信，只有在包含个人信息 等敏感数据时，才利用 HTTPS 加密通信。</p>
+</li>
+<li><p>特别是每当那些访问量较多的 Web 网站在进行加密处理时，它们 所承担着的负载不容小觑。在进行加密处理时，并非对所有内容都 进行加密处理，而是仅在那些需要信息隐藏时才会加密，以节约资 源。</p>
+</li>
+<li><p>除此之外，想要节约购买证书的开销也是原因之一。要进行 HTTPS 通信，证书是必不可少的。而使用的证书必须向认 证机构（CA）购买。证书价格可能会根据不同的认证机构略有不同。那些购买证书并不合算的服务以及一些个人网站，可能只会选择采用 HTTP 的通信方式。</p>
+</li>
+</ul>
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><p><a href="https://book.douban.com/subject/25863515/" target="_blank" rel="noopener">《图解HTTP》</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E7%BD%91%E7%BB%9C/" rel="tag"># 网络</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item"></div>
+      <div class="post-nav-item">
+    <a href="/2021/01/10/network-http/" rel="next" title="图解HTTP-笔记Part2-HTTP协议基础">
+      图解HTTP-笔记Part2-HTTP协议基础 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#概述"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HTTP-的缺点"><span class="nav-number">2.</span> <span class="nav-text">HTTP 的缺点</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#通信使用明文可能会被窃听"><span class="nav-number">2.1.</span> <span class="nav-text">通信使用明文可能会被窃听</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#不验证通信方的身份就可能遭遇伪装"><span class="nav-number">2.2.</span> <span class="nav-text">不验证通信方的身份就可能遭遇伪装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#无法证明报文完整性，可能已遭篡改"><span class="nav-number">2.3.</span> <span class="nav-text">无法证明报文完整性，可能已遭篡改</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HTTP-加密-认证-完整性保护-HTTPS"><span class="nav-number">3.</span> <span class="nav-text">HTTP + 加密 + 认证 + 完整性保护 &#x3D; HTTPS</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#HTTP-加上加密处理和认证以及完整性保护后即是-HTTPS"><span class="nav-number">3.1.</span> <span class="nav-text">HTTP 加上加密处理和认证以及完整性保护后即是 HTTPS</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HTTPS-是身披-SSL-外壳的-HTTP"><span class="nav-number">3.2.</span> <span class="nav-text">HTTPS 是身披 SSL 外壳的 HTTP</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HTTPS-的混合加密机制"><span class="nav-number">3.3.</span> <span class="nav-text">HTTPS 的混合加密机制</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#对称加密的困境（共享密钥加密）"><span class="nav-number">3.3.1.</span> <span class="nav-text">对称加密的困境（共享密钥加密）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#非对称加密（使用两把密钥的公开密钥加密）"><span class="nav-number">3.3.2.</span> <span class="nav-text">非对称加密（使用两把密钥的公开密钥加密）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#HTTPS-采用混合加密机制"><span class="nav-number">3.3.3.</span> <span class="nav-text">HTTPS 采用混合加密机制</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#使用第三方证书证明公开密钥的正确性"><span class="nav-number">3.3.4.</span> <span class="nav-text">使用第三方证书证明公开密钥的正确性</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HTTPS-的安全通信机制"><span class="nav-number">3.4.</span> <span class="nav-text">HTTPS 的安全通信机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HTTPS-存在的两个问题"><span class="nav-number">3.5.</span> <span class="nav-text">HTTPS 存在的两个问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#为什么不一直使用-HTTPS"><span class="nav-number">3.6.</span> <span class="nav-text">为什么不一直使用 HTTPS</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考文献"><span class="nav-number">4.</span> <span class="nav-text">参考文献</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="crazyfzw"
+      src="/uploads/avatar.jpg">
+  <p class="site-author-name" itemprop="name">crazyfzw</p>
+  <div class="site-description" itemprop="description">做个有趣的技术人</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">55</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">34</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/crazyfzw" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;crazyfzw" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://book.douban.com/people/crazyfzw/" title="Booklist → https:&#x2F;&#x2F;book.douban.com&#x2F;people&#x2F;crazyfzw&#x2F;" rel="noopener" target="_blank"><i class="fab fa-skype fa-fw"></i>Booklist</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:crazyfzw@gmail.com" title="E-Mail → mailto:crazyfzw@gmail.com" rel="noopener" target="_blank"><i class="fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://plus.google.com/104894167431407693109" title="Google → https:&#x2F;&#x2F;plus.google.com&#x2F;104894167431407693109" rel="noopener" target="_blank"><i class="fab fa-google fa-fw"></i>Google</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.facebook.com/profile.php?id=100011315733045" title="Facebook → https:&#x2F;&#x2F;www.facebook.com&#x2F;profile.php?id&#x3D;100011315733045" rel="noopener" target="_blank"><i class="fab fa-facebook fa-fw"></i>Facebook</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/u/3829383159" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;3829383159" rel="noopener" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://ifeve.com/" title="http:&#x2F;&#x2F;ifeve.com&#x2F;" rel="noopener" target="_blank">并发编程网</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="http://www.importnew.com/" title="http:&#x2F;&#x2F;www.importnew.com&#x2F;" rel="noopener" target="_blank">ImportNew</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="http://jm.taobao.org/categories/" title="http:&#x2F;&#x2F;jm.taobao.org&#x2F;categories&#x2F;" rel="noopener" target="_blank">阿里中间件团队博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.ibm.com/developerworks/cn/java/" title="https:&#x2F;&#x2F;www.ibm.com&#x2F;developerworks&#x2F;cn&#x2F;java&#x2F;" rel="noopener" target="_blank">IBM developerworks</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tech.meituan.com/" title="https:&#x2F;&#x2F;tech.meituan.com&#x2F;" rel="noopener" target="_blank">美团点评技术团队</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="http://calvin1978.blogcn.com/" title="http:&#x2F;&#x2F;calvin1978.blogcn.com&#x2F;" rel="noopener" target="_blank">江南白衣的博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="http://blog.720ui.com/" title="http:&#x2F;&#x2F;blog.720ui.com" rel="noopener" target="_blank">梁桂钊的博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.jianshu.com/u/581f548ef0ec" title="https:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;581f548ef0ec" rel="noopener" target="_blank">李艳鹏的博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="http://jinnianshilongnian.iteye.com/" title="http:&#x2F;&#x2F;jinnianshilongnian.iteye.com&#x2F;" rel="noopener" target="_blank">张开涛的博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/zuoxiaolong" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;zuoxiaolong" rel="noopener" target="_blank">左潇龙的博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/xrq730/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;xrq730&#x2F;" rel="noopener" target="_blank">五月的仓颉</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://yikun.github.io/" title="https:&#x2F;&#x2F;yikun.github.io&#x2F;" rel="noopener" target="_blank">Yikun的博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="http://www.ruanyifeng.com/" title="http:&#x2F;&#x2F;www.ruanyifeng.com" rel="noopener" target="_blank">阮一峰的个人网站</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">crazyfzw</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">549k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">8:19</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : false,
+      appId      : 'jyxPxkBMeEmDfMMTuuyBdGdu-gzGzoHsz',
+      appKey     : '7SEECyfT4R10oTtj4zDMOdBt',
+      placeholder: "ヾﾉ≧∀≦)o 来呀！吐槽一番吧！",
+      avatar     : 'monsterid',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : '' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

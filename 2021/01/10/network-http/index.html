@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"crazyfzw.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"valine","storage":true,"lazyload":true,"nav":null,"activeClass":"valine"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="HTTP 1.1 支持的方法">
+<meta property="og:type" content="article">
+<meta property="og:title" content="图解HTTP-笔记Part2-HTTP协议基础">
+<meta property="og:url" content="https://crazyfzw.github.io/2021/01/10/network-http/index.html">
+<meta property="og:site_name" content="Crazyfzw&#39;s blog">
+<meta property="og:description" content="HTTP 1.1 支持的方法">
+<meta property="og:image" content="https://crazyfzw.github.io/images/http01.jpg">
+<meta property="og:image" content="https://crazyfzw.github.io/images/http02.jpg">
+<meta property="og:image" content="https://crazyfzw.github.io/images/http03.jpg">
+<meta property="og:image" content="https://crazyfzw.github.io/images/http04.jpg">
+<meta property="og:image" content="https://crazyfzw.github.io/images/http05.jpg">
+<meta property="og:image" content="https://crazyfzw.github.io/images/http06.jpg">
+<meta property="og:image" content="https://crazyfzw.github.io/images/http07.jpg">
+<meta property="og:image" content="https://crazyfzw.github.io/images/http08.jpg">
+<meta property="og:image" content="https://crazyfzw.github.io/images/http09.jpg">
+<meta property="og:image" content="https://crazyfzw.github.io/images/http10.jpg">
+<meta property="og:image" content="https://crazyfzw.github.io/images/http11.jpg">
+<meta property="og:image" content="https://crazyfzw.github.io/images/http12.jpg">
+<meta property="og:image" content="https://crazyfzw.github.io/images/http13.jpg">
+<meta property="og:image" content="https://crazyfzw.github.io/images/http14.jpg">
+<meta property="og:image" content="https://crazyfzw.github.io/images/http15.jpg">
+<meta property="og:image" content="https://crazyfzw.github.io/images/http16.jpg">
+<meta property="og:image" content="https://crazyfzw.github.io/images/http17.jpg">
+<meta property="og:image" content="https://crazyfzw.github.io/images/http18.jpg">
+<meta property="og:image" content="https://crazyfzw.github.io/images/http19.jpg">
+<meta property="og:image" content="https://crazyfzw.github.io/images/http20.jpg">
+<meta property="og:image" content="https://crazyfzw.github.io/images/http21.jpg">
+<meta property="og:image" content="https://crazyfzw.github.io/images/http22.jpg">
+<meta property="og:image" content="https://crazyfzw.github.io/images/http23.jpg">
+<meta property="og:image" content="https://crazyfzw.github.io/images/http24.jpg">
+<meta property="og:image" content="https://crazyfzw.github.io/images/http25.jpg">
+<meta property="og:image" content="https://crazyfzw.github.io/images/http26.jpg">
+<meta property="og:image" content="https://crazyfzw.github.io/images/http27.jpg">
+<meta property="og:image" content="https://crazyfzw.github.io/images/http28.jpg">
+<meta property="og:image" content="https://crazyfzw.github.io/images/http29.jpg">
+<meta property="og:image" content="https://crazyfzw.github.io/images/http30.jpg">
+<meta property="article:published_time" content="2021-01-10T12:21:59.000Z">
+<meta property="article:modified_time" content="2021-02-05T14:42:57.292Z">
+<meta property="article:author" content="crazyfzw">
+<meta property="article:tag" content="网络">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://crazyfzw.github.io/images/http01.jpg">
+
+<link rel="canonical" href="https://crazyfzw.github.io/2021/01/10/network-http/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-Hans'
+  };
+</script>
+
+  <title>图解HTTP-笔记Part2-HTTP协议基础 | Crazyfzw's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Crazyfzw's blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Crazyfzw's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Return to base, step by step.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="https://crazyfzw.github.io/2021/01/10/network-http/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/uploads/avatar.jpg">
+      <meta itemprop="name" content="crazyfzw">
+      <meta itemprop="description" content="做个有趣的技术人">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Crazyfzw's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          图解HTTP-笔记Part2-HTTP协议基础
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-01-10 20:21:59" itemprop="dateCreated datePublished" datetime="2021-01-10T20:21:59+08:00">2021-01-10</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-02-05 22:42:57" itemprop="dateModified" datetime="2021-02-05T22:42:57+08:00">2021-02-05</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BD%91%E7%BB%9C/" itemprop="url" rel="index"><span itemprop="name">网络</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2021/01/10/network-http/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2021/01/10/network-http/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>4.6k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>4 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="HTTP-1-1-支持的方法"><a href="#HTTP-1-1-支持的方法" class="headerlink" title="HTTP 1.1 支持的方法"></a>HTTP 1.1 支持的方法</h2><p><img src="/images/http01.jpg" alt="6bcbfb290291e747e4fcf6e0815e1169.png"></p>
+<a id="more"></a>
+
+<h2 id="从HTTP1-0-的短连接-到-HTTP1-1-的长连接的改进"><a href="#从HTTP1-0-的短连接-到-HTTP1-1-的长连接的改进" class="headerlink" title="从HTTP1.0 的短连接 到 HTTP1.1 的长连接的改进"></a>从HTTP1.0 的短连接 到 HTTP1.1 的长连接的改进</h2><h3 id="短连接"><a href="#短连接" class="headerlink" title="短连接"></a>短连接</h3><p><img src="/images/http02.jpg" alt="51d56b10fe3dc71ad57f654396b65ab9.png"></p>
+<p><img src="/images/http03.jpg" alt="853aeec78dfd44c1175614da0b358601.png"></p>
+<h3 id="长连接"><a href="#长连接" class="headerlink" title="长连接"></a>长连接</h3><p>为解决上述 TCP 连接的问题，HTTP/1.1 和一部分的 HTTP/1.0 想出了 持久连接（HTTP Persistent Connections，也称为 HTTP keep-alive 或 HTTP connection reuse）的方法。持久连接的特点是，只要任意一端 没有明确提出断开连接，则保持 TCP 连接状态。</p>
+<p><img src="/images/http04.jpg" alt="595411c9d411abf2bff6245a0ae67978.png"></p>
+<p>图：持久连接旨在建立 1 次 TCP 连接后进行多次请求和响应的交互</p>
+<p>持久连接的好处在于减少了 TCP 连接的重复建立和断开所造成的额 外开销，减轻了服务器端的负载。另外，减少开销的那部分时间，使 HTTP 请求和响应能够更早地结束，这样 Web 页面的显示速度也就相 应提高了。</p>
+<p>在 HTTP/1.1 中，所有的连接默认都是持久连接，但在 HTTP/1.0 内并 未标准化。虽然有一部分服务器通过非标准的手段实现了持久连接， 但服务器端不一定能够支持持久连接。毫无疑问，除了服务器端，客 户端也需要支持持久连接。</p>
+<h3 id="管线化"><a href="#管线化" class="headerlink" title="管线化"></a>管线化</h3><p>1.1 版还引入了管道机制（pipelining），即在同一个TCP连接里面，客户端可以同时发送多个请求。这样就进一步改进了HTTP协议的效率。</p>
+<p>举例来说，客户端需要请求两个资源。以前的做法是，在同一个TCP连接里面，先发送A请求，然后等待服务器做出回应，收到后再发出B请求。管道机制则是允许浏览器同时发出A请求和B请求，但是服务器还是按照顺序，先回应A请求，完成后再回应B请求。</p>
+<p><img src="/images/http05.jpg" alt="ba1a756470a99f25c7f433a45d71d8fe.png"></p>
+<h3 id="使用-Cookie-的状态管理"><a href="#使用-Cookie-的状态管理" class="headerlink" title="使用 Cookie 的状态管理"></a>使用 Cookie 的状态管理</h3><p>HTTP 是无状态协议，它不对之前发生过的请求和响应的状态进行管 理。也就是说，无法根据之前的状态进行本次的请求处理。</p>
+<p>假设要求登录认证的 Web 页面本身无法进行状态的管理（不记录已 登录的状态），那么每次跳转新页面不是要再次登录，就是要在每次 请求报文中附加参数来管理登录状态。</p>
+<p>不可否认，无状态协议当然也有它的优点。由于不必保存状态，自然 可减少服务器的 CPU 及内存资源的消耗。从另一侧面来说，也正是 因为 HTTP 协议本身是非常简单的，所以才会被应用在各种场景里。</p>
+<p>保留无状态协议这个特征的同时又要解决类似的矛盾问题，于是引入 了 Cookie 技术。Cookie 技术通过在请求和响应报文中写入 Cookie 信 息来控制客户端的状态。</p>
+<p>Cookie 会根据从服务器端发送的响应报文内的一个叫做 Set-Cookie 的 首部字段信息，通知客户端保存 Cookie。当下次客户端再往该服务器 发送请求时，客户端会自动在请求报文中加入 Cookie 值后发送出 去。</p>
+<p><img src="/images/http06.jpg" alt="545faee9fd9d4965197252c0a1d54fa3.png"><br><img src="/images/http07.jpg" alt="ed90b8868b3d92230eeda16aff8a6cd9.png"><br><img src="/images/http08.jpg" alt="cd9931bb7ed9e660a4858dde8d52ea65.png"></p>
+<h2 id="HTTP-报文"><a href="#HTTP-报文" class="headerlink" title="HTTP 报文"></a>HTTP 报文</h2><p>用于 HTTP 协议交互的信息被称为 HTTP 报文。请求端（客户端）的 HTTP 报文叫做请求报文，响应端（服务器端）的叫做响应报文。 HTTP 报文本身是由多行（用 CR+LF 作换行符）数据构成的字符串文 本。</p>
+<p>HTTP 报文大致可分为报文首部和报文主体两块。两者由最初出现的 空行（CR+LF）来划分。通常，并不一定要有报文主体。</p>
+<p><img src="/images/http09.jpg" alt="5e7517ef6041fb689b2965c220328cf4.png"></p>
+<h3 id="请求报文及响应的报文的结构"><a href="#请求报文及响应的报文的结构" class="headerlink" title="请求报文及响应的报文的结构"></a>请求报文及响应的报文的结构</h3><p><img src="/images/http10.jpg" alt="572bb8e4599687b7be9e9331cb8bea7c.png"></p>
+<p><img src="/images/http11.jpg" alt="990a34bee6ce463370de62e8645fe1ab.png"></p>
+<ul>
+<li>请求行：包含用于请求的方法，请求 URI 和 HTTP 版本。 </li>
+<li>状态行： 包含表明响应结果的状态码，原因短语和 HTTP 版本。 </li>
+<li>首部字段： 包含表示请求和响应的各种条件和属性的各类首部，一般有4种首部：通用首部、请求首部、响应首部和实体首部。</li>
+<li>其他可能包含 HTTP 的 RFC 里未定义的首部（Cookie 等）。</li>
+</ul>
+<h3 id="编码提升传输速率"><a href="#编码提升传输速率" class="headerlink" title="编码提升传输速率"></a>编码提升传输速率</h3><p>HTTP 在传输数据时可以按照数据原貌直接传输，但也可以在传输过 程中通过编码提升传输速率。通过在传输时编码，能有效地处理大量 的访问请求。但是，编码的操作需要计算机来完成，因此会消耗更多 的 CPU 等资源。</p>
+<h3 id="压缩传输的内容编码"><a href="#压缩传输的内容编码" class="headerlink" title="压缩传输的内容编码"></a>压缩传输的内容编码</h3><p>向待发送邮件内增加附件时，为了使邮件容量变小，我们会先用 ZIP 压缩文件之后再添加附件发送。HTTP 协议中有一种被称为内容编码的功能也能进行类似的操作。</p>
+<p>内容编码指明应用在实体内容上的编码格式，并保持实体信息原样压缩。内容编码后的实体由客户端接收并负责解码。</p>
+<p><img src="/images/http12.jpg" alt="43e129c7d778ac8e8641e0151d9042fb.png"></p>
+<p>常用的内容编码有以下几种：</p>
+<ul>
+<li>gzip（GNU zip） </li>
+<li>compress（UNIX 系统的标准压缩） </li>
+<li>deflate（zlib） </li>
+<li>identity（不进行编码）</li>
+</ul>
+<h3 id="分割发送的分块传输编码"><a href="#分割发送的分块传输编码" class="headerlink" title="分割发送的分块传输编码"></a>分割发送的分块传输编码</h3><p>在 HTTP 通信过程中，请求的编码实体资源尚未全部传输完成之前， 浏览器无法显示请求页面。在传输大容量数据时，通过把数据分割成 多块，能够让浏览器逐步显示页面。</p>
+<p>这种把实体主体分块的功能称为分块传输编码（Chunked Transfer Coding）。</p>
+<p><img src="/images/http13.jpg" alt="d37222e9b2090552c1ce600c6956381d.png"></p>
+<p>分块传输编码会将实体主体分成多个部分（块）。每一块都会用十六 进制来标记块的大小，而实体主体的最后一块会使用“0(CR+LF)”来标 记。</p>
+<p>使用分块传输编码的实体主体会由接收的客户端负责解码，恢复到编 码前的实体主体。 </p>
+<p>HTTP/1.1 中存在一种称为传输编码（Transfer Coding）的机制，它可 以在通信时按某种编码方式传输，但只定义作用于分块传输编码中。</p>
+<h3 id="发送多种数据的多部分对象集合"><a href="#发送多种数据的多部分对象集合" class="headerlink" title="发送多种数据的多部分对象集合"></a>发送多种数据的多部分对象集合</h3><p>HTTP 协议中也采纳了多部分对象集合，发送的一份报文主 体内可含有多类型实体。通常是在图片或文本文件等上传时使用。</p>
+<h3 id="获取部分内容的范围请求"><a href="#获取部分内容的范围请求" class="headerlink" title="获取部分内容的范围请求"></a>获取部分内容的范围请求</h3><p>以前，用户不能使用现在这种高速的带宽访问互联网，当时，下载一 个尺寸稍大的图片或文件就已经很吃力了。如果下载过程中遇到网络 中断的情况，那就必须重头开始。为了解决上述问题，需要一种可恢 复的机制。所谓恢复是指能从之前下载中断处恢复下载。</p>
+<p>要实现该功能需要指定下载的实体范围。像这样，指定范围发送的请 求叫做范围请求（Range Request）。对一份 10 000 字节大小的资源，如果使用范围请求，可以只请求 5001~10 000 字节内的资源。</p>
+<p><img src="/images/http14.jpg" alt="60bacebe3f75e349407ab97f06627fa4.png"></p>
+<h3 id="内容协商返回最合适的内容"><a href="#内容协商返回最合适的内容" class="headerlink" title="内容协商返回最合适的内容"></a>内容协商返回最合适的内容</h3><p>当浏览器的默认语言为英语或中文，访问相同 URI 的 Web 页面时， 则会显示对应的英语版或中文版的 Web 页面。这样的机制称为内容 协商（Content Negotiation）。</p>
+<p>内容协商机制是指客户端和服务器端就响应的资源内容进行交涉，然 后提供给客户端最为适合的资源。内容协商会以响应资源的语言、字 符集、编码方式等作为判断的基准。</p>
+<p><img src="/images/http15.jpg" alt="16bc7cccdf52b0b46b108f703a961e8c.png"></p>
+<p>包含在请求报文中的某些首部字段（如下）就是判断的基准：</p>
+<ul>
+<li>Accept </li>
+<li>Accept-Charset 57</li>
+<li>Accept-Encoding </li>
+<li>Accept-Language </li>
+<li>Content-Language</li>
+</ul>
+<h2 id="响应结果中的-HTTP-状态码"><a href="#响应结果中的-HTTP-状态码" class="headerlink" title="响应结果中的 HTTP 状态码"></a>响应结果中的 HTTP 状态码</h2><p>状态码的职责是当客户端向服务器端发送请求时，描述返回的请求结 果。借助状态码，用户可以知道服务器端是正常处理了请求，还是出 现了错误。</p>
+<p><img src="/images/http16.jpg" alt="a75d79c4a178769f59484bd0f5e24e49.png"></p>
+<p>状态码如 200 OK，以 3 位数字和原因短语组成。数字中的第一位指定了响应类别，后两位无分类。响应类别有以下 5 种。</p>
+<p><img src="/images/http17.jpg" alt="c1b775e6005549323c69de278815da75.png"></p>
+<h2 id="参与HTTP协作的代理、网关、隧道"><a href="#参与HTTP协作的代理、网关、隧道" class="headerlink" title="参与HTTP协作的代理、网关、隧道"></a>参与HTTP协作的代理、网关、隧道</h2><p>HTTP 通信时，除客户端和服务器以外，还有一些用于通信数据转发 的应用程序，例如代理、网关和隧道。它们可以配合服务器工作。这些应用程序和服务器可以将请求转发给通信线路上的下一站服务器，并且能接收从那台服务器发送的响应再转发给客户端。</p>
+<ul>
+<li><p>代理是一种有转发功能的应用程序，它扮演了位于服务器和客户 端“中间人”的角色，接收由客户端发送的请求并转发给服务器，同时 也接收服务器返回的响应并转发给客户端。</p>
+</li>
+<li><p>网关是转发其他服务器通信数据的服务器，接收从客户端发送来的请 求时，它就像自己拥有资源的源服务器一样对请求进行处理。有时客 户端可能都不会察觉，自己的通信目标是一个网关。</p>
+</li>
+<li><p>隧道是在相隔甚远的客户端和服务器两者之间进行中转，并保持双方 通信连接的应用程序。</p>
+</li>
+</ul>
+<h3 id="代理"><a href="#代理" class="headerlink" title="代理"></a>代理</h3><p>代理服务器的基本行为就是接收客户端发送的请求后转发给其他服务 器。代理不改变请求 URI，会直接发送给前方持有资源的目标服务器。</p>
+<p><img src="/images/http18.jpg" alt="a5dc9d090d5754ba4caf0559d48da46f.png"></p>
+<p>使用代理服务器的理由有：利用缓存技术（稍后讲解）减少网络带宽 的流量，组织内部针对特定网站的访问控制，以获取访问日志为主要目的，等等。</p>
+<p>代理有多种使用方法，按两种基准分类。一种是是否使用缓存，另一 种是是否会修改报文。</p>
+<ul>
+<li><p>缓存代理：代理转发响应时，缓存代理（Caching Proxy）会预先将资源的副本 （缓存）保存在代理服务器上。当代理再次接收到对相同资源的请求时，就可以不从源服务器那里获 取资源，而是将之前缓存的资源作为响应返回。</p>
+</li>
+<li><p>透明代理：转发请求或响应时，不对报文做任何加工的代理类型被称为透明代理 （Transparent Proxy）。反之，对报文内容进行加工的代理被称为非 透明代理。</p>
+</li>
+</ul>
+<h3 id="网关"><a href="#网关" class="headerlink" title="网关"></a>网关</h3><p>网关的工作机制和代理十分相似。而网关能使通信线路上的服务器提 供非 HTTP 协议服务。 </p>
+<p>利用网关能提高通信的安全性，因为可以在客户端与网关之间的通信 线路上加密以确保连接的安全。比如，网关可以连接数据库，使用 SQL语句查询数据。另外，在 Web 购物网站上进行信用卡结算时， 网关可以和信用卡结算系统联动。</p>
+<p>下图为 ：利用网关可以由 HTTP 请求转化为其他协议通信<br><img src="/images/http19.jpg" alt="09053cfafe5a1827864cbe34e9f9e7c4.png"></p>
+<h3 id="隧道"><a href="#隧道" class="headerlink" title="隧道"></a>隧道</h3><p>隧道可按要求建立起一条与其他服务器的通信线路，届时使用 SSL等 加密手段进行通信。隧道的目的是确保客户端能与服务器进行安全的 通信。 </p>
+<p>隧道本身不会去解析 HTTP 请求。也就是说，请求保持原样中转给之后的服务器。隧道会在通信双方断开连接时结束。</p>
+<p><img src="/images/http20.jpg" alt="4c4f74bec17ecdaab64f788bc17f081a.png"></p>
+<h2 id="保存资源的缓存"><a href="#保存资源的缓存" class="headerlink" title="保存资源的缓存"></a>保存资源的缓存</h2><h3 id="缓存服务器"><a href="#缓存服务器" class="headerlink" title="缓存服务器"></a>缓存服务器</h3><p>缓存是指代理服务器或客户端本地磁盘内保存的资源副本。利用缓存 可减少对源服务器的访问，因此也就节省了通信流量和通信时间。</p>
+<p>缓存服务器是代理服务器的一种，并归类在缓存代理类型中。换句话 说，当代理转发从服务器返回的响应时，代理服务器将会保存一份资源的副本。</p>
+<p>缓存服务器的优势在于利用缓存可避免多次从源服务器转发资源。因 此客户端可就近从缓存服务器上获取资源，而源服务器也不必多次处 理相同的请求了。（这样也是 CDN加速的原理）</p>
+<p><img src="/images/http21.jpg" alt="0eff3a6e5576989627e0f7c2df923ce8.png"></p>
+<h3 id="客户端本地的缓存"><a href="#客户端本地的缓存" class="headerlink" title="客户端本地的缓存"></a>客户端本地的缓存</h3><p>缓存不仅可以存在于缓存服务器内，还可以存在客户端浏览器中。以 Internet Explorer 程序为例，把客户端缓存称为临时网络文件 （Temporary Internet File）。</p>
+<p>浏览器缓存如果有效，就不必再向服务器请求相同的资源了，可以直 接从本地磁盘内读取。另外，和缓存服务器相同的一点是，当判定缓存过期后，会向源服务 器确认资源的有效性。若判断浏览器缓存失效，浏览器会再次请求新资源。<br><img src="/images/http22.jpg" alt="0dae39c791cabbd7bf2727424a23bea8.png"></p>
+<h3 id="缓存的有效性"><a href="#缓存的有效性" class="headerlink" title="缓存的有效性"></a>缓存的有效性</h3><p>即便缓存服务器内有缓存，也不能保证每次都会返回对同资源的请 求。因为这关系到被缓存资源的有效性问题。</p>
+<p>当遇上源服务器上的资源更新时，如果还是使用不变的缓存，那就会 演变成返回更新前的“旧”资源了。</p>
+<p>即使存在缓存，也会因为客户端的要求、缓存的有效期等因素，向源 服务器确认资源的有效性。若判断缓存失效，缓存服务器将会再次从 源服务器上获取“新”资源。</p>
+<p><img src="/images/http23.jpg" alt="debe1a7d52a77b7cdec54715f908936f.png"></p>
+<h2 id="HTTP-首部"><a href="#HTTP-首部" class="headerlink" title="HTTP 首部"></a>HTTP 首部</h2><h3 id="HTTP-报文首部"><a href="#HTTP-报文首部" class="headerlink" title="HTTP 报文首部"></a>HTTP 报文首部</h3><p>HTTP 协议的请求和响应报文中必定包含 HTTP 首部。首部内容为客 户端和服务器分别处理请求和响应提供所需要的信息。对于客户端用户来说，这些信息中的大部分内容都无须亲自查看。</p>
+<h3 id="HTTP-请求报文"><a href="#HTTP-请求报文" class="headerlink" title="HTTP 请求报文"></a>HTTP 请求报文</h3><p>在请求中，HTTP 报文由方法、URI、HTTP 版本、HTTP 首部字段等 部分构成。</p>
+<p><img src="/images/http24.jpg" alt="113d79bdfbb4033e1c51d67a30a3dd41.png"></p>
+<h3 id="HTTP-响应报文"><a href="#HTTP-响应报文" class="headerlink" title="HTTP 响应报文"></a>HTTP 响应报文</h3><p>在响应中，HTTP 报文由 HTTP 版本、状态码（数字和原因短语）、 HTTP 首部字段 3 部分构成。</p>
+<p><img src="/images/http25.jpg" alt="c872b7def402b79cc06884520effc6e7.png"></p>
+<h3 id="HTTP-首部字段"><a href="#HTTP-首部字段" class="headerlink" title="HTTP 首部字段"></a>HTTP 首部字段</h3><p>HTTP 首部字段是构成 HTTP 报文的要素之一。在客户端与服务器之 间以 HTTP 协议进行通信的过程中，无论是请求还是响应都会使用首 部字段，它能起到传递额外重要信息的作用。 </p>
+<p>使用首部字段是为了给浏览器和服务器提供报文主体大小、所使用的 语言、认证信息等内容。</p>
+<p><img src="/images/http26.jpg" alt="c66887f3345cc9b032aec80caf6cafa2.png"></p>
+<h3 id="HTTP-1-1-首部字段一览"><a href="#HTTP-1-1-首部字段一览" class="headerlink" title="HTTP/1.1 首部字段一览"></a>HTTP/1.1 首部字段一览</h3><h4 id="通用首部字段"><a href="#通用首部字段" class="headerlink" title="通用首部字段"></a>通用首部字段</h4><p><img src="/images/http27.jpg" alt="2c3d0f3d4fa22cb5ee92fd54f08bbed1.png"></p>
+<h4 id="请求首部字段"><a href="#请求首部字段" class="headerlink" title="请求首部字段"></a>请求首部字段</h4><p><img src="/images/http28.jpg" alt="b967c5e5a793a444341d2c66944ab7ae.png"></p>
+<h4 id="响应首部字段"><a href="#响应首部字段" class="headerlink" title="响应首部字段"></a>响应首部字段</h4><p><img src="/images/http29.jpg" alt="f34520980b65f81d3f11dd56b84a60df.png"></p>
+<h4 id="实体首部字段"><a href="#实体首部字段" class="headerlink" title="实体首部字段"></a>实体首部字段</h4><p><img src="/images/http30.jpg" alt="886b39f9c93f116d55dca0a16dd55f90.png"></p>
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><p><a href="https://book.douban.com/subject/25863515/" target="_blank" rel="noopener">《图解HTTP》</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E7%BD%91%E7%BB%9C/" rel="tag"># 网络</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/01/15/network-https/" rel="prev" title="图解HTTP-笔记Part3-HTTPS 是如何保证安全的">
+      <i class="fa fa-chevron-left"></i> 图解HTTP-笔记Part3-HTTPS 是如何保证安全的
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/01/05/network-tcp-ip/" rel="next" title="图解HTTP-笔记Part1-网络基础 TCP/IP协议">
+      图解HTTP-笔记Part1-网络基础 TCP/IP协议 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#HTTP-1-1-支持的方法"><span class="nav-number">1.</span> <span class="nav-text">HTTP 1.1 支持的方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#从HTTP1-0-的短连接-到-HTTP1-1-的长连接的改进"><span class="nav-number">2.</span> <span class="nav-text">从HTTP1.0 的短连接 到 HTTP1.1 的长连接的改进</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#短连接"><span class="nav-number">2.1.</span> <span class="nav-text">短连接</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#长连接"><span class="nav-number">2.2.</span> <span class="nav-text">长连接</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#管线化"><span class="nav-number">2.3.</span> <span class="nav-text">管线化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用-Cookie-的状态管理"><span class="nav-number">2.4.</span> <span class="nav-text">使用 Cookie 的状态管理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HTTP-报文"><span class="nav-number">3.</span> <span class="nav-text">HTTP 报文</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#请求报文及响应的报文的结构"><span class="nav-number">3.1.</span> <span class="nav-text">请求报文及响应的报文的结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#编码提升传输速率"><span class="nav-number">3.2.</span> <span class="nav-text">编码提升传输速率</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#压缩传输的内容编码"><span class="nav-number">3.3.</span> <span class="nav-text">压缩传输的内容编码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#分割发送的分块传输编码"><span class="nav-number">3.4.</span> <span class="nav-text">分割发送的分块传输编码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#发送多种数据的多部分对象集合"><span class="nav-number">3.5.</span> <span class="nav-text">发送多种数据的多部分对象集合</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#获取部分内容的范围请求"><span class="nav-number">3.6.</span> <span class="nav-text">获取部分内容的范围请求</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#内容协商返回最合适的内容"><span class="nav-number">3.7.</span> <span class="nav-text">内容协商返回最合适的内容</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#响应结果中的-HTTP-状态码"><span class="nav-number">4.</span> <span class="nav-text">响应结果中的 HTTP 状态码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参与HTTP协作的代理、网关、隧道"><span class="nav-number">5.</span> <span class="nav-text">参与HTTP协作的代理、网关、隧道</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#代理"><span class="nav-number">5.1.</span> <span class="nav-text">代理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#网关"><span class="nav-number">5.2.</span> <span class="nav-text">网关</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#隧道"><span class="nav-number">5.3.</span> <span class="nav-text">隧道</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#保存资源的缓存"><span class="nav-number">6.</span> <span class="nav-text">保存资源的缓存</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#缓存服务器"><span class="nav-number">6.1.</span> <span class="nav-text">缓存服务器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#客户端本地的缓存"><span class="nav-number">6.2.</span> <span class="nav-text">客户端本地的缓存</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#缓存的有效性"><span class="nav-number">6.3.</span> <span class="nav-text">缓存的有效性</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HTTP-首部"><span class="nav-number">7.</span> <span class="nav-text">HTTP 首部</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#HTTP-报文首部"><span class="nav-number">7.1.</span> <span class="nav-text">HTTP 报文首部</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HTTP-请求报文"><span class="nav-number">7.2.</span> <span class="nav-text">HTTP 请求报文</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HTTP-响应报文"><span class="nav-number">7.3.</span> <span class="nav-text">HTTP 响应报文</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HTTP-首部字段"><span class="nav-number">7.4.</span> <span class="nav-text">HTTP 首部字段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HTTP-1-1-首部字段一览"><span class="nav-number">7.5.</span> <span class="nav-text">HTTP&#x2F;1.1 首部字段一览</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#通用首部字段"><span class="nav-number">7.5.1.</span> <span class="nav-text">通用首部字段</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#请求首部字段"><span class="nav-number">7.5.2.</span> <span class="nav-text">请求首部字段</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#响应首部字段"><span class="nav-number">7.5.3.</span> <span class="nav-text">响应首部字段</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#实体首部字段"><span class="nav-number">7.5.4.</span> <span class="nav-text">实体首部字段</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考文献"><span class="nav-number">8.</span> <span class="nav-text">参考文献</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="crazyfzw"
+      src="/uploads/avatar.jpg">
+  <p class="site-author-name" itemprop="name">crazyfzw</p>
+  <div class="site-description" itemprop="description">做个有趣的技术人</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">55</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">34</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/crazyfzw" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;crazyfzw" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://book.douban.com/people/crazyfzw/" title="Booklist → https:&#x2F;&#x2F;book.douban.com&#x2F;people&#x2F;crazyfzw&#x2F;" rel="noopener" target="_blank"><i class="fab fa-skype fa-fw"></i>Booklist</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:crazyfzw@gmail.com" title="E-Mail → mailto:crazyfzw@gmail.com" rel="noopener" target="_blank"><i class="fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://plus.google.com/104894167431407693109" title="Google → https:&#x2F;&#x2F;plus.google.com&#x2F;104894167431407693109" rel="noopener" target="_blank"><i class="fab fa-google fa-fw"></i>Google</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.facebook.com/profile.php?id=100011315733045" title="Facebook → https:&#x2F;&#x2F;www.facebook.com&#x2F;profile.php?id&#x3D;100011315733045" rel="noopener" target="_blank"><i class="fab fa-facebook fa-fw"></i>Facebook</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/u/3829383159" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;3829383159" rel="noopener" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://ifeve.com/" title="http:&#x2F;&#x2F;ifeve.com&#x2F;" rel="noopener" target="_blank">并发编程网</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="http://www.importnew.com/" title="http:&#x2F;&#x2F;www.importnew.com&#x2F;" rel="noopener" target="_blank">ImportNew</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="http://jm.taobao.org/categories/" title="http:&#x2F;&#x2F;jm.taobao.org&#x2F;categories&#x2F;" rel="noopener" target="_blank">阿里中间件团队博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.ibm.com/developerworks/cn/java/" title="https:&#x2F;&#x2F;www.ibm.com&#x2F;developerworks&#x2F;cn&#x2F;java&#x2F;" rel="noopener" target="_blank">IBM developerworks</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tech.meituan.com/" title="https:&#x2F;&#x2F;tech.meituan.com&#x2F;" rel="noopener" target="_blank">美团点评技术团队</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="http://calvin1978.blogcn.com/" title="http:&#x2F;&#x2F;calvin1978.blogcn.com&#x2F;" rel="noopener" target="_blank">江南白衣的博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="http://blog.720ui.com/" title="http:&#x2F;&#x2F;blog.720ui.com" rel="noopener" target="_blank">梁桂钊的博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.jianshu.com/u/581f548ef0ec" title="https:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;581f548ef0ec" rel="noopener" target="_blank">李艳鹏的博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="http://jinnianshilongnian.iteye.com/" title="http:&#x2F;&#x2F;jinnianshilongnian.iteye.com&#x2F;" rel="noopener" target="_blank">张开涛的博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/zuoxiaolong" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;zuoxiaolong" rel="noopener" target="_blank">左潇龙的博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/xrq730/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;xrq730&#x2F;" rel="noopener" target="_blank">五月的仓颉</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://yikun.github.io/" title="https:&#x2F;&#x2F;yikun.github.io&#x2F;" rel="noopener" target="_blank">Yikun的博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="http://www.ruanyifeng.com/" title="http:&#x2F;&#x2F;www.ruanyifeng.com" rel="noopener" target="_blank">阮一峰的个人网站</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">crazyfzw</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">549k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">8:19</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : false,
+      appId      : 'jyxPxkBMeEmDfMMTuuyBdGdu-gzGzoHsz',
+      appKey     : '7SEECyfT4R10oTtj4zDMOdBt',
+      placeholder: "ヾﾉ≧∀≦)o 来呀！吐槽一番吧！",
+      avatar     : 'monsterid',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : '' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>
